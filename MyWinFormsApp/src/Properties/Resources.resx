@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ExampleString" xml:space="preserve">
+    <value>This is an example string resource.</value>
+  </data>
+  <data name="ExampleImage" type="System.Drawing.Bitmap, System.Drawing">
+    <value>ExampleImage.png</value>
+  </data>
+</root>

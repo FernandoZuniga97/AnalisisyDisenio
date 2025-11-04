@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="FormTitle" xml:space="preserve">
+    <value>Main Form</value>
+  </data>
+  <data name="ButtonText" xml:space="preserve">
+    <value>Click Me</value>
+  </data>
+  <data name="LabelText" xml:space="preserve">
+    <value>Hello, World!</value>
+  </data>
+</root>
