@@ -10,7 +10,7 @@
     <Content Include="src\login\Image\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>Image\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-    </Content>+
+    </Content>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
   </ItemGroup>
 

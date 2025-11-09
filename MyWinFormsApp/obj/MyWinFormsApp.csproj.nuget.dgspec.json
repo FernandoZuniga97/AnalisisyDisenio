@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\cuent\\OneDrive\\Documentos\\Fernando U\\AnalisisyDiseño\\1\\Proyecto\\MyWinFormsApp\\MyWinFormsApp.csproj": {}
+    "C:\\Users\\User\\Desktop\\AnalisisyDisenio\\MyWinFormsApp\\MyWinFormsApp.csproj": {}
   },
   "projects": {
-    "c:\\Users\\cuent\\OneDrive\\Documentos\\Fernando U\\AnalisisyDiseño\\1\\Proyecto\\MyWinFormsApp\\MyWinFormsApp.csproj": {
+    "C:\\Users\\User\\Desktop\\AnalisisyDisenio\\MyWinFormsApp\\MyWinFormsApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\cuent\\OneDrive\\Documentos\\Fernando U\\AnalisisyDiseño\\1\\Proyecto\\MyWinFormsApp\\MyWinFormsApp.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Desktop\\AnalisisyDisenio\\MyWinFormsApp\\MyWinFormsApp.csproj",
         "projectName": "MyWinFormsApp",
-        "projectPath": "c:\\Users\\cuent\\OneDrive\\Documentos\\Fernando U\\AnalisisyDiseño\\1\\Proyecto\\MyWinFormsApp\\MyWinFormsApp.csproj",
-        "packagesPath": "C:\\Users\\cuent\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\cuent\\OneDrive\\Documentos\\Fernando U\\AnalisisyDiseño\\1\\Proyecto\\MyWinFormsApp\\obj\\",
+        "projectPath": "C:\\Users\\User\\Desktop\\AnalisisyDisenio\\MyWinFormsApp\\MyWinFormsApp.csproj",
+        "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\User\\Desktop\\AnalisisyDisenio\\MyWinFormsApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\cuent\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0-windows"
