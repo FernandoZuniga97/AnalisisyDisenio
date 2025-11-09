@@ -21,6 +21,7 @@ namespace MyWinFormsApp
         private Button btnEditar;
 
         private List<Parte> lista;
+        private int contadorID = 4; // Contador para nuevos IDs (inicia según los datos iniciales)
 
         public InventarioPartesForm()
         {
@@ -43,15 +44,13 @@ namespace MyWinFormsApp
                 BackColor = ColorTranslator.FromHtml("#002060")
             };
 
-            // Panel para título e imagen
             TableLayoutPanel titlePanel = new TableLayoutPanel()
             {
-                Dock = DockStyle.Top,
-                Height = 150,
+                Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 1
             };
-            titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             titlePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
@@ -63,6 +62,12 @@ namespace MyWinFormsApp
                 Height = 150,
                 Anchor = AnchorStyles.Left | AnchorStyles.Top
             };
+            titlePanel.Controls.Add(logo, 0, 0);
+
+            Panel textoPanel = new Panel()
+            {
+                Dock = DockStyle.Fill
+            };
 
             lblTitulo = new Label()
             {
@@ -70,19 +75,17 @@ namespace MyWinFormsApp
                 Font = new Font("Century Gothic", 30, FontStyle.Bold),
                 ForeColor = Color.White,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Top,
+                Height = 60
             };
-
-            titlePanel.Controls.Add(logo, 0, 0);
-            titlePanel.Controls.Add(lblTitulo, 1, 0);
 
             lblSubtitulo = new Label()
             {
                 Text = "Inventario De Partes",
                 Font = new Font("Segoe UI", 14),
                 ForeColor = Color.White,
-                Dock = DockStyle.Top,
                 TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Top,
                 Height = 40
             };
 
@@ -91,14 +94,16 @@ namespace MyWinFormsApp
                 Text = "Fecha: (01/11/2025)",
                 Font = new Font("Segoe UI", 11, FontStyle.Italic),
                 ForeColor = Color.White,
-                Dock = DockStyle.Top,
                 TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Top,
                 Height = 30
             };
 
-            // Agregar controles en orden correcto para que se muestren
-            headerPanel.Controls.Add(lblFecha);
-            headerPanel.Controls.Add(lblSubtitulo);
+            textoPanel.Controls.Add(lblFecha);
+            textoPanel.Controls.Add(lblSubtitulo);
+            textoPanel.Controls.Add(lblTitulo);
+
+            titlePanel.Controls.Add(textoPanel, 1, 0);
             headerPanel.Controls.Add(titlePanel);
 
             contentPanel = new Panel()
@@ -126,8 +131,7 @@ namespace MyWinFormsApp
                 ColumnHeadersHeight = 35,
                 EnableHeadersVisualStyles = false,
                 RowHeadersVisible = false,
-                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter },
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect
+                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
             };
 
             dgvInventario.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
@@ -135,7 +139,6 @@ namespace MyWinFormsApp
             dgvInventario.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgvInventario.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-            // Botón Agregar
             btnAgregar = new Button()
             {
                 Text = "Agregar Parte",
@@ -147,7 +150,6 @@ namespace MyWinFormsApp
             };
             btnAgregar.Click += BtnAgregar_Click;
 
-            // Botón Eliminar
             btnEliminar = new Button()
             {
                 Text = "Eliminar Parte",
@@ -159,23 +161,22 @@ namespace MyWinFormsApp
             };
             btnEliminar.Click += BtnEliminar_Click;
 
-            // Botón Editar
             btnEditar = new Button()
             {
                 Text = "Editar Parte",
                 Dock = DockStyle.Bottom,
                 Height = 40,
-                BackColor = ColorTranslator.FromHtml("#FFA500"),
+                BackColor = ColorTranslator.FromHtml("#E1E11F"),
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
             btnEditar.Click += BtnEditar_Click;
 
             contentPanel.Controls.Add(dgvInventario);
-            contentPanel.Controls.Add(separatorLine);
             contentPanel.Controls.Add(btnAgregar);
-            contentPanel.Controls.Add(btnEditar);
             contentPanel.Controls.Add(btnEliminar);
+            contentPanel.Controls.Add(btnEditar);
+            contentPanel.Controls.Add(separatorLine);
 
             contenedorReporte.Controls.Add(contentPanel);
             contenedorReporte.Controls.Add(headerPanel);
@@ -276,8 +277,9 @@ namespace MyWinFormsApp
                     return;
                 }
 
+                contadorID++; // Avanzar el contador solo al agregar
+                string nuevoID = $"P-{contadorID.ToString("D3")}";
                 decimal valorTotal = cantidad * costo;
-                string nuevoID = $"P-{(lista.Count + 1).ToString("D3")}";
 
                 lista.Add(new Parte()
                 {
@@ -297,47 +299,23 @@ namespace MyWinFormsApp
                 formAgregar.Close();
             };
 
-            panel.Controls.AddRange(new Control[]
-            {
-                lblNombre, txtNombre,
-                lblCategoria, txtCategoria,
-                lblProveedor, txtProveedor,
-                lblCantidad, txtCantidad,
-                lblUnidad, txtUnidad,
-                lblCosto, txtCosto,
-                lblEstado, txtEstado,
-                lblObs, txtObs,
-                btnGuardar
-            });
+            panel.Controls.AddRange(new Control[] {
+                lblNombre, txtNombre, lblCategoria, txtCategoria, lblProveedor, txtProveedor,
+                lblCantidad, txtCantidad, lblUnidad, txtUnidad, lblCosto, txtCosto,
+                lblEstado, txtEstado, lblObs, txtObs, btnGuardar });
 
             formAgregar.ShowDialog();
         }
 
         private void BtnEliminar_Click(object sender, EventArgs e)
         {
-            if (dgvInventario.SelectedRows.Count == 0)
+            if (dgvInventario.CurrentRow != null)
             {
-                MessageBox.Show("Seleccione un registro para eliminar.");
-                return;
-            }
-
-            var fila = dgvInventario.SelectedRows[0];
-            string id = fila.Cells["ID"].Value.ToString();
-
-            DialogResult dr = MessageBox.Show($"¿Está seguro de borrar el registro \"{id}\"?", "Confirmar eliminación", MessageBoxButtons.YesNo);
-            if (dr == DialogResult.Yes)
-            {
-                int index = lista.FindIndex(p => p.ID == id);
-                if (index >= 0)
+                string id = dgvInventario.CurrentRow.Cells["ID"].Value.ToString();
+                DialogResult result = MessageBox.Show($"¿Está seguro de borrar el registro '{id}'?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.Yes)
                 {
-                    lista.RemoveAt(index);
-
-                    // Reasignar IDs
-                    for (int i = 0; i < lista.Count; i++)
-                    {
-                        lista[i].ID = $"P-{(i + 1).ToString("D3")}";
-                    }
-
+                    lista.RemoveAt(dgvInventario.CurrentRow.Index);
                     ActualizarGrid();
                 }
             }
@@ -345,15 +323,10 @@ namespace MyWinFormsApp
 
         private void BtnEditar_Click(object sender, EventArgs e)
         {
-            if (dgvInventario.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Seleccione un registro para editar.");
-                return;
-            }
+            if (dgvInventario.CurrentRow == null) return;
 
-            var fila = dgvInventario.SelectedRows[0];
-            string id = fila.Cells["ID"].Value.ToString();
-            Parte parte = lista.Find(p => p.ID == id);
+            int index = dgvInventario.CurrentRow.Index;
+            Parte parte = lista[index];
 
             Form formEditar = new Form()
             {
@@ -445,18 +418,10 @@ namespace MyWinFormsApp
                 formEditar.Close();
             };
 
-            panel.Controls.AddRange(new Control[]
-            {
-                lblNombre, txtNombre,
-                lblCategoria, txtCategoria,
-                lblProveedor, txtProveedor,
-                lblCantidad, txtCantidad,
-                lblUnidad, txtUnidad,
-                lblCosto, txtCosto,
-                lblEstado, txtEstado,
-                lblObs, txtObs,
-                btnGuardar
-            });
+            panel.Controls.AddRange(new Control[] {
+                lblNombre, txtNombre, lblCategoria, txtCategoria, lblProveedor, txtProveedor,
+                lblCantidad, txtCantidad, lblUnidad, txtUnidad, lblCosto, txtCosto,
+                lblEstado, txtEstado, lblObs, txtObs, btnGuardar });
 
             formEditar.ShowDialog();
         }
@@ -488,16 +453,6 @@ namespace MyWinFormsApp
                 if (int.TryParse(id.Split('-')[1], out int numero) && numero % 2 == 0)
                     row.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#E7E6E6");
             }
-
-            dgvInventario.Paint += (s, ev) =>
-            {
-                int headerHeight = dgvInventario.ColumnHeadersHeight;
-                using (Pen pen = new Pen(Color.Yellow, 3))
-                {
-                    float y = headerHeight - 1;
-                    ev.Graphics.DrawLine(pen, 0, y, dgvInventario.Width, y);
-                }
-            };
         }
     }
 
@@ -514,6 +469,4 @@ namespace MyWinFormsApp
         public string EstadoStock { get; set; }
         public string Observaciones { get; set; }
     }
-
-    
 }
