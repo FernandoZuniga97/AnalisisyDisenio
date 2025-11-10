@@ -82,9 +82,11 @@ namespace MyWinFormsApp
             PictureBox logo = new PictureBox()
             {
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Width = 150,
-                Height = 150,
-                Anchor = AnchorStyles.Left | AnchorStyles.Top
+                Width = 100,
+                Height = 100,
+                Anchor = AnchorStyles.None,
+                Dock = DockStyle.Left, // Esto centrará la imagen verticalmente dentro de su celda de 150x150
+                Margin = new Padding(25, 0, 0, 0)
             };
 
             try
@@ -136,7 +138,7 @@ namespace MyWinFormsApp
 
             lblSubtitulo = new Label()
             {
-                Text = "Inventario De Partes",
+                Text = "Dispositivos No Reparados",
                 Font = new Font("Segoe UI", 14),
                 ForeColor = Color.White,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -146,7 +148,7 @@ namespace MyWinFormsApp
 
             lblFecha = new Label()
             {
-                Text = "Fecha: (01/11/2025)",
+                Text = "Periodo: (27/08/2025) -(27/09/2025)",
                 Font = new Font("Segoe UI", 11, FontStyle.Italic),
                 ForeColor = Color.White,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -179,7 +181,7 @@ namespace MyWinFormsApp
             dgDnRepa = new DataGridView()
             {
                 Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, //estaba en none
                 ReadOnly = true,
                 BackgroundColor = Color.White,
                 BorderStyle = BorderStyle.None,
@@ -191,13 +193,70 @@ namespace MyWinFormsApp
                 AllowUserToResizeRows = false,           // Prevenir redimensionamiento de filas
                 AllowUserToOrderColumns = false,
                 ScrollBars = ScrollBars.Both,
-            };
+                GridColor = Color.White, // Establecer el color del borde de la celda a BLANCO
+                CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical,
 
+
+            };
+            //dgDnRepa.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            //dgDnRepa.BorderStyle = BorderStyle.FixedSingle;
             dgDnRepa.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
             dgDnRepa.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dgDnRepa.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
             dgDnRepa.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgDnRepa.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgDnRepa.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            // **1. Añadir el borde inferior amarillo (Franja)**
+            dgDnRepa.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
 
+            dgDnRepa.Columns.Cast<DataGridViewColumn>().ToList().ForEach(col =>
+            {
+                // Crear un borde amarillo de 3 píxeles
+                col.HeaderCell.Style.Padding = new Padding(0, 0, 0, 5);
+                col.HeaderCell.Style.SelectionBackColor = ColorTranslator.FromHtml("#0070C0");
+            });
+
+            // **2. Estilo de fila alternada (Gris salteado)**
+            dgDnRepa.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F0F0F0"); // Gris claro
+
+            // **3. Borde de celdas (Blanco) y Centrado General**
+            dgDnRepa.DefaultCellStyle.SelectionBackColor = Color.LightGray; // Para que no sea azul al seleccionar
+            dgDnRepa.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            // dgDnRepa.GridColor ya se estableció en Color.White
+            // Usamos CellPainting para dibujar el borde blanco y la franja amarilla en el encabezado
+            dgDnRepa.CellPainting += (s, ev) =>
+            {
+                if (ev.RowIndex == -1 && ev.ColumnIndex >= 0) // Solo para las celdas del encabezado
+                {
+                    ev.Paint(ev.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.Border); // Pinta todo excepto el borde por defecto
+
+                    Rectangle rect = ev.CellBounds;
+                    int lineThickness = 1; // Grosor del borde blanco (1px)
+                    int yellowThickness = 3; // Grosor de la franja amarilla
+
+                    // 1. Dibuja el Borde Separador (Blanco) a la DERECHA de la celda del encabezado
+                    using (Pen whitePen = new Pen(Color.White, lineThickness))
+                    {
+                        // Dibuja la línea blanca en el lado derecho de la celda del encabezado
+                        // Esto crea el borde de separación entre columnas (vertical)
+                        ev.Graphics.DrawLine(whitePen, rect.Right - lineThickness / 2, rect.Top, rect.Right - lineThickness / 2, rect.Bottom);
+                    }
+
+                    // Dibuja la Franja Amarilla (Horizontal) en la parte INFERIOR de la celda
+                    using (Pen yellowPen = new Pen(ColorTranslator.FromHtml("#FFC000"), yellowThickness))
+                    {
+                        // Altura donde dibujar la franja amarilla.
+                        // Usamos rect.Bottom (borde inferior del encabezado) y le restamos 2px para subirla un poco (separación).
+                        int yellowLineY = rect.Bottom - (lineThickness / 2) - 2;
+
+                        // Dibuja la franja amarilla horizontal en toda la extensión de la celda del encabezado
+                        ev.Graphics.DrawLine(yellowPen, rect.Left, yellowLineY, rect.Right, yellowLineY);
+                    }
+
+                    ev.Handled = true; // Indica que ya manejamos la pintura de la celda
+                }
+            };
+            //------
             btnAgregar = new Button()
             {
                 Text = "Agregar Parte",
@@ -246,10 +305,10 @@ namespace MyWinFormsApp
         {
             lista = new List<Norepa>()
             {
-                new Norepa { ID="P-001", FechadeIngreso="Pantalla iPhone 12", Dispositivo="Pantallas", Cliente="G-Tech Supply", TecnicoAsignado=12, DescripciondelDano="unidades", CostoEstimado=2500m, Observaciones="Rotación alta" },
-                new Norepa { ID="P-002", FechadeIngreso="Puerto de carga tipo C", Dispositivo="Conectores", Cliente="ElectroParts", TecnicoAsignado=8, DescripciondelDano="unidades", CostoEstimado=180m,  Observaciones="Solicitar reposición" },
-                new Norepa { ID="P-003", FechadeIngreso="Batería Samsung A52", Dispositivo="Baterías", Cliente="MobilePro", TecnicoAsignado=15, DescripciondelDano="unidades", CostoEstimado=600m,  Observaciones="-" },
-                new Norepa { ID="P-004", FechadeIngreso="Pasta térmica", Dispositivo="Insumos", Cliente="Tecnocell", TecnicoAsignado=20, DescripciondelDano="tubos", CostoEstimado=120m, Observaciones="Uso frecuente" }
+                new Norepa { ID="NR-001", FechadeIngreso="13/9/2025", Dispositivo="Samsung S23 plus", Cliente=" Ana García", TecnicoAsignado=" M. Pérez", DescripciondelDano="Revisión general y limpieza", CostoEstimado=2500m, Observaciones="Rotación alta" },
+                new Norepa { ID="NR-002", FechadeIngreso="13/10/2025", Dispositivo=" iPhone 14 Pro", Cliente=" Carlos Mejía", TecnicoAsignado=" D. López", DescripciondelDano="Botón Home sin respuesta", CostoEstimado=180m,  Observaciones="Solicitar reposición" },
+                new Norepa { ID="NR-003", FechadeIngreso="25/10/2025", Dispositivo="iPhone 13", Cliente="Luis Torres", TecnicoAsignado="M. Pérez", DescripciondelDano="Batería se descarga muy rápido", CostoEstimado=600m,  Observaciones="-" },
+                new Norepa { ID="NR-004", FechadeIngreso="17/10/2025", Dispositivo=" Xiaomi Redmi 11", Cliente=" Pedro López", TecnicoAsignado="L. Reyes", DescripciondelDano="Puerto de carga dañado", CostoEstimado=120m, Observaciones="Uso frecuente" }
             };
             ActualizarGrid();
         }
@@ -315,11 +374,11 @@ namespace MyWinFormsApp
                     return;
                 }
 
-                if (!int.TryParse(txtTecnicoAsignado.Text, out int cantidad))
-                {
-                    MessageBox.Show("Solo se permiten números en la cantidad.");
-                    return;
-                }
+                //if (!int.TryParse(txtTecnicoAsignado.Text, out int cantidad))
+                //{
+                //     MessageBox.Show("Solo se permiten números en la cantidad.");
+                //      return;
+                //}
 
                 if (!decimal.TryParse(txtCostoEstimado.Text, out decimal costo))
                 {
@@ -329,7 +388,7 @@ namespace MyWinFormsApp
 
                 contadorID++; // Avanzar el contador solo al agregar
                 string nuevoID = $"P-{contadorID.ToString("D3")}";
-                decimal valorTotal = cantidad * costo;
+                //  decimal valorTotal = cantidad * costo;
 
                 lista.Add(new Norepa()
                 {
@@ -337,7 +396,7 @@ namespace MyWinFormsApp
                     FechadeIngreso = txtFechadeIngreso.Text,
                     Dispositivo = txtDispositivo.Text,
                     Cliente = txtCliente.Text,
-                    TecnicoAsignado = cantidad,
+                    TecnicoAsignado = txtTecnicoAsignado.Text,
                     DescripciondelDano = txtDescripciondelDano.Text,
                     CostoEstimado = costo,
                     Observaciones = string.IsNullOrWhiteSpace(txtObs.Text) ? "-" : txtObs.Text
@@ -405,7 +464,7 @@ namespace MyWinFormsApp
             top += gap;
 
             Label lblTecnicoAsignado = new Label() { Text = "Tecnico Asignado", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtTecnicoAsignado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.TecnicoAsignado.ToString() };
+            TextBox txtTecnicoAsignado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.TecnicoAsignado };
             top += gap;
 
             Label lblDescripciondelDano = new Label() { Text = "Descripcion del daño", Left = 20, Top = top, Width = labelWidth };
@@ -434,11 +493,11 @@ namespace MyWinFormsApp
                     return;
                 }
 
-                if (!int.TryParse(txtTecnicoAsignado.Text, out int cantidad))
-                {
-                    MessageBox.Show("Solo se permiten números en la cantidad.");
-                    return;
-                }
+                //  if (!int.TryParse(txtTecnicoAsignado.Text, out int cantidad))
+                //  {
+                //       MessageBox.Show("Solo se permiten números en la cantidad.");
+                //      return;
+                // }
 
                 if (!decimal.TryParse(txtCostoEstimado.Text, out decimal costo))
                 {
@@ -449,7 +508,7 @@ namespace MyWinFormsApp
                 norepa.FechadeIngreso = txtFechadeIngreso.Text;
                 norepa.Dispositivo = txtDispositivo.Text;
                 norepa.Cliente = txtCliente.Text;
-                norepa.TecnicoAsignado = cantidad;
+                norepa.TecnicoAsignado = txtTecnicoAsignado.Text;
                 norepa.DescripciondelDano = txtDescripciondelDano.Text;
                 norepa.CostoEstimado = costo;
                 norepa.Observaciones = string.IsNullOrWhiteSpace(txtObs.Text) ? "-" : txtObs.Text;
@@ -482,8 +541,12 @@ namespace MyWinFormsApp
 
             if (dgDnRepa.Columns.Contains("CostoEstimado"))
                 dgDnRepa.Columns["CostoEstimado"].HeaderText = "Costo Estimado (L.)";
-            // Forzar modo None antes de fijar anchos
-            dgDnRepa.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+            // ----------------------------
+
+            dgDnRepa.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgDnRepa.Columns.Contains("ID")) dgDnRepa.Columns["ID"].FillWeight = 50;
+            if (dgDnRepa.Columns.Contains("Observaciones")) dgDnRepa.Columns["Observaciones"].FillWeight = 150;
+            // Ajuste de anchos específicos
 
             var widths = new Dictionary<string, int>
             {
@@ -515,9 +578,7 @@ namespace MyWinFormsApp
 
             // Asegura que el contenedor permita desplazamiento horizontal si el grid es más ancho
             contenedorReporte.AutoScroll = true;
-            contenedorReporte.AutoScrollMinSize = new Size(Math.Max(totalWidth + 40, this.Width), 0);
-
-            // ...estilizado de filas...
+            contenedorReporte.AutoScrollMinSize = new Size(dgDnRepa.Width, 0);
         }
 
     }
@@ -528,7 +589,7 @@ namespace MyWinFormsApp
         public string FechadeIngreso { get; set; }
         public string Dispositivo { get; set; }
         public string Cliente { get; set; }
-        public int TecnicoAsignado { get; set; }
+        public string TecnicoAsignado { get; set; }
         public string DescripciondelDano { get; set; }
         public decimal CostoEstimado { get; set; }
         public string Observaciones { get; set; }
