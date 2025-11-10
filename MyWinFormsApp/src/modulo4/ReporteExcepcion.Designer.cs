@@ -30,12 +30,6 @@ namespace MyWinFormsApp.src.modulo4
         {
             panel2 = new System.Windows.Forms.Panel();
             dataGridView1 = new System.Windows.Forms.DataGridView();
-            panel1 = new System.Windows.Forms.Panel();
-            label4 = new System.Windows.Forms.Label();
-            label3 = new System.Windows.Forms.Label();
-            label2 = new System.Windows.Forms.Label();
-            label1 = new System.Windows.Forms.Label();
-            pictureBox1 = new System.Windows.Forms.PictureBox();
             txtID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblFecha = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblCliente = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -43,6 +37,12 @@ namespace MyWinFormsApp.src.modulo4
             lblEstado = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblDiasSinRetiro = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblMontoPendiente = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            panel1 = new System.Windows.Forms.Panel();
+            label4 = new System.Windows.Forms.Label();
+            label3 = new System.Windows.Forms.Label();
+            label2 = new System.Windows.Forms.Label();
+            label1 = new System.Windows.Forms.Label();
+            pictureBox1 = new System.Windows.Forms.PictureBox();
             panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             panel1.SuspendLayout();
@@ -61,6 +61,7 @@ namespace MyWinFormsApp.src.modulo4
             // 
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
             dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Columns.AddRange( new System.Windows.Forms.DataGridViewColumn[] { txtID, lblFecha, lblCliente, lblDispostivo, lblEstado, lblDiasSinRetiro, lblMontoPendiente } );
             dataGridView1.Location = new System.Drawing.Point( 0, 3 );
@@ -71,6 +72,62 @@ namespace MyWinFormsApp.src.modulo4
             dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.Size = new System.Drawing.Size( 776, 317 );
             dataGridView1.TabIndex = 0;
+            // 
+            // txtID
+            // 
+            txtID.Frozen = true;
+            txtID.HeaderText = "ID";
+            txtID.Name = "txtID";
+            txtID.ReadOnly = true;
+            txtID.Width = 43;
+            // 
+            // lblFecha
+            // 
+            lblFecha.Frozen = true;
+            lblFecha.HeaderText = "Fecha ingreso";
+            lblFecha.Name = "lblFecha";
+            lblFecha.ReadOnly = true;
+            lblFecha.Width = 97;
+            // 
+            // lblCliente
+            // 
+            lblCliente.Frozen = true;
+            lblCliente.HeaderText = "Cliente";
+            lblCliente.Name = "lblCliente";
+            lblCliente.ReadOnly = true;
+            lblCliente.Width = 69;
+            // 
+            // lblDispostivo
+            // 
+            lblDispostivo.Frozen = true;
+            lblDispostivo.HeaderText = "Dispositivo";
+            lblDispostivo.Name = "lblDispostivo";
+            lblDispostivo.ReadOnly = true;
+            lblDispostivo.Width = 90;
+            // 
+            // lblEstado
+            // 
+            lblEstado.Frozen = true;
+            lblEstado.HeaderText = "Estado de reparacion";
+            lblEstado.Name = "lblEstado";
+            lblEstado.ReadOnly = true;
+            lblEstado.Width = 130;
+            // 
+            // lblDiasSinRetiro
+            // 
+            lblDiasSinRetiro.Frozen = true;
+            lblDiasSinRetiro.HeaderText = "Días sin retirar";
+            lblDiasSinRetiro.Name = "lblDiasSinRetiro";
+            lblDiasSinRetiro.ReadOnly = true;
+            lblDiasSinRetiro.Width = 97;
+            // 
+            // lblMontoPendiente
+            // 
+            lblMontoPendiente.Frozen = true;
+            lblMontoPendiente.HeaderText = "Monto pendiente";
+            lblMontoPendiente.Name = "lblMontoPendiente";
+            lblMontoPendiente.ReadOnly = true;
+            lblMontoPendiente.Width = 114;
             // 
             // panel1
             // 
@@ -136,62 +193,6 @@ namespace MyWinFormsApp.src.modulo4
             pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
-            // 
-            // txtID
-            // 
-            txtID.Frozen = true;
-            txtID.HeaderText = "ID";
-            txtID.Name = "txtID";
-            txtID.ReadOnly = true;
-            txtID.Width = 43;
-            // 
-            // lblFecha
-            // 
-            lblFecha.Frozen = true;
-            lblFecha.HeaderText = "Fecha ingreso";
-            lblFecha.Name = "lblFecha";
-            lblFecha.ReadOnly = true;
-            lblFecha.Width = 97;
-            // 
-            // lblCliente
-            // 
-            lblCliente.Frozen = true;
-            lblCliente.HeaderText = "Cliente";
-            lblCliente.Name = "lblCliente";
-            lblCliente.ReadOnly = true;
-            lblCliente.Width = 69;
-            // 
-            // lblDispostivo
-            // 
-            lblDispostivo.Frozen = true;
-            lblDispostivo.HeaderText = "Dispositivo";
-            lblDispostivo.Name = "lblDispostivo";
-            lblDispostivo.ReadOnly = true;
-            lblDispostivo.Width = 90;
-            // 
-            // lblEstado
-            // 
-            lblEstado.Frozen = true;
-            lblEstado.HeaderText = "Estado de reparacion";
-            lblEstado.Name = "lblEstado";
-            lblEstado.ReadOnly = true;
-            lblEstado.Width = 130;
-            // 
-            // lblDiasSinRetiro
-            // 
-            lblDiasSinRetiro.Frozen = true;
-            lblDiasSinRetiro.HeaderText = "Días sin retirar";
-            lblDiasSinRetiro.Name = "lblDiasSinRetiro";
-            lblDiasSinRetiro.ReadOnly = true;
-            lblDiasSinRetiro.Width = 97;
-            // 
-            // lblMontoPendiente
-            // 
-            lblMontoPendiente.Frozen = true;
-            lblMontoPendiente.HeaderText = "Monto pendiente";
-            lblMontoPendiente.Name = "lblMontoPendiente";
-            lblMontoPendiente.ReadOnly = true;
-            lblMontoPendiente.Width = 114;
             // 
             // ReporteExcepcion
             // 

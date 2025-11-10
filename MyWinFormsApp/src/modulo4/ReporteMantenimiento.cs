@@ -1,20 +1,407 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection.Metadata;
 using System.Windows.Forms;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using MyWinFormsApp.src.Models;
+
 
 namespace MyWinFormsApp.src.modulo4
 {
     public partial class ReporteMantenimiento : Form
     {
+        private readonly List<RegistroMantenimiento> registros = [];
+
         public ReporteMantenimiento()
         {
             InitializeComponent();
+        }
+
+        private void ReporteMantenimiento_Load( object sender, EventArgs e )
+        {
+            // Limpiar filas existentes
+            dataGridView1.Rows.Clear();
+            FiltrarPorSemana( dateTimePicker1.Value );
+
+            // Agregar filas de ejemplo
+            registros.Add( new RegistroMantenimiento { ID = "M-001", Fecha = "12/06/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "D. Lopez", Materiales = "Puerto USB-C", Costo = "2564", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-002", Fecha = "06/10/2025", Dispositivo = "iPad Pro 11-inch", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "A. Gomez", Materiales = "Marco frontal", Costo = "2616", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-003", Fecha = "19/10/2025", Dispositivo = "iPad Mini", Tipo = "Correctivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "J. Martinez", Materiales = "Marco frontal", Costo = "2950", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-004", Fecha = "24/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Preventivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "C. Torres", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "721", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-005", Fecha = "28/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "M. Perez", Materiales = "Resorte botón", Costo = "1565", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-006", Fecha = "02/10/2025", Dispositivo = "Google Pixel 7", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "L. Reyes", Materiales = "Pantalla original, adhesivo", Costo = "3806", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-007", Fecha = "05/06/2025", Dispositivo = "Samsung A52", Tipo = "Correctivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "J. Martinez", Materiales = "Antena wifi", Costo = "443", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-008", Fecha = "15/10/2025", Dispositivo = "iPhone 13", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "D. Lopez", Materiales = "Cristal templado, adhesivo", Costo = "3796", Observaciones = "Requiere segunda visita si persiste ruido" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-009", Fecha = "30/10/2025", Dispositivo = "Motorola Edge", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "C. Torres", Materiales = "Lente cámara", Costo = "3461", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-010", Fecha = "22/10/2025", Dispositivo = "Huawei P30", Tipo = "Correctivo", Descripcion = "Reparación de cámara trasera y enfoque", Tecnico = "A. Gomez", Materiales = "S pen reemplazo", Costo = "1056", Observaciones = "Requiere segunda visita si persiste ruido" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-011", Fecha = "08/10/2025", Dispositivo = "iPhone 12", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "M. Perez", Materiales = "Marco frontal", Costo = "3960", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-012", Fecha = "14/10/2025", Dispositivo = "Samsung Note 20", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "D. Lopez", Materiales = "Batería nueva", Costo = "3953", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-013", Fecha = "01/06/2025", Dispositivo = "Google Pixel 6", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "A. Gomez", Materiales = "Carcasa trasera", Costo = "1145", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-014", Fecha = "12/10/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "J. Martinez", Materiales = "Pantalla original, adhesivo", Costo = "2681", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-015", Fecha = "09/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "L. Reyes", Materiales = "Modulo cámara, cinta adhesiva", Costo = "3896", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-016", Fecha = "01/10/2025", Dispositivo = "iPad Air", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "C. Torres", Materiales = "Conector de carga, soldadura", Costo = "3774", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-017", Fecha = "18/10/2025", Dispositivo = "Samsung S20", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "A. Gomez", Materiales = "Resorte botón", Costo = "1049", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-018", Fecha = "04/11/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Preventivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "M. Perez", Materiales = "Pantalla original, adhesivo", Costo = "4349", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-019", Fecha = "21/06/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "D. Lopez", Materiales = "Cristal templado, adhesivo", Costo = "1214", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-020", Fecha = "09/10/2025", Dispositivo = "Google Pixel 5", Tipo = "Preventivo", Descripcion = "Limpieza de humedad y secado profesional", Tecnico = "J. Martinez", Materiales = "Conector de carga, soldadura", Costo = "664", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-021", Fecha = "27/06/2025", Dispositivo = "Samsung A13", Tipo = "Correctivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "L. Reyes", Materiales = "Pantalla original, adhesivo", Costo = "1456", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-022", Fecha = "05/11/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Correctivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "A. Gomez", Materiales = "Altavoz, estanqueidad", Costo = "1874", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-023", Fecha = "03/10/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Preventivo", Descripcion = "Sustitución de altavoz auricular y pruebas", Tecnico = "M. Perez", Materiales = "Batería nueva", Costo = "3158", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-024", Fecha = "14/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "D. Lopez", Materiales = "Pantalla original, adhesivo", Costo = "1939", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-025", Fecha = "25/10/2025", Dispositivo = "Samsung Tab A8", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "C. Torres", Materiales = "Carcasa trasera", Costo = "1176", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-026", Fecha = "06/10/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "J. Martinez", Materiales = "Cristal templado, adhesivo", Costo = "2640", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-027", Fecha = "19/06/2025", Dispositivo = "iPhone 14 Plus", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "L. Reyes", Materiales = "Carcasa trasera", Costo = "2841", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-028", Fecha = "08/10/2025", Dispositivo = "Google Pixel 7", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "A. Gomez", Materiales = "Lente cámara", Costo = "1386", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-029", Fecha = "03/10/2025", Dispositivo = "iPad Mini", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "M. Perez", Materiales = "Modulo cámara, cinta adhesiva", Costo = "3966", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-030", Fecha = "29/10/2025", Dispositivo = "Samsung S21", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "D. Lopez", Materiales = "Puerto USB-C", Costo = "429", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-031", Fecha = "26/06/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Correctivo", Descripcion = "Cambio de conector de auriculares y prueba", Tecnico = "C. Torres", Materiales = "Botón home, tornillos", Costo = "4060", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-032", Fecha = "08/10/2025", Dispositivo = "Huawei MatePad", Tipo = "Correctivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "J. Martinez", Materiales = "Antena wifi", Costo = "3250", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-033", Fecha = "11/10/2025", Dispositivo = "Samsung Note 20", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "A. Gomez", Materiales = "Cargador original", Costo = "1568", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-034", Fecha = "15/10/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Correctivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "M. Perez", Materiales = "Lente cámara", Costo = "1366", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-035", Fecha = "04/10/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Preventivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "L. Reyes", Materiales = "Batería nueva", Costo = "1937", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-036", Fecha = "13/06/2025", Dispositivo = "Samsung S20", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "D. Lopez", Materiales = "Conector de carga, soldadura", Costo = "3016", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-037", Fecha = "07/10/2025", Dispositivo = "iPhone 12", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "A. Gomez", Materiales = "Pantalla original, adhesivo", Costo = "4183", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-038", Fecha = "19/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "J. Martinez", Materiales = "Resorte botón", Costo = "2300", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-039", Fecha = "01/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "M. Perez", Materiales = "Altavoz, estanqueidad", Costo = "3052", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-040", Fecha = "13/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "D. Lopez", Materiales = "Pantalla original, adhesivo", Costo = "4126", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-041", Fecha = "23/10/2025", Dispositivo = "Samsung A52", Tipo = "Preventivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "L. Reyes", Materiales = "Lente cámara", Costo = "2041", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-042", Fecha = "09/10/2025", Dispositivo = "iPad Air", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "C. Torres", Materiales = "Carcasa trasera", Costo = "2389", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-043", Fecha = "03/10/2025", Dispositivo = "iPhone 13", Tipo = "Correctivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "A. Gomez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "2362", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-044", Fecha = "20/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Preventivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "J. Martinez", Materiales = "Antena wifi", Costo = "1481", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-045", Fecha = "14/10/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "D. Lopez", Materiales = "Batería nueva", Costo = "1785", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-046", Fecha = "09/10/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Preventivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "L. Reyes", Materiales = "Pantalla original, adhesivo", Costo = "3533", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-047", Fecha = "18/06/2025", Dispositivo = "iPhone 14", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "C. Torres", Materiales = "Altavoz, estanqueidad", Costo = "2245", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-048", Fecha = "12/10/2025", Dispositivo = "Samsung S20", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "M. Perez", Materiales = "Conector de carga, soldadura", Costo = "3826", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-049", Fecha = "27/06/2025", Dispositivo = "Google Pixel 5", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "A. Gomez", Materiales = "Micrófono, pasta térmica", Costo = "3296", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-050", Fecha = "10/10/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "J. Martinez", Materiales = "Cargador original", Costo = "2379", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-051", Fecha = "30/10/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "D. Lopez", Materiales = "Modulo cámara, cinta adhesiva", Costo = "3656", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-052", Fecha = "02/10/2025", Dispositivo = "iPad Mini", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "L. Reyes", Materiales = "Sensor de proximidad", Costo = "1461", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-053", Fecha = "06/11/2025", Dispositivo = "Samsung A13", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "A. Gomez", Materiales = "Cristal templado, adhesivo", Costo = "2269", Observaciones = "Se recomendó seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-054", Fecha = "21/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "M. Perez", Materiales = "Puerto USB-C", Costo = "2327", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-055", Fecha = "17/06/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Correctivo", Descripcion = "Cambio de conector de auriculares y prueba", Tecnico = "J. Martinez", Materiales = "Botón home, tornillos", Costo = "3990", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-056", Fecha = "06/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "D. Lopez", Materiales = "Carcasa trasera", Costo = "1257", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-057", Fecha = "20/10/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "A. Gomez", Materiales = "Pantalla original, adhesivo", Costo = "2436", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-058", Fecha = "29/10/2025", Dispositivo = "Samsung Note 20", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "L. Reyes", Materiales = "Batería nueva", Costo = "2176", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-059", Fecha = "16/10/2025", Dispositivo = "iPhone 12", Tipo = "Correctivo", Descripcion = "Reparación de cámara trasera y enfoque", Tecnico = "C. Torres", Materiales = "Lente cámara", Costo = "620", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-060", Fecha = "04/06/2025", Dispositivo = "Google Pixel 7", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "M. Perez", Materiales = "Marco frontal", Costo = "2006", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-061", Fecha = "25/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "J. Martinez", Materiales = "Pantalla original, adhesivo", Costo = "2508", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-062", Fecha = "06/06/2025", Dispositivo = "iPad Air", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "D. Lopez", Materiales = "Conector de carga, soldadura", Costo = "2961", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-063", Fecha = "02/11/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Correctivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "A. Gomez", Materiales = "Lente cámara", Costo = "3288", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-064", Fecha = "14/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "L. Reyes", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "4206", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-065", Fecha = "11/10/2025", Dispositivo = "Samsung S20", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "J. Martinez", Materiales = "Conector de carga, soldadura", Costo = "1971", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-066", Fecha = "20/10/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "M. Perez", Materiales = "Cargador original", Costo = "2573", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-067", Fecha = "05/10/2025", Dispositivo = "Google Pixel 5", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "A. Gomez", Materiales = "Micrófono, pasta térmica", Costo = "435", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-068", Fecha = "28/10/2025", Dispositivo = "iPhone 14 Plus", Tipo = "Preventivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "D. Lopez", Materiales = "Antena wifi", Costo = "2809", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-069", Fecha = "03/10/2025", Dispositivo = "Samsung A52", Tipo = "Correctivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "L. Reyes", Materiales = "Resorte botón", Costo = "2386", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-070", Fecha = "30/06/2025", Dispositivo = "iPad Mini", Tipo = "Preventivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "C. Torres", Materiales = "Pantalla original, adhesivo", Costo = "2164", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-071", Fecha = "12/10/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "J. Martinez", Materiales = "Modulo cámara, cinta adhesiva", Costo = "3376", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-072", Fecha = "23/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "M. Perez", Materiales = "Sensor de proximidad", Costo = "1307", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-073", Fecha = "01/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "A. Gomez", Materiales = "Cristal templado, adhesivo", Costo = "4270", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-074", Fecha = "07/10/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Preventivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "L. Reyes", Materiales = "Batería nueva", Costo = "2656", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-075", Fecha = "02/06/2025", Dispositivo = "Samsung Note 20", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "D. Lopez", Materiales = "Conector de carga, soldadura", Costo = "2095", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-076", Fecha = "19/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "C. Torres", Materiales = "Pantalla original, adhesivo", Costo = "3085", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-077", Fecha = "26/10/2025", Dispositivo = "iPhone 14", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "J. Martinez", Materiales = "Carcasa trasera", Costo = "994", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-078", Fecha = "17/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "A. Gomez", Materiales = "Altavoz, estanqueidad", Costo = "2092", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-079", Fecha = "09/10/2025", Dispositivo = "iPad Pro 11-inch", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "M. Perez", Materiales = "Conector de carga, soldadura", Costo = "3866", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-080", Fecha = "28/06/2025", Dispositivo = "Samsung A13", Tipo = "Correctivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "L. Reyes", Materiales = "Puerto USB-C", Costo = "1178", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-081", Fecha = "15/06/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "D. Lopez", Materiales = "Altavoz, estanqueidad", Costo = "2590", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-082", Fecha = "04/10/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Correctivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "J. Martinez", Materiales = "Lente cámara", Costo = "2401", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-083", Fecha = "22/10/2025", Dispositivo = "Motorola Edge", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "A. Gomez", Materiales = "Carcasa trasera", Costo = "1046", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-084", Fecha = "10/10/2025", Dispositivo = "iPhone 12", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "M. Perez", Materiales = "Batería nueva", Costo = "2122", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-085", Fecha = "29/10/2025", Dispositivo = "Google Pixel 5", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "L. Reyes", Materiales = "Botón home, tornillos", Costo = "3669", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-086", Fecha = "16/10/2025", Dispositivo = "iPad Mini", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "D. Lopez", Materiales = "Cristal templado, adhesivo", Costo = "1422", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-087", Fecha = "07/11/2025", Dispositivo = "Samsung Tab A8", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "C. Torres", Materiales = "Modulo cámara, cinta adhesiva", Costo = "2770", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-088", Fecha = "13/06/2025", Dispositivo = "iPhone 13", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "J. Martinez", Materiales = "Sensor de proximidad", Costo = "2452", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-089", Fecha = "02/10/2025", Dispositivo = "Samsung S21", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "A. Gomez", Materiales = "Pantalla original, adhesivo", Costo = "2754", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-090", Fecha = "21/10/2025", Dispositivo = "Google Pixel 7", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "M. Perez", Materiales = "Altavoz, estanqueidad", Costo = "3986", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-091", Fecha = "24/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "D. Lopez", Materiales = "Conector de carga, soldadura", Costo = "1439", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-092", Fecha = "11/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "L. Reyes", Materiales = "Cargador original", Costo = "3595", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-093", Fecha = "19/10/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "J. Martinez", Materiales = "Batería nueva", Costo = "3067", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-094", Fecha = "06/10/2025", Dispositivo = "Samsung S20", Tipo = "Preventivo", Descripcion = "Cambio de conector de auriculares y prueba", Tecnico = "A. Gomez", Materiales = "Botón home, tornillos", Costo = "3417", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-095", Fecha = "02/06/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz auricular y pruebas", Tecnico = "M. Perez", Materiales = "Altavoz, estanqueidad", Costo = "3480", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-096", Fecha = "05/10/2025", Dispositivo = "Huawei MatePad", Tipo = "Correctivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "D. Lopez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "4272", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-097", Fecha = "20/10/2025", Dispositivo = "iPad Pro 11-inch", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "C. Torres", Materiales = "Marco frontal", Costo = "2275", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-098", Fecha = "30/10/2025", Dispositivo = "Samsung A52", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "J. Martinez", Materiales = "Micrófono, pasta térmica", Costo = "3024", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-099", Fecha = "14/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "L. Reyes", Materiales = "Carcasa trasera", Costo = "2057", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-100", Fecha = "25/10/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "A. Gomez", Materiales = "Batería nueva", Costo = "3389", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-101", Fecha = "22/10/2025", Dispositivo = "Samsung S21", Tipo = "Correctivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "M. Perez", Materiales = "Pantalla original, adhesivo", Costo = "2560", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-102", Fecha = "28/10/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "L. Reyes", Materiales = "Botón home, tornillos", Costo = "4109", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-103", Fecha = "02/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Preventivo", Descripcion = "Cambio de conector de auriculares y prueba", Tecnico = "L. Reyes", Materiales = "Cable flex, carcasa", Costo = "4176", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-104", Fecha = "18/10/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "L. Reyes", Materiales = "Antena wifi", Costo = "1957", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-105", Fecha = "15/10/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "M. Perez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "1351", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-106", Fecha = "17/06/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Preventivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "M. Perez", Materiales = "Botón home, tornillos", Costo = "2095", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-107", Fecha = "02/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "J. Martinez", Materiales = "Conector de carga, soldadura", Costo = "1186", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-108", Fecha = "14/10/2025", Dispositivo = "Samsung S20", Tipo = "Correctivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "C. Torres", Materiales = "Lente cámara", Costo = "4115", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-109", Fecha = "28/10/2025", Dispositivo = "iPad Mini", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "L. Reyes", Materiales = "S pen reemplazo", Costo = "322", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-110", Fecha = "07/10/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "M. Perez", Materiales = "Altavoz, estanqueidad", Costo = "1388", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-111", Fecha = "09/10/2025", Dispositivo = "iPhone 12", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "L. Reyes", Materiales = "Conector de carga, soldadura", Costo = "1533", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-112", Fecha = "30/10/2025", Dispositivo = "Samsung A13", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "A. Gomez", Materiales = "Sensor de proximidad", Costo = "4380", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-113", Fecha = "13/06/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Cambio de conector de auriculares y prueba", Tecnico = "C. Torres", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "4475", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-114", Fecha = "02/11/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Correctivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "L. Reyes", Materiales = "Cristal templado, adhesivo", Costo = "1865", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-115", Fecha = "22/10/2025", Dispositivo = "Samsung S21", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "A. Gomez", Materiales = "Puerto USB-C", Costo = "1117", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-116", Fecha = "23/10/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "M. Perez", Materiales = "Carcasa trasera", Costo = "2287", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-117", Fecha = "09/11/2025", Dispositivo = "Google Pixel 5", Tipo = "Preventivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "L. Reyes", Materiales = "Altavoz, estanqueidad", Costo = "2507", Observaciones = "Fallas intermitentes, observar" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-118", Fecha = "05/06/2025", Dispositivo = "Samsung A52", Tipo = "Preventivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "A. Gomez", Materiales = "Lente cámara", Costo = "672", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-119", Fecha = "25/10/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "D. Lopez", Materiales = "S pen reemplazo", Costo = "1344", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-120", Fecha = "08/11/2025", Dispositivo = "iPad Air", Tipo = "Preventivo", Descripcion = "Limpieza de humedad y secado profesional", Tecnico = "L. Reyes", Materiales = "Conector de carga, soldadura", Costo = "284", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-121", Fecha = "14/10/2025", Dispositivo = "iPhone SE (2022)", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "M. Perez", Materiales = "Pantalla original, adhesivo", Costo = "1004", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-122", Fecha = "14/10/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Preventivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "D. Lopez", Materiales = "Batería nueva", Costo = "2241", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-123", Fecha = "24/10/2025", Dispositivo = "iPhone 14 Plus", Tipo = "Correctivo", Descripcion = "Cambio de conector de auriculares y prueba", Tecnico = "C. Torres", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "3178", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-124", Fecha = "08/11/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "A. Gomez", Materiales = "Pantalla original, adhesivo", Costo = "1009", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-125", Fecha = "05/10/2025", Dispositivo = "iPhone 12", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "C. Torres", Materiales = "Conector de carga, soldadura", Costo = "2044", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-126", Fecha = "07/10/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Preventivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "A. Gomez", Materiales = "Altavoz, estanqueidad", Costo = "2181", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-127", Fecha = "27/10/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Preventivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "L. Reyes", Materiales = "Pantalla original, adhesivo", Costo = "3065", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-128", Fecha = "10/10/2025", Dispositivo = "iPhone 14", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "D. Lopez", Materiales = "Puerto USB-C", Costo = "1812", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-129", Fecha = "10/06/2025", Dispositivo = "Samsung A52", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "J. Martinez", Materiales = "Lente cámara", Costo = "4167", Observaciones = "Fallas intermitentes, observar" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-130", Fecha = "16/06/2025", Dispositivo = "Samsung Note 20", Tipo = "Preventivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "J. Martinez", Materiales = "Batería nueva", Costo = "4402", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-131", Fecha = "24/10/2025", Dispositivo = "Samsung S20", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "D. Lopez", Materiales = "Cristal templado, adhesivo", Costo = "1822", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-132", Fecha = "20/10/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Correctivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "D. Lopez", Materiales = "Cristal templado, adhesivo", Costo = "3914", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-133", Fecha = "07/10/2025", Dispositivo = "Google Pixel 7", Tipo = "Correctivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "L. Reyes", Materiales = "Carcasa trasera", Costo = "555", Observaciones = "Requiere segunda visita si persiste ruido" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-134", Fecha = "08/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Correctivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "D. Lopez", Materiales = "Altavoz, estanqueidad", Costo = "4049", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-135", Fecha = "24/06/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Preventivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "J. Martinez", Materiales = "Cargador original", Costo = "3067", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-136", Fecha = "07/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Correctivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "A. Gomez", Materiales = "Antena wifi", Costo = "3088", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-137", Fecha = "29/10/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Preventivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "L. Reyes", Materiales = "Micrófono, pasta térmica", Costo = "1231", Observaciones = "Fallas intermitentes, observar" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-138", Fecha = "20/10/2025", Dispositivo = "Samsung A13", Tipo = "Preventivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "A. Gomez", Materiales = "Pantalla original, adhesivo", Costo = "2728", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-139", Fecha = "25/10/2025", Dispositivo = "Samsung S20", Tipo = "Preventivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "C. Torres", Materiales = "Conector de carga, soldadura", Costo = "2766", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-140", Fecha = "10/06/2025", Dispositivo = "Samsung S21", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "J. Martinez", Materiales = "Batería nueva", Costo = "2451", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-141", Fecha = "04/10/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Correctivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "D. Lopez", Materiales = "Cristal templado, adhesivo", Costo = "2654", Observaciones = "Fallas intermitentes, observar" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-142", Fecha = "10/06/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "J. Martinez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "650", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-143", Fecha = "29/10/2025", Dispositivo = "Google Pixel 5", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "A. Gomez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "1537", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-144", Fecha = "06/06/2025", Dispositivo = "Google Pixel 7", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "C. Torres", Materiales = "Marco frontal", Costo = "3562", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-145", Fecha = "06/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Preventivo", Descripcion = "Sustitución de altavoz auricular y pruebas", Tecnico = "J. Martinez", Materiales = "Modulo cámara, cinta adhesiva", Costo = "3784", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-146", Fecha = "22/10/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Preventivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "J. Martinez", Materiales = "Altavoz, estanqueidad", Costo = "1252", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-147", Fecha = "10/10/2025", Dispositivo = "iPhone 14 Plus", Tipo = "Correctivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "L. Reyes", Materiales = "Marco frontal", Costo = "2100", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-148", Fecha = "30/10/2025", Dispositivo = "Samsung A52", Tipo = "Correctivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "L. Reyes", Materiales = "Botón home, tornillos", Costo = "2878", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-149", Fecha = "01/10/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Correctivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "L. Reyes", Materiales = "Cargador original", Costo = "2503", Observaciones = "Fallas intermitentes, observar" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-150", Fecha = "21/10/2025", Dispositivo = "iPhone 14", Tipo = "Correctivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "C. Torres", Materiales = "Pantalla original, adhesivo", Costo = "3107", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-151", Fecha = "07/06/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Correctivo", Descripcion = "Limpieza de humedad y secado profesional", Tecnico = "D. Lopez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "837", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-152", Fecha = "28/06/2025", Dispositivo = "iPhone 12", Tipo = "Correctivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "A. Gomez", Materiales = "Resorte botón", Costo = "3814", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-153", Fecha = "02/10/2025", Dispositivo = "Xiaomi Redmi Note 10", Tipo = "Preventivo", Descripcion = "Sustitución de altavoz auricular y pruebas", Tecnico = "M. Perez", Materiales = "Batería nueva", Costo = "2581", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-154", Fecha = "29/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "J. Martinez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "607", Observaciones = "Requiere segunda visita si persiste ruido" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-155", Fecha = "24/10/2025", Dispositivo = "iPad Air", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "L. Reyes", Materiales = "Marco frontal", Costo = "2594", Observaciones = "Fallas intermitentes, observar" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-156", Fecha = "07/10/2025", Dispositivo = "Samsung A52", Tipo = "Preventivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "J. Martinez", Materiales = "Sensor de proximidad", Costo = "2199", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-157", Fecha = "25/10/2025", Dispositivo = "Samsung A52", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz auricular y pruebas", Tecnico = "A. Gomez", Materiales = "Marco frontal", Costo = "3541", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-158", Fecha = "26/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "A. Gomez", Materiales = "Antena wifi", Costo = "595", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-159", Fecha = "14/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "J. Martinez", Materiales = "Altavoz, estanqueidad", Costo = "1993", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-160", Fecha = "02/11/2025", Dispositivo = "Samsung S21", Tipo = "Preventivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "M. Perez", Materiales = "Resorte botón", Costo = "851", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-161", Fecha = "24/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Correctivo", Descripcion = "Reemplazo de batería y prueba de carga", Tecnico = "C. Torres", Materiales = "Altavoz, estanqueidad", Costo = "1053", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-162", Fecha = "11/10/2025", Dispositivo = "Huawei P30", Tipo = "Correctivo", Descripcion = "Reparación de cámara trasera y enfoque", Tecnico = "C. Torres", Materiales = "Resorte botón", Costo = "1664", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-163", Fecha = "06/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Preventivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "J. Martinez", Materiales = "Resorte botón", Costo = "1469", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-164", Fecha = "24/10/2025", Dispositivo = "iPhone 14 Plus", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "D. Lopez", Materiales = "Puerto USB-C", Costo = "3637", Observaciones = "Se solicitó aprobación para placa" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-165", Fecha = "21/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "C. Torres", Materiales = "Carcasa trasera", Costo = "1111", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-166", Fecha = "18/10/2025", Dispositivo = "Samsung Tab A8", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "L. Reyes", Materiales = "Modulo cámara, cinta adhesiva", Costo = "2955", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-167", Fecha = "21/10/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Preventivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "J. Martinez", Materiales = "Resorte botón", Costo = "334", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-168", Fecha = "06/10/2025", Dispositivo = "iPhone 13", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "D. Lopez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "4124", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-169", Fecha = "04/10/2025", Dispositivo = "iPad Mini", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "D. Lopez", Materiales = "Batería nueva", Costo = "2616", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-170", Fecha = "25/10/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Preventivo", Descripcion = "Reemplazo de micrófono y prueba de llamadas", Tecnico = "D. Lopez", Materiales = "Carcasa trasera", Costo = "2179", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-171", Fecha = "08/11/2025", Dispositivo = "iPhone 12 Pro", Tipo = "Correctivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "A. Gomez", Materiales = "Placa lógica limpieza, soldadura puntual", Costo = "4361", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-172", Fecha = "14/10/2025", Dispositivo = "Huawei MatePad", Tipo = "Preventivo", Descripcion = "Cambio de placa lógica (parcial) y pruebas", Tecnico = "L. Reyes", Materiales = "Altavoz, estanqueidad", Costo = "1831", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-173", Fecha = "14/06/2025", Dispositivo = "iPhone 14 Plus", Tipo = "Preventivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "J. Martinez", Materiales = "Lente cámara", Costo = "2046", Observaciones = "Se recomienda seguimiento" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-174", Fecha = "11/06/2025", Dispositivo = "iPhone 12", Tipo = "Correctivo", Descripcion = "Limpieza de humedad y secado profesional", Tecnico = "J. Martinez", Materiales = "Lente cámara", Costo = "4007", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-175", Fecha = "17/06/2025", Dispositivo = "iPhone 14 Pro", Tipo = "Correctivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "C. Torres", Materiales = "Modulo cámara, cinta adhesiva", Costo = "651", Observaciones = "Se retiró suciedad abundante" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-176", Fecha = "27/10/2025", Dispositivo = "iPad Mini", Tipo = "Preventivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "L. Reyes", Materiales = "Pantalla original, adhesivo", Costo = "1113", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-177", Fecha = "02/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Correctivo", Descripcion = "Sustitución de altavoz y ajuste de volumen", Tecnico = "D. Lopez", Materiales = "Conector de carga, soldadura", Costo = "3600", Observaciones = "Garantía 30 días" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-178", Fecha = "08/06/2025", Dispositivo = "Samsung S21", Tipo = "Correctivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "L. Reyes", Materiales = "Cargador original", Costo = "3972", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-179", Fecha = "07/10/2025", Dispositivo = "Samsung Tab A8", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "M. Perez", Materiales = "Lente cámara", Costo = "3636", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-180", Fecha = "21/10/2025", Dispositivo = "Samsung Note 20", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "M. Perez", Materiales = "Antena wifi", Costo = "2864", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-181", Fecha = "24/10/2025", Dispositivo = "Samsung S21 Ultra", Tipo = "Correctivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "M. Perez", Materiales = "Cristal templado, adhesivo", Costo = "1475", Observaciones = "Pendiente cotización adicional" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-182", Fecha = "03/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Correctivo", Descripcion = "Sustitución de cristal trasero y pulido", Tecnico = "A. Gomez", Materiales = "Carcasa trasera", Costo = "649", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-183", Fecha = "08/11/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Alineación de antena y mejora de señal", Tecnico = "C. Torres", Materiales = "Cable flex, carcasa", Costo = "1280", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-184", Fecha = "25/06/2025", Dispositivo = "Google Pixel 6", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "L. Reyes", Materiales = "Botón home, tornillos", Costo = "4225", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-185", Fecha = "15/10/2025", Dispositivo = "iPad Air", Tipo = "Correctivo", Descripcion = "Soldadura de conector de carga y test de corriente", Tecnico = "J. Martinez", Materiales = "Conector de carga, soldadura", Costo = "3238", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-186", Fecha = "05/10/2025", Dispositivo = "Motorola Edge", Tipo = "Correctivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "L. Reyes", Materiales = "Resorte botón", Costo = "2365", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-187", Fecha = "09/10/2025", Dispositivo = "Samsung Note 20", Tipo = "Preventivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "A. Gomez", Materiales = "Carcasa trasera", Costo = "1114", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-188", Fecha = "14/10/2025", Dispositivo = "Lenovo Tab M8", Tipo = "Preventivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "J. Martinez", Materiales = "Sensor de proximidad", Costo = "342", Observaciones = "Trabajo realizado sin novedad" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-189", Fecha = "16/06/2025", Dispositivo = "iPhone 13", Tipo = "Correctivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "A. Gomez", Materiales = "Puerto USB-C", Costo = "2643", Observaciones = "Se dejó nota al cliente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-190", Fecha = "04/06/2025", Dispositivo = "Motorola Moto G Power", Tipo = "Correctivo", Descripcion = "Cambio de pantalla y calibración táctil", Tecnico = "J. Martinez", Materiales = "Modulo cámara, cinta adhesiva", Costo = "3150", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-191", Fecha = "01/11/2025", Dispositivo = "iPad Air", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "C. Torres", Materiales = "Carcasa trasera", Costo = "733", Observaciones = "Cliente pidió entrega urgente" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-192", Fecha = "23/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Preventivo", Descripcion = "Formateo y reinstalación de sistema operativo", Tecnico = "M. Perez", Materiales = "Altavoz, estanqueidad", Costo = "3333", Observaciones = "Pieza no original instalada" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-193", Fecha = "/21/10/2025", Dispositivo = "Google Pixel 6", Tipo = "Preventivo", Descripcion = "Actualización de firmware y calibración sensores", Tecnico = "D. Lopez", Materiales = "Botón home, tornillos", Costo = "3268", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-194", Fecha = "/21/10/2025", Dispositivo = "Google Pixel 5", Tipo = "Preventivo", Descripcion = "Limpieza de puertos y revisión de batería", Tecnico = "J. Martinez", Materiales = "Altavoz, estanqueidad", Costo = "2184", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-195", Fecha = "27/06/2025", Dispositivo = "Google Pixel 7", Tipo = "Correctivo", Descripcion = "Cambio de conector de carga y limpieza interna", Tecnico = "A. Gomez", Materiales = "S pen reemplazo", Costo = "2705", Observaciones = "Prueba de rendimiento OK" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-196", Fecha = "07/11/2025", Dispositivo = "Samsung S20", Tipo = "Correctivo", Descripcion = "Reparación de botonera y reemplazo de botones", Tecnico = "M. Perez", Materiales = "Antena wifi", Costo = "301", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-197", Fecha = "08/10/2025", Dispositivo = "Samsung S20", Tipo = "Preventivo", Descripcion = "Revisión general y mantenimiento preventivo", Tecnico = "D. Lopez", Materiales = "Conector de carga, soldadura", Costo = "3952", Observaciones = "Se reemplazó componente dañado" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-198", Fecha = "18/10/2025", Dispositivo = "Xiaomi Mi 11", Tipo = "Correctivo", Descripcion = "Limpieza de humedad y secado profesional", Tecnico = "A. Gomez", Materiales = "Carcasa trasera", Costo = "4408", Observaciones = "Sin signos de desgaste" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-199", Fecha = "05/06/2025", Dispositivo = "iPhone 13 Mini", Tipo = "Correctivo", Descripcion = "Sustitución de lente cámara y calibración", Tecnico = "D. Lopez", Materiales = "Antena wifi", Costo = "3595", Observaciones = "Cliente satisfecho" } );
+            registros.Add( new RegistroMantenimiento { ID = "M-200", Fecha = "28/10/2025", Dispositivo = "iPhone 13 Pro Max", Tipo = "Preventivo", Descripcion = "Sustitución de panel LCD y ajuste de colores", Tecnico = "C. Torres", Materiales = "Conector de carga, soldadura", Costo = "3468", Observaciones = "Se retiró suciedad abundante" } );
+        }
+
+        private void btnExportarPDF_Click( object sender, EventArgs e )
+        {
+            if ( dataGridView1.Rows.Count == 0 )
+            {
+                MessageBox.Show( "No hay datos para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information );
+                return;
+            }
+
+            // Lógica para exportar los datos del DataGridView a PDF
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Archivos PDF (*.pdf)|*.pdf",
+                Title = "Guardar reporte como PDF",
+                FileName = "ReporteMantenimiento" + ObtenerRangoSemana( dateTimePicker1.Value ).inicio.ToString( "yyyyMMdd" ) + "_" + ObtenerRangoSemana( dateTimePicker1.Value ).fin.ToString( "yyyyMMdd" ) + ".pdf"
+            };
+
+            if ( saveFileDialog.ShowDialog() == DialogResult.OK )
+            {
+                string filePath = saveFileDialog.FileName;
+                try
+                {
+                    // Crear documento PDF
+                    iTextSharp.text.Document doc = new( PageSize.A4.Rotate(), 10, 10, 10, 26 );
+                    PdfWriter writer = PdfWriter.GetInstance( doc, new FileStream( filePath, FileMode.Create ) );
+                    writer.PageEvent = new PdfFooter();
+                    doc.Open();
+
+                    // Capturar panel como imagen
+                    Bitmap bmp = new Bitmap( panel1.Width, panel1.Height );
+                    panel1.DrawToBitmap( bmp, new System.Drawing.Rectangle( 0, 0, bmp.Width, bmp.Height ) );
+
+                    // Insertar panel como imagen en el PDF
+                    using ( MemoryStream ms = new MemoryStream() )
+                    {
+                        bmp.Save( ms, System.Drawing.Imaging.ImageFormat.Png );
+                        iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance( ms.ToArray() );
+                        img.ScaleToFit( doc.PageSize.Width - 20, doc.PageSize.Height - 20 );
+                        img.Alignment = Element.ALIGN_CENTER;
+                        doc.Add( img );
+                    }
+
+                    doc.Add( new Paragraph( "\n" ) );
+
+                    // Insertar datos del DataGridView en una tabla PDF
+                    PdfPTable pdfTable = new PdfPTable( dataGridView1.Columns.Count );
+                    pdfTable.WidthPercentage = 100;
+
+                    float[] columnWidths = new float[dataGridView1.Columns.Count];
+
+                    // Columna ID más estrecha
+                    columnWidths[0] = 7f;    // ID
+                    columnWidths[1] = 12f;    // Fecha
+                    columnWidths[2] = 16f;   // Dispositivo
+                    columnWidths[3] = 16f;   // Tipo de Mantenimiento
+                    columnWidths[4] = 25f;   // Descripción del Servicio
+                    columnWidths[5] = 12f;   // Técnico Asignado
+                    columnWidths[6] = 15f;   // Repuestos Utilizados
+                    columnWidths[7] = 15f;    // Costo (L.)
+                    columnWidths[8] = 20f;   // Observaciones
+                    pdfTable.SetWidths( columnWidths );
+
+                    // Estilo de tabla
+                    iTextSharp.text.Font headerFont = new( iTextSharp.text.Font.FontFamily.UNDEFINED, 12, iTextSharp.text.Font.BOLD, BaseColor.WHITE );
+
+                    // Agregar encabezados
+                    foreach ( DataGridViewColumn column in dataGridView1.Columns )
+                    {
+                        PdfPCell cell = new PdfPCell( new Phrase( column.HeaderText, headerFont ) )
+                        {
+                            BackgroundColor = new BaseColor( 0, 32, 96 ),
+                            HorizontalAlignment = Element.ALIGN_CENTER,
+                            VerticalAlignment = Element.ALIGN_MIDDLE,
+                            MinimumHeight = 40f,
+                            Padding = 5,
+                        };
+                        pdfTable.AddCell( cell );
+                    }
+
+                    // Agregar filas
+                    foreach ( DataGridViewRow row in dataGridView1.Rows )
+                    {
+                        //if ( row.IsNewRow ) continue; // Omitir fila nueva
+
+                        BaseColor rowColor = row.Index % 2 == 0 ? BaseColor.WHITE : BaseColor.LIGHT_GRAY;
+
+                        foreach ( DataGridViewCell cell in row.Cells )
+                        {
+                            string columnHeader = dataGridView1.Columns[cell.ColumnIndex].HeaderText;
+                            object cellValue = cell.Value ?? string.Empty;
+                            string cellText;
+
+                            if ( columnHeader.Contains( "(L.)" ) )
+                            {
+                                if ( decimal.TryParse( cellValue.ToString(), out decimal amount ) )
+                                {
+                                    string formattedAmount = amount.ToString( "N2" );
+
+                                    int totalWidth = 18;
+                                    cellText = "L." + formattedAmount.PadLeft( totalWidth - 2 );
+                                }
+                                else
+                                {
+                                    cellText = "L. 0.00".PadLeft( 18 );
+                                }
+                            }
+                            else
+                            {
+                                cellText = cellValue.ToString();
+                            }
+
+                            PdfPCell pdfCell = new PdfPCell( new Phrase( cellText ) )
+                            {
+                                BackgroundColor = rowColor,
+                                HorizontalAlignment = Element.ALIGN_CENTER,
+                                VerticalAlignment = Element.ALIGN_MIDDLE,
+                                Padding = 2,
+                            };
+
+                            pdfTable.AddCell( pdfCell );
+                        }
+                    }
+                    doc.Add( pdfTable );
+                    doc.Close();
+
+                    MessageBox.Show( "Reporte exportado exitosamente a " + filePath, "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information );
+                }
+                catch ( Exception ex )
+                {
+                    MessageBox.Show( "Error al exportar el reporte: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                }
+            }
+        }
+
+        public (DateTime inicio, DateTime fin) ObtenerRangoSemana( DateTime fecha )
+        {
+            int diff = (7 + (fecha.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime inicio = fecha.AddDays( -diff ).Date;
+            DateTime fin = inicio.AddDays( 6 ).Date;
+            return (inicio, fin);
+        }
+
+        private void FiltrarPorSemana( DateTime fecha )
+        {
+            var rango = ObtenerRangoSemana( dateTimePicker1.Value );
+            DateTime inicio = rango.inicio;
+            DateTime fin = rango.fin;
+
+            lblFechas.Text = "(" + inicio.ToString( "dd/MM/yyyy" ) + " - " + fin.ToString( "dd/MM/yyyy" ) + ")";
+
+            var filtrados = registros
+                .Where( r =>
+                {
+                    // Convertir el string a DateTime
+                    if ( DateTime.TryParse( r.Fecha, out DateTime fechaRegistro ) )
+                    {
+                        return fechaRegistro >= inicio && fechaRegistro <= fin;
+                    }
+                    return false; // si no se puede parsear, no incluir
+                } )
+                .OrderBy( r => DateTime.Parse( r.Fecha ) )
+                .ToList();
+
+            dataGridView1.Rows.Clear();
+            foreach ( var r in filtrados )
+            {
+                dataGridView1.Rows.Add( r.ID, r.Fecha, r.Dispositivo, r.Tipo, r.Descripcion, r.Tecnico, r.Materiales, r.Costo, r.Observaciones );
+            }
+        }
+
+        private void dateTimePicker1_ValueChanged( object sender, EventArgs e )
+        {
+            FiltrarPorSemana( dateTimePicker1.Value );
         }
     }
 }
