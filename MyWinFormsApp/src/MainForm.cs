@@ -1,40 +1,29 @@
 using System;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace MyWinFormsApp
 {
     public partial class MainForm : Form
     {
-        private bool isSubMenu5Expanded = false;
+        // --- Soporte para flags usados dentro de lambdas ---
+        public class BoolRef
+        {
+            public bool Value;
+            public BoolRef(bool v) => Value = v;
+        }
+
+        // Flags correctos
+        private BoolRef isSubMenu1Expanded = new BoolRef(false);
+        private BoolRef isSubMenu5Expanded = new BoolRef(false);
+
+        // Control actual cargado dentro del panelContent
         private Control currentContent = null;
 
+        // Indica si es empleado o cliente
         private readonly bool _isEmployee;
 
-        private void ConfigureModules()
-        {
-            // mostrar módulos 1-4 solo para empleados; módulo 5 siempre visible
-            btnModule1.Visible = btnModule2.Visible = btnModule3.Visible = btnModule4.Visible = _isEmployee;
-            btnModule5.Visible = true;
-            // ajuste visual si es cliente
-            if (!_isEmployee && panelLeft != null)
-            {
-                panelLeft.Width = 140;
-            }
-        }
-
-        private void ModuleButton_Click(object sender, EventArgs e)
-        {
-            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int n))
-            {
-                lblContent.Text = $"Hola mundo desde Módulo {n}";
-            }
-            else
-            {
-                lblContent.Text = "Hola mundo";
-            }
-        }
-        // animacion boton
+        // Animación de botones
         private Timer _animTimer;
         private Button _animButton;
         private int _animStep;
@@ -48,27 +37,52 @@ namespace MyWinFormsApp
             ConfigureModules();
         }
 
+        // ================================
+        // CONFIGURACIÓN DE MÓDULOS
+        // ================================
+        private void ConfigureModules()
+        {
+            // Mostrar módulos 1-4 solo para empleados
+            btnModule1.Visible = btnModule2.Visible =
+            btnModule3.Visible = btnModule4.Visible = _isEmployee;
+
+            btnModule5.Visible = true; // Siempre visible
+
+            if (!_isEmployee)
+            {
+                panelLeft.Width = 140;
+            }
+        }
+
+        // ================================
+        // CARGA DE MÓDULOS (Botones 2-4)
+        // ================================
+        private void ModuleButton_Click(object sender, EventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int n))
+                lblContent.Text = $"Hola mundo desde Módulo {n}";
+            else
+                lblContent.Text = "Hola mundo";
+        }
+
+        // ================================
+        // ANIMACIÓN DEL EFECTO CLICK
+        // ================================
         private void InitializeAnimation()
         {
             _animTimer = new Timer();
             _animTimer.Interval = 20;
             _animTimer.Tick += AnimTimer_Tick;
             _animButton = null;
-            _animStep = 0;
         }
 
-        // Evento que dispara la animación (hooked desde el diseñador)
         private void AnimateButton_Click(object sender, EventArgs e)
         {
-            if (sender is Button b)
+            if (sender is Button b && _animButton == null)
             {
-                // iniciar animación si no está corriendo
-                if (_animButton == null)
-                {
-                    _animButton = b;
-                    _animStep = 0;
-                    _animTimer.Start();
-                }
+                _animButton = b;
+                _animStep = 0;
+                _animTimer.Start();
             }
         }
 
@@ -80,19 +94,18 @@ namespace MyWinFormsApp
                 return;
             }
 
-            // efecto simple: flash (white -> light gray -> white)
-            double t;
-            if (_animStep <= _animSteps / 2) t = (double)_animStep / (_animSteps / 2);
-            else t = (double)(_animSteps - _animStep) / (_animSteps / 2);
+            double t = (_animStep <= _animSteps / 2)
+                ? (double)_animStep / (_animSteps / 2)
+                : (double)(_animSteps - _animStep) / (_animSteps / 2);
 
             Color start = Color.White;
             Color end = Color.LightGray;
+
             _animButton.BackColor = LerpColor(start, end, t);
 
             _animStep++;
             if (_animStep > _animSteps)
             {
-                // restaurar y parar
                 _animButton.BackColor = Color.White;
                 _animButton = null;
                 _animTimer.Stop();
@@ -107,54 +120,116 @@ namespace MyWinFormsApp
             int bl = (int)(a.B + (b.B - a.B) * t);
             return Color.FromArgb(r, g, bl);
         }
-        //metodos sub
-        private void BtnAdministracion_Click(object sender, EventArgs e)
-        {
-            // Animación del submenú
-            if (!isSubMenu5Expanded)
-            {
-                panelSubMenu5.Height = 0;
-                panelSubMenu5.Visible = true;
 
-                // Animación para expandir
-                Timer timer = new Timer();
-                timer.Interval = 10;
-                timer.Tick += (s, args) =>
+        // =====================================================
+        //         SISTEMA DE SUBMENÚS EN CASCADA
+        // =====================================================
+        private void ToggleSubMenuExclusive(Panel panelToToggle, BoolRef flag, int targetHeight)
+        {
+            Panel[] allPanels = { panelSubMenu1, panelSubMenu5 };
+
+            // Cerrar todos menos el panel clickeado
+            foreach (var p in allPanels)
+            {
+                if (p == null) continue;
+
+                if (p != panelToToggle)
                 {
-                    if (panelSubMenu5.Height >= 40)
+                    p.Visible = false;
+                    p.Height = 0;
+                    if (p == panelSubMenu1) isSubMenu1Expanded.Value = false;
+                    if (p == panelSubMenu5) isSubMenu5Expanded.Value = false;
+                }
+            }
+
+            // ---- EXPANDIR ----
+            if (!flag.Value)
+            {
+                panelToToggle.Height = 0;
+                panelToToggle.Visible = true;
+
+                Timer t = new Timer { Interval = 10 };
+                t.Tick += (s, e) =>
+                {
+                    if (panelToToggle.Height >= targetHeight)
                     {
-                        timer.Stop();
-                        timer.Dispose();
+                        t.Stop();
+                        t.Dispose();
+                        flag.Value = true;
                     }
                     else
                     {
-                        panelSubMenu5.Height += 4;
+                        panelToToggle.Height += 4;
                     }
                 };
-                timer.Start();
+                t.Start();
             }
+            // ---- CONTRAER ----
             else
             {
-                // Animación para contraer
-                Timer timer = new Timer();
-                timer.Interval = 10;
-                timer.Tick += (s, args) =>
+                Timer t = new Timer { Interval = 10 };
+                t.Tick += (s, e) =>
                 {
-                    if (panelSubMenu5.Height <= 0)
+                    if (panelToToggle.Height <= 0)
                     {
-                        panelSubMenu5.Visible = false;
-                        timer.Stop();
-                        timer.Dispose();
+                        panelToToggle.Visible = false;
+                        t.Stop();
+                        t.Dispose();
+                        flag.Value = false;
                     }
                     else
                     {
-                        panelSubMenu5.Height -= 4;
+                        panelToToggle.Height -= 4;
                     }
                 };
-                timer.Start();
+                t.Start();
             }
+        }
 
-            isSubMenu5Expanded = !isSubMenu5Expanded;
+        // =====================================================
+        //  SUBMENÚ 1 — REGISTRO DE MANTENIMIENTO
+        // =====================================================
+        private void BtnMantenimiento_Click(object sender, EventArgs e)
+        {
+            int target = 40; // altura del submenú
+            ToggleSubMenuExclusive(panelSubMenu1, isSubMenu1Expanded, target);
+        }
+
+        private void BtnDnR_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (currentContent != null)
+                {
+                    panelContent.Controls.Remove(currentContent);
+                    currentContent.Dispose();
+                    currentContent = null;
+                }
+
+                var form = new RDdispositivosnorepaForm();
+                form.TopLevel = false;
+                form.FormBorderStyle = FormBorderStyle.None;
+                form.Dock = DockStyle.Fill;
+
+                panelContent.Controls.Add(form);
+                currentContent = form;
+
+                form.Show();
+                lblContent.Visible = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar dispositivos no reparados: {ex.Message}");
+            }
+        }
+
+        // =====================================================
+        //  SUBMENÚ 5 — ADMINISTRACIÓN GENERAL
+        // =====================================================
+        private void BtnAdministracion_Click(object sender, EventArgs e)
+        {
+            int target = 40;
+            ToggleSubMenuExclusive(panelSubMenu5, isSubMenu5Expanded, target);
         }
 
         private void BtnInventario_Click(object sender, EventArgs e)
@@ -168,23 +243,20 @@ namespace MyWinFormsApp
                     currentContent = null;
                 }
 
-                var inventarioForm = new InventarioPartesForm();
-                inventarioForm.TopLevel = false;
-                inventarioForm.FormBorderStyle = FormBorderStyle.None;
-                inventarioForm.Dock = DockStyle.Fill;
+                var form = new InventarioPartesForm();
+                form.TopLevel = false;
+                form.FormBorderStyle = FormBorderStyle.None;
+                form.Dock = DockStyle.Fill;
 
-                // IMPORTANTE: agregar AL panelContent, NO al this.Controls
-                panelContent.Controls.Add(inventarioForm);
-                panelContent.Tag = inventarioForm;
-                currentContent = inventarioForm;
+                panelContent.Controls.Add(form);
+                currentContent = form;
 
-                inventarioForm.Show();
-                inventarioForm.BringToFront();
+                form.Show();
                 lblContent.Visible = false;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar inventario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al cargar inventario: {ex.Message}");
             }
         }
     }
