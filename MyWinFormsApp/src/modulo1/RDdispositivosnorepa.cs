@@ -242,7 +242,7 @@ namespace MyWinFormsApp
                         ev.Graphics.DrawLine(whitePen, rect.Right - lineThickness / 2, rect.Top, rect.Right - lineThickness / 2, rect.Bottom);
                     }
 
-                    // 2. Dibuja la Franja Amarilla (Horizontal) en la parte INFERIOR de la celda
+                    // Dibuja la Franja Amarilla (Horizontal) en la parte INFERIOR de la celda
                     using (Pen yellowPen = new Pen(ColorTranslator.FromHtml("#FFC000"), yellowThickness))
                     {
                         // Altura donde dibujar la franja amarilla.
@@ -543,17 +543,10 @@ namespace MyWinFormsApp
                 dgDnRepa.Columns["CostoEstimado"].HeaderText = "Costo Estimado (L.)";
             // ----------------------------
 
-            // Usar Fill para que el grid se autoajuste al ancho del panel padre.
             dgDnRepa.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-            // Nota: Cuando usas DataGridViewAutoSizeColumnsMode.Fill,
-            // definir un 'widths' fijo ya no es necesario, pero puedes usarlo para establecer 
-            // pesos relativos.
-
-            // Si quieres anchos relativos:
             if (dgDnRepa.Columns.Contains("ID")) dgDnRepa.Columns["ID"].FillWeight = 50;
             if (dgDnRepa.Columns.Contains("Observaciones")) dgDnRepa.Columns["Observaciones"].FillWeight = 150;
-            // El resto se repartirá el espacio sobrante equitativamente.
+            // Ajuste de anchos específicos
 
             var widths = new Dictionary<string, int>
             {
@@ -586,8 +579,6 @@ namespace MyWinFormsApp
             // Asegura que el contenedor permita desplazamiento horizontal si el grid es más ancho
             contenedorReporte.AutoScroll = true;
             contenedorReporte.AutoScrollMinSize = new Size(dgDnRepa.Width, 0);
-
-            // ...estilizado de filas...
         }
 
     }
