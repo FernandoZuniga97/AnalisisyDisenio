@@ -29,6 +29,7 @@ namespace MyWinFormsApp
 
         // Submenú del módulo 5
         private Button btnInventario;
+        private Button btnTipoFallas; // NUEVO BOTÓN
 
         private void InitializeComponent()
         {
@@ -53,6 +54,7 @@ namespace MyWinFormsApp
             // Crear botones de submenú
             this.btnDnR = new Button();
             this.btnInventario = new Button();
+            this.btnTipoFallas = new Button(); // NUEVO BOTÓN
 
             this.SuspendLayout();
 
@@ -89,7 +91,6 @@ namespace MyWinFormsApp
             ConfigureMainButton(btnModule4, "Línea de tiempo", ModuleButton_Click);
             ConfigureMainButton(btnModule5, "Administración general", BtnAdministracion_Click);
 
-            // Etiquetas de módulo (para ModuleButton_Click)
             btnModule2.Tag = 2;
             btnModule3.Tag = 3;
             btnModule4.Tag = 4;
@@ -107,6 +108,8 @@ namespace MyWinFormsApp
 
             // ======== SUBMENÚ 5 ========
             ConfigureSubButton(btnInventario, "Inventario", BtnInventario_Click);
+            ConfigureSubButton(btnTipoFallas, "Tipo de fallas", BtnTipoFallas_Click); // NUEVO BOTÓN
+            panelSubMenu5.Controls.Add(btnTipoFallas);
             panelSubMenu5.Controls.Add(btnInventario);
 
             // ======== ORDEN DE CONTROLES ========
@@ -124,9 +127,6 @@ namespace MyWinFormsApp
             this.ResumeLayout(false);
         }
 
-        // =============================
-        // FUNCIONES AUXILIARES
-        // =============================
         private void ConfigureMainButton(Button btn, string text, EventHandler action)
         {
             btn.Text = text;
@@ -137,8 +137,8 @@ namespace MyWinFormsApp
             btn.BackColor = Color.White;
             btn.ForeColor = Color.Black;
             btn.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            btn.Click += AnimateButton_Click; // activa animación visual
-            btn.Click += action; // ejecuta acción funcional
+            btn.Click += AnimateButton_Click;
+            btn.Click += action;
         }
 
         private void ConfigureSubMenuPanel(Panel panel)
@@ -159,7 +159,7 @@ namespace MyWinFormsApp
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
             btn.BackColor = Color.FromArgb(220, 225, 250);
-            btn.Click += AnimateButton_Click; // animación al hacer click
+            btn.Click += AnimateButton_Click;
             btn.Click += action;
         }
     }
