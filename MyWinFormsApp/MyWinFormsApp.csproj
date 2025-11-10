@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="src\login\Image\**\*.*">
+    <Content Include="src\login\Image\**\*.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>Image\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+      <!--<TargetPath>Image\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>-->
     </Content>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
   </ItemGroup>

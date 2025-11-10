@@ -7,6 +7,9 @@ namespace MyWinFormsApp
 {
     public partial class MainForm : Form
     {
+        private bool isSubMenu5Expanded = false;
+        private Control currentContent = null;
+
         private readonly bool _isEmployee;
 
         private void ConfigureModules()
@@ -106,8 +109,86 @@ namespace MyWinFormsApp
             int bl = (int)(a.B + (b.B - a.B) * t);
             return Color.FromArgb(r, g, bl);
         }
+        //metodos sub
+        private void BtnAdministracion_Click(object sender, EventArgs e)
+        {
+            // Animación del submenú
+            if (!isSubMenu5Expanded)
+            {
+                panelSubMenu5.Height = 0;
+                panelSubMenu5.Visible = true;
 
+                // Animación para expandir
+                Timer timer = new Timer();
+                timer.Interval = 10;
+                timer.Tick += (s, args) =>
+                {
+                    if (panelSubMenu5.Height >= 40)
+                    {
+                        timer.Stop();
+                        timer.Dispose();
+                    }
+                    else
+                    {
+                        panelSubMenu5.Height += 4;
+                    }
+                };
+                timer.Start();
+            }
+            else
+            {
+                // Animación para contraer
+                Timer timer = new Timer();
+                timer.Interval = 10;
+                timer.Tick += (s, args) =>
+                {
+                    if (panelSubMenu5.Height <= 0)
+                    {
+                        panelSubMenu5.Visible = false;
+                        timer.Stop();
+                        timer.Dispose();
+                    }
+                    else
+                    {
+                        panelSubMenu5.Height -= 4;
+                    }
+                };
+                timer.Start();
+            }
+
+            isSubMenu5Expanded = !isSubMenu5Expanded;
+        }
+
+        private void BtnInventario_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (currentContent != null)
+                {
+                    panelContent.Controls.Remove(currentContent);
+                    currentContent.Dispose();
+                    currentContent = null;
+                }
+
+                var inventarioForm = new InventarioPartesForm();
+                inventarioForm.TopLevel = false;
+                inventarioForm.FormBorderStyle = FormBorderStyle.None;
+                inventarioForm.Dock = DockStyle.Fill;
+
+                // IMPORTANTE: agregar AL panelContent, NO al this.Controls
+                panelContent.Controls.Add(inventarioForm);
+                panelContent.Tag = inventarioForm;
+                currentContent = inventarioForm;
+
+                inventarioForm.Show();
+                inventarioForm.BringToFront();
+                lblContent.Visible = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar inventario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         // ...existing methods like ModuleButton_Click, ConfigureModules ...
     }
 }
-// ...existing code...

@@ -15,7 +15,10 @@ namespace MyWinFormsApp
         private Button btnModule4;
         private Button btnModule5;
         private Label lblContent;
-
+        //submenu especifico para el boton 5
+        private Panel panelSubMenu5;
+        private Button btnInventario;
+        //------------------------------- aqui termina el sub5
         private void InitializeComponent()
         {
             this.panelLeft = new Panel();
@@ -26,6 +29,10 @@ namespace MyWinFormsApp
             this.btnModule5 = new Button();
             this.panelContent = new Panel();
             this.lblContent = new Label();
+            //submenu papu
+            this.panelSubMenu5 = new Panel();
+            this.btnInventario = new Button();
+            //-------------------------------
 
             // MainForm
             this.SuspendLayout();
@@ -38,7 +45,11 @@ namespace MyWinFormsApp
             this.panelLeft.Width = 180;
             this.panelLeft.BackColor = Color.Blue;
             this.Controls.Add(this.panelLeft);
-
+            // panel de contenido
+            this.panelContent.Dock = DockStyle.Fill;
+            this.panelContent.BackColor = Color.White;
+            this.Controls.Add(this.panelContent);
+            this.panelContent.BringToFront();
             // Buttons (dock top to stack vertically)
             var buttons = new[] { btnModule5, btnModule4, btnModule3, btnModule2, btnModule1 };
             for (int i = 0; i < buttons.Length; i++)
@@ -86,13 +97,34 @@ namespace MyWinFormsApp
             // btnModule5
             this.btnModule5.Text = "Administración general";
             this.btnModule5.Tag = "5";
-            this.btnModule5.Click += ModuleButton_Click;
+            this.btnModule5.Click -= ModuleButton_Click;
+            this.btnModule5.Click += BtnAdministracion_Click; // manejo especial para módulo 5
             this.btnModule5.Click += AnimateButton_Click;
-
+            // submenu del 5
+            this.panelSubMenu5 = new Panel();
+            this.panelSubMenu5.BackColor = Color.FromArgb(230, 230, 250); // Color lavanda claro
+            this.panelSubMenu5.Visible = false;
+            this.panelSubMenu5.Height = 0; // Inicialmente altura 0
+            this.panelSubMenu5.Width = 180;
+            this.panelSubMenu5.Location = new Point(0, btnModule5.Bottom);
+            this.panelLeft.Controls.Add(this.panelSubMenu5);
+            //inventario sub menu
+            // Configurar el botón de inventario
+            this.btnInventario = new Button();
+            this.btnInventario.Text = "Inventario";
+            this.btnInventario.Height = 40;
+            this.btnInventario.Width = 180;
+            this.btnInventario.FlatStyle = FlatStyle.Flat;
+            this.btnInventario.FlatAppearance.BorderSize = 0;
+            this.btnInventario.BackColor = Color.FromArgb(240, 240, 255);
+            this.btnInventario.ForeColor = Color.Black;
+            this.btnInventario.TextAlign = ContentAlignment.MiddleLeft;
+            this.btnInventario.Padding = new Padding(20, 0, 0, 0); // Sangría para indicar que es submenú
+            this.btnInventario.Click += BtnInventario_Click;
+            this.panelSubMenu5.Controls.Add(this.btnInventario);
+            //aqui termina el submenu del5 
             // panelContent
-            this.panelContent.Dock = DockStyle.Fill;
-            this.panelContent.BackColor = Color.White;
-            this.Controls.Add(this.panelContent);
+
 
             // lblContent
             this.lblContent.AutoSize = false;
@@ -106,4 +138,3 @@ namespace MyWinFormsApp
         }
     }
 }
-// ...existing code...

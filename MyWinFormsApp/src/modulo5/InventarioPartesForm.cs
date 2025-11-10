@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MyWinFormsApp
@@ -29,12 +31,20 @@ namespace MyWinFormsApp
             Width = 1250;
             Height = 700;
             BackColor = Color.FromArgb(242, 242, 242);
-
+            TopLevel = false; // Agregar esta línea
+            Dock = DockStyle.Fill;
+            //para quitar la basura del minimizar y demas
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.ControlBox = false;   // opcional, asegura que no haya botones
+            this.TopLevel = false;
+            this.Dock = DockStyle.Fill;
             contenedorReporte = new Panel()
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                AutoScroll = true,
+                Padding = new Padding(8)
             };
 
             headerPanel = new Panel()
@@ -42,6 +52,22 @@ namespace MyWinFormsApp
                 Dock = DockStyle.Top,
                 Height = 150,
                 BackColor = ColorTranslator.FromHtml("#002060")
+            };
+
+            contentPanel = new Panel()
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
+                Padding = new Padding(0, 15, 0, 15),
+                AutoScroll = true            // por si el contenido interno excede el espacio
+            };
+
+            separatorLine = new Panel()
+            {
+                Height = 3,
+                BackColor = Color.White,
+                Dock = DockStyle.Top,
+                Margin = new Padding(0, 15, 0, 15)
             };
 
             TableLayoutPanel titlePanel = new TableLayoutPanel()
@@ -53,17 +79,48 @@ namespace MyWinFormsApp
             titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             titlePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-
+            //----------------
+            // Update the logo loading code to use a try-catch and search multiple locations
             PictureBox logo = new PictureBox()
             {
-                Image = Image.FromFile("Image\\logo_g.jpg"),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Width = 150,
                 Height = 150,
                 Anchor = AnchorStyles.Left | AnchorStyles.Top
             };
-            titlePanel.Controls.Add(logo, 0, 0);
 
+            try
+            {
+                string[] possiblePaths = new[]
+                {
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src","Login", "Image", "logo_g.jpg"),
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Image", "logo_g.jpg"),
+        Path.Combine(Application.StartupPath, "src","Login", "Image", "logo_g.jpg"),
+        Path.Combine(Application.StartupPath, "Image", "logo_g.jpg")
+    };
+
+                string foundPath = possiblePaths.FirstOrDefault(File.Exists);
+                if (foundPath != null)
+                {
+                    using (var stream = new FileStream(foundPath, FileMode.Open, FileAccess.Read))
+                    {
+                        logo.Image = Image.FromStream(stream);
+                    }
+                }
+                else
+                {
+                    // If no image is found, continue without it
+                    MessageBox.Show("Logo image not found. The application will continue without it.", "Warning",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading logo: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            titlePanel.Controls.Add(logo, 0, 0);
+            //--------------
             Panel textoPanel = new Panel()
             {
                 Dock = DockStyle.Fill
@@ -124,14 +181,18 @@ namespace MyWinFormsApp
             dgvInventario = new DataGridView()
             {
                 Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
                 ReadOnly = true,
                 BackgroundColor = Color.White,
                 BorderStyle = BorderStyle.None,
                 ColumnHeadersHeight = 35,
                 EnableHeadersVisualStyles = false,
                 RowHeadersVisible = false,
-                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
+                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter },
+                AllowUserToResizeColumns = false,        // Prevenir redimensionamiento de columnas
+                AllowUserToResizeRows = false,           // Prevenir redimensionamiento de filas
+                AllowUserToOrderColumns = false,
+                ScrollBars = ScrollBars.Both,
             };
 
             dgvInventario.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
@@ -172,11 +233,11 @@ namespace MyWinFormsApp
             };
             btnEditar.Click += BtnEditar_Click;
 
-            contentPanel.Controls.Add(dgvInventario);
+            contentPanel.Controls.Add(separatorLine);
             contentPanel.Controls.Add(btnAgregar);
             contentPanel.Controls.Add(btnEliminar);
             contentPanel.Controls.Add(btnEditar);
-            contentPanel.Controls.Add(separatorLine);
+            contentPanel.Controls.Add(dgvInventario);
 
             contenedorReporte.Controls.Add(contentPanel);
             contenedorReporte.Controls.Add(headerPanel);
@@ -431,29 +492,48 @@ namespace MyWinFormsApp
             dgvInventario.DataSource = null;
             dgvInventario.DataSource = lista;
 
-            dgvInventario.Columns["ID"].HeaderText = "ID";
-            dgvInventario.Columns["Nombre"].HeaderText = "Nombre del Repuesto";
-            dgvInventario.Columns["Categoria"].HeaderText = "Categoría";
-            dgvInventario.Columns["Proveedor"].HeaderText = "Proveedor";
-            dgvInventario.Columns["CantidadActual"].HeaderText = "Cantidad Actual";
-            dgvInventario.Columns["Unidad"].HeaderText = "Unidad";
-            dgvInventario.Columns["CostoUnitario"].HeaderText = "Costo Unitario (L)";
-            dgvInventario.Columns["ValorTotal"].HeaderText = "Valor Total (L)";
-            dgvInventario.Columns["EstadoStock"].HeaderText = "Estado de Stock";
-            dgvInventario.Columns["Observaciones"].HeaderText = "Observaciones";
+            // ...encabezados y formatos...
 
-            dgvInventario.Columns["CostoUnitario"].DefaultCellStyle.Format = "C0";
-            dgvInventario.Columns["CostoUnitario"].DefaultCellStyle.FormatProvider = new CultureInfo("es-HN");
-            dgvInventario.Columns["ValorTotal"].DefaultCellStyle.Format = "C0";
-            dgvInventario.Columns["ValorTotal"].DefaultCellStyle.FormatProvider = new CultureInfo("es-HN");
+            // Forzar modo None antes de fijar anchos
+            dgvInventario.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
 
-            foreach (DataGridViewRow row in dgvInventario.Rows)
+            var widths = new Dictionary<string, int>
             {
-                string id = row.Cells["ID"].Value.ToString();
-                if (int.TryParse(id.Split('-')[1], out int numero) && numero % 2 == 0)
-                    row.DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#E7E6E6");
+                ["ID"] = 80,
+                ["Nombre"] = 300,
+                ["Categoria"] = 140,
+                ["Proveedor"] = 160,
+                ["CantidadActual"] = 110,
+                ["Unidad"] = 90,
+                ["CostoUnitario"] = 120,
+                ["ValorTotal"] = 120,
+                ["EstadoStock"] = 140,
+                ["Observaciones"] = 240
+            };
+
+            int totalWidth = 0;
+            foreach (DataGridViewColumn col in dgvInventario.Columns)
+            {
+                if (widths.TryGetValue(col.Name, out int w))
+                {
+                    col.Width = w;
+                    totalWidth += w;
+                }
+                else
+                {
+                    // ancho por defecto si falta en el diccionario
+                    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                    totalWidth += col.Width;
+                }
             }
+
+            // Asegura que el contenedor permita desplazamiento horizontal si el grid es más ancho
+            contenedorReporte.AutoScroll = true;
+            contenedorReporte.AutoScrollMinSize = new Size(Math.Max(totalWidth + 40, this.Width), 0);
+
+            // ...estilizado de filas...
         }
+
     }
 
     public class Parte
