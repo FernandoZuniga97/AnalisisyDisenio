@@ -36,6 +36,9 @@ namespace MyWinFormsApp.src.modulo4
             pictureBox1 = new System.Windows.Forms.PictureBox();
             btnExportarPDF = new System.Windows.Forms.Button();
             dataGridView1 = new System.Windows.Forms.DataGridView();
+            panel2 = new System.Windows.Forms.Panel();
+            dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            label5 = new System.Windows.Forms.Label();
             txtID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblFecha = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblDispostivo = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -45,9 +48,6 @@ namespace MyWinFormsApp.src.modulo4
             lblMateriales = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblCosto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblObservaciones = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            panel2 = new System.Windows.Forms.Panel();
-            dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
-            label5 = new System.Windows.Forms.Label();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -153,13 +153,44 @@ namespace MyWinFormsApp.src.modulo4
             dataGridView1.Size = new System.Drawing.Size( 746, 317 );
             dataGridView1.TabIndex = 0;
             // 
+            // panel2
+            // 
+            panel2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            panel2.Controls.Add( dataGridView1 );
+            panel2.Location = new System.Drawing.Point( 12, 118 );
+            panel2.Name = "panel2";
+            panel2.Size = new System.Drawing.Size( 762, 320 );
+            panel2.TabIndex = 1;
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            dateTimePicker1.Font = new System.Drawing.Font( "Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0 );
+            dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            dateTimePicker1.Location = new System.Drawing.Point( 780, 139 );
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.Size = new System.Drawing.Size( 85, 25 );
+            dateTimePicker1.TabIndex = 6;
+            dateTimePicker1.Value = new System.DateTime( 2025, 11, 10, 0, 0, 0, 0 );
+            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
+            // 
+            // label5
+            // 
+            label5.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point( 780, 121 );
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size( 46, 15 );
+            label5.TabIndex = 7;
+            label5.Text = "Fechas:";
+            // 
             // txtID
             // 
             txtID.Frozen = true;
             txtID.HeaderText = "ID";
             txtID.Name = "txtID";
             txtID.ReadOnly = true;
-            txtID.Width = 43;
+            txtID.Width = 55;
             // 
             // lblFecha
             // 
@@ -224,37 +255,6 @@ namespace MyWinFormsApp.src.modulo4
             lblObservaciones.Name = "lblObservaciones";
             lblObservaciones.ReadOnly = true;
             lblObservaciones.Width = 109;
-            // 
-            // panel2
-            // 
-            panel2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            panel2.Controls.Add( dataGridView1 );
-            panel2.Location = new System.Drawing.Point( 12, 118 );
-            panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size( 762, 320 );
-            panel2.TabIndex = 1;
-            // 
-            // dateTimePicker1
-            // 
-            dateTimePicker1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            dateTimePicker1.Font = new System.Drawing.Font( "Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0 );
-            dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            dateTimePicker1.Location = new System.Drawing.Point( 780, 139 );
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new System.Drawing.Size( 85, 25 );
-            dateTimePicker1.TabIndex = 6;
-            dateTimePicker1.Value = new System.DateTime( 2025, 11, 10, 0, 0, 0, 0 );
-            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
-            // 
-            // label5
-            // 
-            label5.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            label5.AutoSize = true;
-            label5.Location = new System.Drawing.Point( 780, 121 );
-            label5.Name = "label5";
-            label5.Size = new System.Drawing.Size( 46, 15 );
-            label5.TabIndex = 7;
-            label5.Text = "Fechas:";
             // 
             // ReporteMantenimiento
             // 

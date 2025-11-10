@@ -311,9 +311,12 @@ namespace MyWinFormsApp.src.modulo4
                     // Agregar filas
                     foreach ( DataGridViewRow row in dataGridView1.Rows )
                     {
-                        //if ( row.IsNewRow ) continue; // Omitir fila nueva
+                        bool esFilaTotal = row.Cells[0].Value != null &&
+                                           row.Cells[0].Value.ToString().ToUpper().Contains( "TOTAL" );
 
-                        BaseColor rowColor = row.Index % 2 == 0 ? BaseColor.WHITE : BaseColor.LIGHT_GRAY;
+                        BaseColor rowColor = esFilaTotal
+                            ? new BaseColor( 230, 230, 230 )
+                            : (row.Index % 2 == 0 ? BaseColor.WHITE : BaseColor.LIGHT_GRAY);
 
                         foreach ( DataGridViewCell cell in row.Cells )
                         {
@@ -321,12 +324,17 @@ namespace MyWinFormsApp.src.modulo4
                             object cellValue = cell.Value ?? string.Empty;
                             string cellText;
 
-                            if ( columnHeader.Contains( "(L.)" ) )
+                            if ( esFilaTotal )
                             {
+                                // 🔹 Si es la fila de TOTAL, dejar el valor tal cual
+                                cellText = cellValue.ToString();
+                            }
+                            else if ( columnHeader.Contains( "(L.)" ) )
+                            {
+                                // 🔹 Si es una celda de monto normal, formatearla
                                 if ( decimal.TryParse( cellValue.ToString(), out decimal amount ) )
                                 {
                                     string formattedAmount = amount.ToString( "N2" );
-
                                     int totalWidth = 18;
                                     cellText = "L." + formattedAmount.PadLeft( totalWidth - 2 );
                                 }
@@ -337,15 +345,20 @@ namespace MyWinFormsApp.src.modulo4
                             }
                             else
                             {
+                                // 🔹 Cualquier otro texto
                                 cellText = cellValue.ToString();
                             }
 
-                            PdfPCell pdfCell = new PdfPCell( new Phrase( cellText ) )
+                            // 🔹 Fuente según si es fila total o no
+                            var font = esFilaTotal
+                                ? new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 12, iTextSharp.text.Font.BOLD )
+                                : new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 10 );
+
+                            PdfPCell pdfCell = new PdfPCell( new Phrase( cellText, font ) )
                             {
                                 BackgroundColor = rowColor,
                                 HorizontalAlignment = Element.ALIGN_CENTER,
-                                VerticalAlignment = Element.ALIGN_MIDDLE,
-                                Padding = 2,
+                                Padding = 5
                             };
 
                             pdfTable.AddCell( pdfCell );
@@ -397,6 +410,16 @@ namespace MyWinFormsApp.src.modulo4
             {
                 dataGridView1.Rows.Add( r.ID, r.Fecha, r.Dispositivo, r.Tipo, r.Descripcion, r.Tecnico, r.Materiales, r.Costo, r.Observaciones );
             }
+
+            // Calcular el costo total
+            decimal totalCosto = filtrados.Sum( r => decimal.TryParse( r.Costo, out decimal costo) ? costo : 0 );
+            int index = dataGridView1.Rows.Add();
+            DataGridViewRow totalRow = dataGridView1.Rows[index];
+
+            totalRow.DefaultCellStyle.BackColor = Color.LightGray;
+            totalRow.DefaultCellStyle.Font = new System.Drawing.Font( dataGridView1.Font, FontStyle.Bold );
+            totalRow.Cells[0].Value = "TOTAL";
+            totalRow.Cells[7].Value = "L. " + totalCosto.ToString( "N2" ).PadLeft(18);
         }
 
         private void dateTimePicker1_ValueChanged( object sender, EventArgs e )
