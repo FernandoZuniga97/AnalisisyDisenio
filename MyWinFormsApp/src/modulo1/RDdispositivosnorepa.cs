@@ -246,10 +246,10 @@ namespace MyWinFormsApp
         {
             lista = new List<Norepa>()
             {
-                new Norepa { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-                new Norepa { ID="P-002", Nombre="Puerto de carga tipo C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=8, Unidad="unidades", CostoUnitario=180m, ValorTotal=1440m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-                new Norepa { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
-                new Norepa { ID="P-004", Nombre="Pasta térmica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=120m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="Uso frecuente" }
+                new Norepa { ID="P-001", FechadeIngreso="Pantalla iPhone 12", Dispositivo="Pantallas", Cliente="G-Tech Supply", TecnicoAsignado=12, DescripciondelDano="unidades", CostoEstimado=2500m, Observaciones="Rotación alta" },
+                new Norepa { ID="P-002", FechadeIngreso="Puerto de carga tipo C", Dispositivo="Conectores", Cliente="ElectroParts", TecnicoAsignado=8, DescripciondelDano="unidades", CostoEstimado=180m,  Observaciones="Solicitar reposición" },
+                new Norepa { ID="P-003", FechadeIngreso="Batería Samsung A52", Dispositivo="Baterías", Cliente="MobilePro", TecnicoAsignado=15, DescripciondelDano="unidades", CostoEstimado=600m,  Observaciones="-" },
+                new Norepa { ID="P-004", FechadeIngreso="Pasta térmica", Dispositivo="Insumos", Cliente="Tecnocell", TecnicoAsignado=20, DescripciondelDano="tubos", CostoEstimado=120m, Observaciones="Uso frecuente" }
             };
             ActualizarGrid();
         }
@@ -273,32 +273,28 @@ namespace MyWinFormsApp
             int top = 20;
             int gap = 40;
 
-            Label lblNombre = new Label() { Text = "Nombre", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtNombre = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
+            Label lblFechadeIngreso = new Label() { Text = "Fecha de ingreso", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtFechadeIngreso = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
             top += gap;
 
-            Label lblCategoria = new Label() { Text = "Categoría", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCategoria = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
+            Label lblDispositivo = new Label() { Text = "Dispositivo", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtDispositivo = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
             top += gap;
 
-            Label lblProveedor = new Label() { Text = "Proveedor", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtProveedor = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
+            Label lblCliente = new Label() { Text = "Cliente", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtCliente = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
             top += gap;
 
-            Label lblCantidad = new Label() { Text = "Cantidad", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCantidad = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
+            Label lblTecnicoAsignado = new Label() { Text = "Tecnico Asignado", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtTecnicoAsignado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
             top += gap;
 
-            Label lblUnidad = new Label() { Text = "Unidad", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtUnidad = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
+            Label lblDescripciondelDano = new Label() { Text = "Descripción del Daño", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtDescripciondelDano = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
             top += gap;
 
-            Label lblCosto = new Label() { Text = "Costo Unitario", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCosto = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
-            top += gap;
-
-            Label lblEstado = new Label() { Text = "Estado Stock", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtEstado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
+            Label lblCostoEstimado = new Label() { Text = "Costo Esimado(L.)", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtCostoEstimado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth };
             top += gap;
 
             Label lblObs = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
@@ -308,25 +304,24 @@ namespace MyWinFormsApp
             Button btnGuardar = new Button() { Text = "Guardar", Left = 150, Width = 100, Top = top };
             btnGuardar.Click += (s2, e2) =>
             {
-                if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
-                    string.IsNullOrWhiteSpace(txtCategoria.Text) ||
-                    string.IsNullOrWhiteSpace(txtProveedor.Text) ||
-                    string.IsNullOrWhiteSpace(txtCantidad.Text) ||
-                    string.IsNullOrWhiteSpace(txtUnidad.Text) ||
-                    string.IsNullOrWhiteSpace(txtCosto.Text) ||
-                    string.IsNullOrWhiteSpace(txtEstado.Text))
+                if (string.IsNullOrWhiteSpace(txtFechadeIngreso.Text) ||
+                    string.IsNullOrWhiteSpace(txtDispositivo.Text) ||
+                    string.IsNullOrWhiteSpace(txtCliente.Text) ||
+                    string.IsNullOrWhiteSpace(txtTecnicoAsignado.Text) ||
+                    string.IsNullOrWhiteSpace(txtDescripciondelDano.Text) ||
+                    string.IsNullOrWhiteSpace(txtCostoEstimado.Text))
                 {
                     MessageBox.Show("Todos los campos son obligatorios excepto Observaciones.");
                     return;
                 }
 
-                if (!int.TryParse(txtCantidad.Text, out int cantidad))
+                if (!int.TryParse(txtTecnicoAsignado.Text, out int cantidad))
                 {
                     MessageBox.Show("Solo se permiten números en la cantidad.");
                     return;
                 }
 
-                if (!decimal.TryParse(txtCosto.Text, out decimal costo))
+                if (!decimal.TryParse(txtCostoEstimado.Text, out decimal costo))
                 {
                     MessageBox.Show("Solo se permiten números en el costo unitario.");
                     return;
@@ -339,14 +334,12 @@ namespace MyWinFormsApp
                 lista.Add(new Norepa()
                 {
                     ID = nuevoID,
-                    Nombre = txtNombre.Text,
-                    Categoria = txtCategoria.Text,
-                    Proveedor = txtProveedor.Text,
-                    CantidadActual = cantidad,
-                    Unidad = txtUnidad.Text,
-                    CostoUnitario = costo,
-                    ValorTotal = valorTotal,
-                    EstadoStock = txtEstado.Text,
+                    FechadeIngreso = txtFechadeIngreso.Text,
+                    Dispositivo = txtDispositivo.Text,
+                    Cliente = txtCliente.Text,
+                    TecnicoAsignado = cantidad,
+                    DescripciondelDano = txtDescripciondelDano.Text,
+                    CostoEstimado = costo,
                     Observaciones = string.IsNullOrWhiteSpace(txtObs.Text) ? "-" : txtObs.Text
                 });
 
@@ -355,9 +348,9 @@ namespace MyWinFormsApp
             };
 
             panel.Controls.AddRange(new Control[] {
-                lblNombre, txtNombre, lblCategoria, txtCategoria, lblProveedor, txtProveedor,
-                lblCantidad, txtCantidad, lblUnidad, txtUnidad, lblCosto, txtCosto,
-                lblEstado, txtEstado, lblObs, txtObs, btnGuardar });
+                lblFechadeIngreso, txtFechadeIngreso, lblDispositivo, txtDispositivo, lblCliente, txtCliente,
+                lblTecnicoAsignado, txtTecnicoAsignado, lblDescripciondelDano, txtDescripciondelDano, lblCostoEstimado, txtCostoEstimado,
+                lblObs, txtObs, btnGuardar });
             formAgregar.ShowDialog();
         }
 
@@ -399,32 +392,28 @@ namespace MyWinFormsApp
             int top = 20;
             int gap = 40;
 
-            Label lblNombre = new Label() { Text = "Nombre", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtNombre = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.Nombre };
+            Label lblFechadeIngreso = new Label() { Text = "Fecha de ingreso", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtFechadeIngreso = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.FechadeIngreso };
             top += gap;
 
-            Label lblCategoria = new Label() { Text = "Categoría", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCategoria = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.Categoria };
+            Label lblDispositivo = new Label() { Text = "Dispositivo", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtDispositivo = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.Dispositivo };
             top += gap;
 
-            Label lblProveedor = new Label() { Text = "Proveedor", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtProveedor = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.Proveedor };
+            Label lblCliente = new Label() { Text = "Cliente", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtCliente = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.Cliente };
             top += gap;
 
-            Label lblCantidad = new Label() { Text = "Cantidad", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCantidad = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.CantidadActual.ToString() };
+            Label lblTecnicoAsignado = new Label() { Text = "Tecnico Asignado", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtTecnicoAsignado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.TecnicoAsignado.ToString() };
             top += gap;
 
-            Label lblUnidad = new Label() { Text = "Unidad", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtUnidad = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.Unidad };
+            Label lblDescripciondelDano = new Label() { Text = "Descripcion del daño", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtDescripciondelDano = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.DescripciondelDano };
             top += gap;
 
-            Label lblCosto = new Label() { Text = "Costo Unitario", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCosto = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.CostoUnitario.ToString() };
-            top += gap;
-
-            Label lblEstado = new Label() { Text = "Estado Stock", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtEstado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.EstadoStock };
+            Label lblCostoEstimado = new Label() { Text = "Costo Estimado", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtCostoEstimado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.CostoEstimado.ToString() };
             top += gap;
 
             Label lblObs = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
@@ -434,48 +423,44 @@ namespace MyWinFormsApp
             Button btnGuardar = new Button() { Text = "Guardar", Left = 150, Width = 100, Top = top };
             btnGuardar.Click += (s2, e2) =>
             {
-                if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
-                    string.IsNullOrWhiteSpace(txtCategoria.Text) ||
-                    string.IsNullOrWhiteSpace(txtProveedor.Text) ||
-                    string.IsNullOrWhiteSpace(txtCantidad.Text) ||
-                    string.IsNullOrWhiteSpace(txtUnidad.Text) ||
-                    string.IsNullOrWhiteSpace(txtCosto.Text) ||
-                    string.IsNullOrWhiteSpace(txtEstado.Text))
+                if (string.IsNullOrWhiteSpace(txtFechadeIngreso.Text) ||
+                    string.IsNullOrWhiteSpace(txtDispositivo.Text) ||
+                    string.IsNullOrWhiteSpace(txtCliente.Text) ||
+                    string.IsNullOrWhiteSpace(txtTecnicoAsignado.Text) ||
+                    string.IsNullOrWhiteSpace(txtDescripciondelDano.Text) ||
+                    string.IsNullOrWhiteSpace(txtCostoEstimado.Text))
                 {
                     MessageBox.Show("Todos los campos son obligatorios excepto Observaciones.");
                     return;
                 }
 
-                if (!int.TryParse(txtCantidad.Text, out int cantidad))
+                if (!int.TryParse(txtTecnicoAsignado.Text, out int cantidad))
                 {
                     MessageBox.Show("Solo se permiten números en la cantidad.");
                     return;
                 }
 
-                if (!decimal.TryParse(txtCosto.Text, out decimal costo))
+                if (!decimal.TryParse(txtCostoEstimado.Text, out decimal costo))
                 {
                     MessageBox.Show("Solo se permiten números en el costo unitario.");
                     return;
                 }
 
-                norepa.Nombre = txtNombre.Text;
-                norepa.Categoria = txtCategoria.Text;
-                norepa.Proveedor = txtProveedor.Text;
-                norepa.CantidadActual = cantidad;
-                norepa.Unidad = txtUnidad.Text;
-                norepa.CostoUnitario = costo;
-                norepa.ValorTotal = cantidad * costo;
-                norepa.EstadoStock = txtEstado.Text;
+                norepa.FechadeIngreso = txtFechadeIngreso.Text;
+                norepa.Dispositivo = txtDispositivo.Text;
+                norepa.Cliente = txtCliente.Text;
+                norepa.TecnicoAsignado = cantidad;
+                norepa.DescripciondelDano = txtDescripciondelDano.Text;
+                norepa.CostoEstimado = costo;
                 norepa.Observaciones = string.IsNullOrWhiteSpace(txtObs.Text) ? "-" : txtObs.Text;
-
                 ActualizarGrid();
                 formEditar.Close();
             };
 
             panel.Controls.AddRange(new Control[] {
-                lblNombre, txtNombre, lblCategoria, txtCategoria, lblProveedor, txtProveedor,
-                lblCantidad, txtCantidad, lblUnidad, txtUnidad, lblCosto, txtCosto,
-                lblEstado, txtEstado, lblObs, txtObs, btnGuardar });
+                lblFechadeIngreso, txtFechadeIngreso, lblDispositivo, txtDispositivo, lblCliente, txtCliente,
+                lblTecnicoAsignado, txtTecnicoAsignado, lblDescripciondelDano, txtDescripciondelDano, lblCostoEstimado, txtCostoEstimado,
+                lblObs, txtObs, btnGuardar });
 
             formEditar.ShowDialog();
         }
@@ -486,22 +471,30 @@ namespace MyWinFormsApp
             dgDnRepa.DataSource = lista;
 
             // ...encabezados y formatos...
+            if (dgDnRepa.Columns.Contains("FechadeIngreso"))
+                dgDnRepa.Columns["FechadeIngreso"].HeaderText = "Fecha de Ingreso";
 
+            if (dgDnRepa.Columns.Contains("TecnicoAsignado"))
+                dgDnRepa.Columns["TecnicoAsignado"].HeaderText = "Técnico Asignado";
+
+            if (dgDnRepa.Columns.Contains("DescripciondelDano"))
+                dgDnRepa.Columns["DescripciondelDano"].HeaderText = "Descripción del Daño";
+
+            if (dgDnRepa.Columns.Contains("CostoEstimado"))
+                dgDnRepa.Columns["CostoEstimado"].HeaderText = "Costo Estimado (L.)";
             // Forzar modo None antes de fijar anchos
             dgDnRepa.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
 
             var widths = new Dictionary<string, int>
             {
                 ["ID"] = 80,
-                ["Nombre"] = 300,
-                ["Categoria"] = 140,
-                ["Proveedor"] = 160,
-                ["CantidadActual"] = 110,
-                ["Unidad"] = 90,
-                ["CostoUnitario"] = 120,
-                ["ValorTotal"] = 120,
-                ["EstadoStock"] = 140,
-                ["Observaciones"] = 240
+                ["FechadeIngreso"] = 160,
+                ["Dispositivo"] = 140,
+                ["Cliente"] = 160,
+                ["TecnicoAsignado"] = 160,
+                ["DescripciondelDaño"] = 300,
+                ["Costo Estimado"] = 120,
+                ["Observaciones"] = 120,
             };
 
             int totalWidth = 0;
@@ -532,14 +525,12 @@ namespace MyWinFormsApp
     public class Norepa
     {
         public string ID { get; set; }
-        public string Nombre { get; set; }
-        public string Categoria { get; set; }
-        public string Proveedor { get; set; }
-        public int CantidadActual { get; set; }
-        public string Unidad { get; set; }
-        public decimal CostoUnitario { get; set; }
-        public decimal ValorTotal { get; set; }
-        public string EstadoStock { get; set; }
+        public string FechadeIngreso { get; set; }
+        public string Dispositivo { get; set; }
+        public string Cliente { get; set; }
+        public int TecnicoAsignado { get; set; }
+        public string DescripciondelDano { get; set; }
+        public decimal CostoEstimado { get; set; }
         public string Observaciones { get; set; }
     }
 }

@@ -9,7 +9,10 @@ namespace MyWinFormsApp
         static void Main()
         {
             ApplicationConfiguration.Initialize();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 75d0ebd033c6ed8a21008acfe3817165ce35ef52
             using (var login = new LoginForm())
             {
                 if (login.ShowDialog() == DialogResult.OK)
@@ -20,6 +23,10 @@ namespace MyWinFormsApp
                     Application.Run(main);
                 }
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 75d0ebd033c6ed8a21008acfe3817165ce35ef52
         }
     }
 }

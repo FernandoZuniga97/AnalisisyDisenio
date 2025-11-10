@@ -30,11 +30,11 @@ namespace MyWinFormsApp.src.modulo4
         {
             panel1 = new System.Windows.Forms.Panel();
             label4 = new System.Windows.Forms.Label();
-            label3 = new System.Windows.Forms.Label();
+            lblFechas = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
             pictureBox1 = new System.Windows.Forms.PictureBox();
-            panel2 = new System.Windows.Forms.Panel();
+            btnExportarPDF = new System.Windows.Forms.Button();
             dataGridView1 = new System.Windows.Forms.DataGridView();
             txtID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblFecha = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -45,27 +45,32 @@ namespace MyWinFormsApp.src.modulo4
             lblMateriales = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblCosto = new System.Windows.Forms.DataGridViewTextBoxColumn();
             lblObservaciones = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            panel2 = new System.Windows.Forms.Panel();
+            dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            label5 = new System.Windows.Forms.Label();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            panel2.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             panel1.BackColor = System.Drawing.Color.FromArgb( 0, 32, 96 );
             panel1.Controls.Add( label4 );
-            panel1.Controls.Add( label3 );
+            panel1.Controls.Add( lblFechas );
             panel1.Controls.Add( label2 );
             panel1.Controls.Add( label1 );
             panel1.Controls.Add( pictureBox1 );
             panel1.Location = new System.Drawing.Point( 12, 12 );
             panel1.Name = "panel1";
-            panel1.Size = new System.Drawing.Size( 776, 100 );
+            panel1.Size = new System.Drawing.Size( 744, 100 );
             panel1.TabIndex = 0;
             // 
             // label4
             // 
+            label4.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             label4.AutoSize = true;
             label4.Font = new System.Drawing.Font( "Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0 );
             label4.ForeColor = System.Drawing.SystemColors.Control;
@@ -75,21 +80,23 @@ namespace MyWinFormsApp.src.modulo4
             label4.TabIndex = 4;
             label4.Text = "Reporte de Mantenimiento";
             // 
-            // label3
+            // lblFechas
             // 
-            label3.AutoSize = true;
-            label3.ForeColor = System.Drawing.SystemColors.Control;
-            label3.Location = new System.Drawing.Point( 413, 76 );
-            label3.Name = "label3";
-            label3.Size = new System.Drawing.Size( 23, 15 );
-            label3.TabIndex = 3;
-            label3.Text = "{}{}";
+            lblFechas.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            lblFechas.AutoSize = true;
+            lblFechas.ForeColor = System.Drawing.SystemColors.Control;
+            lblFechas.Location = new System.Drawing.Point( 367, 76 );
+            lblFechas.Name = "lblFechas";
+            lblFechas.Size = new System.Drawing.Size( 23, 15 );
+            lblFechas.TabIndex = 3;
+            lblFechas.Text = "{}{}";
             // 
             // label2
             // 
+            label2.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             label2.AutoSize = true;
             label2.ForeColor = System.Drawing.SystemColors.Control;
-            label2.Location = new System.Drawing.Point( 358, 76 );
+            label2.Location = new System.Drawing.Point( 315, 76 );
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size( 51, 15 );
             label2.TabIndex = 2;
@@ -97,6 +104,7 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // label1
             // 
+            label1.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             label1.AutoSize = true;
             label1.Font = new System.Drawing.Font( "Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0 );
             label1.ForeColor = System.Drawing.SystemColors.Control;
@@ -116,27 +124,33 @@ namespace MyWinFormsApp.src.modulo4
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
             // 
-            // panel2
+            // btnExportarPDF
             // 
-            panel2.Controls.Add( dataGridView1 );
-            panel2.Location = new System.Drawing.Point( 12, 118 );
-            panel2.Name = "panel2";
-            panel2.Size = new System.Drawing.Size( 776, 320 );
-            panel2.TabIndex = 1;
+            btnExportarPDF.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnExportarPDF.Location = new System.Drawing.Point( 778, 16 );
+            btnExportarPDF.Name = "btnExportarPDF";
+            btnExportarPDF.Size = new System.Drawing.Size( 75, 43 );
+            btnExportarPDF.TabIndex = 5;
+            btnExportarPDF.Text = "Imprimir PDF";
+            btnExportarPDF.UseVisualStyleBackColor = true;
+            btnExportarPDF.Click += btnExportarPDF_Click;
             // 
             // dataGridView1
             // 
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.AllowUserToResizeColumns = false;
+            dataGridView1.AllowUserToResizeRows = false;
+            dataGridView1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Columns.AddRange( new System.Windows.Forms.DataGridViewColumn[] { txtID, lblFecha, lblDispostivo, lblTipo, lblDescripcion, lblTenico, lblMateriales, lblCosto, lblObservaciones } );
-            dataGridView1.Location = new System.Drawing.Point( 0, 3 );
+            dataGridView1.Location = new System.Drawing.Point( 0, 0 );
             dataGridView1.MultiSelect = false;
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersVisible = false;
             dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.Size = new System.Drawing.Size( 776, 317 );
+            dataGridView1.Size = new System.Drawing.Size( 746, 317 );
             dataGridView1.TabIndex = 0;
             // 
             // txtID
@@ -145,6 +159,7 @@ namespace MyWinFormsApp.src.modulo4
             txtID.HeaderText = "ID";
             txtID.Name = "txtID";
             txtID.ReadOnly = true;
+            txtID.Width = 43;
             // 
             // lblFecha
             // 
@@ -152,6 +167,7 @@ namespace MyWinFormsApp.src.modulo4
             lblFecha.HeaderText = "Fecha";
             lblFecha.Name = "lblFecha";
             lblFecha.ReadOnly = true;
+            lblFecha.Width = 63;
             // 
             // lblDispostivo
             // 
@@ -159,6 +175,7 @@ namespace MyWinFormsApp.src.modulo4
             lblDispostivo.HeaderText = "Dispositivo";
             lblDispostivo.Name = "lblDispostivo";
             lblDispostivo.ReadOnly = true;
+            lblDispostivo.Width = 110;
             // 
             // lblTipo
             // 
@@ -166,6 +183,7 @@ namespace MyWinFormsApp.src.modulo4
             lblTipo.HeaderText = "Tipo de Mantenimiento";
             lblTipo.Name = "lblTipo";
             lblTipo.ReadOnly = true;
+            lblTipo.Width = 143;
             // 
             // lblDescripcion
             // 
@@ -173,6 +191,7 @@ namespace MyWinFormsApp.src.modulo4
             lblDescripcion.HeaderText = "Descripcion de la actividad";
             lblDescripcion.Name = "lblDescripcion";
             lblDescripcion.ReadOnly = true;
+            lblDescripcion.Width = 115;
             // 
             // lblTenico
             // 
@@ -180,6 +199,7 @@ namespace MyWinFormsApp.src.modulo4
             lblTenico.HeaderText = "Tecnico responsable";
             lblTenico.Name = "lblTenico";
             lblTenico.ReadOnly = true;
+            lblTenico.Width = 127;
             // 
             // lblMateriales
             // 
@@ -187,13 +207,15 @@ namespace MyWinFormsApp.src.modulo4
             lblMateriales.HeaderText = "Materiales usados";
             lblMateriales.Name = "lblMateriales";
             lblMateriales.ReadOnly = true;
+            lblMateriales.Width = 115;
             // 
             // lblCosto
             // 
             lblCosto.Frozen = true;
-            lblCosto.HeaderText = "Costo estimado";
+            lblCosto.HeaderText = "Costo estimado (L.)";
             lblCosto.Name = "lblCosto";
             lblCosto.ReadOnly = true;
+            lblCosto.Width = 108;
             // 
             // lblObservaciones
             // 
@@ -201,36 +223,77 @@ namespace MyWinFormsApp.src.modulo4
             lblObservaciones.HeaderText = "Observaciones";
             lblObservaciones.Name = "lblObservaciones";
             lblObservaciones.ReadOnly = true;
+            lblObservaciones.Width = 109;
+            // 
+            // panel2
+            // 
+            panel2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            panel2.Controls.Add( dataGridView1 );
+            panel2.Location = new System.Drawing.Point( 12, 118 );
+            panel2.Name = "panel2";
+            panel2.Size = new System.Drawing.Size( 762, 320 );
+            panel2.TabIndex = 1;
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            dateTimePicker1.Font = new System.Drawing.Font( "Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0 );
+            dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            dateTimePicker1.Location = new System.Drawing.Point( 780, 139 );
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.Size = new System.Drawing.Size( 85, 25 );
+            dateTimePicker1.TabIndex = 6;
+            dateTimePicker1.Value = new System.DateTime( 2025, 11, 10, 0, 0, 0, 0 );
+            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
+            // 
+            // label5
+            // 
+            label5.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            label5.AutoSize = true;
+            label5.Location = new System.Drawing.Point( 780, 121 );
+            label5.Name = "label5";
+            label5.Size = new System.Drawing.Size( 46, 15 );
+            label5.TabIndex = 7;
+            label5.Text = "Fechas:";
             // 
             // ReporteMantenimiento
             // 
             AutoScaleDimensions = new System.Drawing.SizeF( 7F, 15F );
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size( 800, 450 );
+            AutoSize = true;
+            ClientSize = new System.Drawing.Size( 878, 450 );
+            Controls.Add( label5 );
+            Controls.Add( dateTimePicker1 );
+            Controls.Add( btnExportarPDF );
             Controls.Add( panel2 );
             Controls.Add( panel1 );
             Name = "ReporteMantenimiento";
             Text = "ReporteMantenimiento";
+            Load += ReporteMantenimiento_Load;
             panel1.ResumeLayout( false );
             panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            panel2.ResumeLayout( false );
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            panel2.ResumeLayout( false );
             ResumeLayout( false );
+            PerformLayout();
         }
 
         #endregion
 
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lblFechas;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn lblFecha;
+        private System.Windows.Forms.Button btnExportarPDF;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.DateTimePicker dateTimePicker1;
+        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.DataGridViewTextBoxColumn txtID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn lblFecha;
         private System.Windows.Forms.DataGridViewTextBoxColumn lblDispostivo;
         private System.Windows.Forms.DataGridViewTextBoxColumn lblTipo;
         private System.Windows.Forms.DataGridViewTextBoxColumn lblDescripcion;

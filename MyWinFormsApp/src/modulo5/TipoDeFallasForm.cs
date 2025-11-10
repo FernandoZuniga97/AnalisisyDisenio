@@ -5,8 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+<<<<<<< HEAD
 using System.Drawing.Printing;
 
+=======
+using System.IO;
+>>>>>>> 75d0ebd033c6ed8a21008acfe3817165ce35ef52
 namespace MyWinFormsApp
 {
     public class TipoDeFallasForm : Form
