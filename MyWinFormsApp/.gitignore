@@ -8,3 +8,5 @@ obj/
 *.dll
 *.exe
 .vs/
+*.db
+*.bin
