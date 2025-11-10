@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-
+using System.IO;
 namespace MyWinFormsApp
 {
     public class TipoDeFallasForm : Form
@@ -71,7 +71,12 @@ namespace MyWinFormsApp
 
             PictureBox logo = new PictureBox()
             {
-                Image = Image.FromFile("src\\login\\Image\\logo_g.jpg"),
+                Image = Image.FromFile(
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                        "..\\..\\..\\src\\login\\Image\\logo_g.jpg" // Ajuste la ruta subiendo 3 niveles para llegar a la raíz del proyecto
+                    )
+                ),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Width = 150,
                 Height = 150,
