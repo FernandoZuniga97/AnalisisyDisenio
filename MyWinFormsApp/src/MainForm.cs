@@ -1,4 +1,3 @@
-// ...existing code...
 using System;
 using System.Windows.Forms;
 using System.Drawing;
@@ -17,7 +16,6 @@ namespace MyWinFormsApp
             // mostrar módulos 1-4 solo para empleados; módulo 5 siempre visible
             btnModule1.Visible = btnModule2.Visible = btnModule3.Visible = btnModule4.Visible = _isEmployee;
             btnModule5.Visible = true;
-
             // ajuste visual si es cliente
             if (!_isEmployee && panelLeft != null)
             {
@@ -36,7 +34,7 @@ namespace MyWinFormsApp
                 lblContent.Text = "Hola mundo";
             }
         }
-        // ...existing fields...
+        // animacion boton
         private Timer _animTimer;
         private Button _animButton;
         private int _animStep;
@@ -189,6 +187,5 @@ namespace MyWinFormsApp
                 MessageBox.Show($"Error al cargar inventario: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        // ...existing methods like ModuleButton_Click, ConfigureModules ...
     }
 }

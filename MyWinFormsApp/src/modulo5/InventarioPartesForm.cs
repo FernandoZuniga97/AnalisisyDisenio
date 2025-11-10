@@ -21,9 +21,8 @@ namespace MyWinFormsApp
         private Button btnAgregar;
         private Button btnEliminar;
         private Button btnEditar;
-
         private List<Parte> lista;
-        private int contadorID = 4; // Contador para nuevos IDs (inicia según los datos iniciales)
+        private int contadorID = 4;
 
         public InventarioPartesForm()
         {
@@ -79,8 +78,7 @@ namespace MyWinFormsApp
             titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
             titlePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             titlePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            //----------------
-            // Update the logo loading code to use a try-catch and search multiple locations
+            //---------------
             PictureBox logo = new PictureBox()
             {
                 SizeMode = PictureBoxSizeMode.Zoom,
@@ -232,16 +230,13 @@ namespace MyWinFormsApp
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
             btnEditar.Click += BtnEditar_Click;
-
             contentPanel.Controls.Add(separatorLine);
             contentPanel.Controls.Add(btnAgregar);
             contentPanel.Controls.Add(btnEliminar);
             contentPanel.Controls.Add(btnEditar);
             contentPanel.Controls.Add(dgvInventario);
-
             contenedorReporte.Controls.Add(contentPanel);
             contenedorReporte.Controls.Add(headerPanel);
-
             Controls.Add(contenedorReporte);
 
             Load += InventarioPartesForm_Load;
@@ -256,7 +251,6 @@ namespace MyWinFormsApp
                 new Parte { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
                 new Parte { ID="P-004", Nombre="Pasta térmica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=120m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="Uso frecuente" }
             };
-
             ActualizarGrid();
         }
 
@@ -364,7 +358,6 @@ namespace MyWinFormsApp
                 lblNombre, txtNombre, lblCategoria, txtCategoria, lblProveedor, txtProveedor,
                 lblCantidad, txtCantidad, lblUnidad, txtUnidad, lblCosto, txtCosto,
                 lblEstado, txtEstado, lblObs, txtObs, btnGuardar });
-
             formAgregar.ShowDialog();
         }
 

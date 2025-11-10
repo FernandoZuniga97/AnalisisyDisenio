@@ -7,8 +7,9 @@ using System.Windows.Forms;
 
 namespace MyWinFormsApp
 {
-    partial class CredentialsForm
+    partial class RegistroForm
     {
+        private System.ComponentModel.IContainer components = null;
         private Panel mainCard;
         private Panel avatarCircle;
         private PictureBox logoPicture;
@@ -17,24 +18,48 @@ namespace MyWinFormsApp
         private Label userIcon;
         private Panel passBorder;
         private TextBox txtPassword;
+        private TextBox txtConfirmPassword;
         private Label passIcon;
         private Button btnOk;
-        private Button btnCancel;
-        private CheckBox chkRemember;
-        private LinkLabel lnkForgot;
         private Panel contentPanel;
         private Panel leftPanel;
         private Panel rightPanel;
-        private Label footerLabel;
+        private Panel confirmPassBorder;
+        private Label confirmPassIcon;
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            this.mainCard = new Panel();
+            this.avatarCircle = new Panel();
+            this.logoPicture = new PictureBox();
+            this.userBorder = new Panel();
+            this.txtUsername = new TextBox();
+            this.userIcon = new Label();
+            this.passBorder = new Panel();
+            this.txtPassword = new TextBox();
+            this.passIcon = new Label();
+            this.confirmPassBorder = new Panel();
+            this.txtConfirmPassword = new TextBox();
+            this.confirmPassIcon = new Label();
+            this.btnOk = new Button();
+            this.contentPanel = new Panel();
+            this.leftPanel = new Panel();
+            this.rightPanel = new Panel();
             // Form
             this.SuspendLayout();
             this.ClientSize = new Size(760, 360); // horizontal
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Text = "Credenciales";
+            this.Text = "Gicell - Registro";
             this.BackColor = Color.FromArgb(0x10, 0x28, 0x44); //azul fondo oscuro
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -42,7 +67,7 @@ namespace MyWinFormsApp
 
             // Main card (tarjeta centrada, horizontal)
             int cardW = 700;
-            int cardH = 300;
+            int cardH = 350;
             this.mainCard = new Panel()
             {
                 Size = new Size(cardW, cardH),
@@ -131,12 +156,12 @@ namespace MyWinFormsApp
             int leftPadding = 8;
             int controlWidth = this.rightPanel.Width - leftPadding * 2;
             int y = 6;
-            int gap = 12;
+            int gap = 8;
 
             // Title
             var title = new Label()
             {
-                Text = "Inicio de sesión",
+                Text = "Registro de usuario",
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = new Font("Segoe UI", 14F, FontStyle.Bold),
@@ -181,11 +206,11 @@ namespace MyWinFormsApp
                 Size = new Size(controlWidth - (8 + iconW + 16), 20)
             };
 
-            try { this.txtUsername.PlaceholderText = "Ingrese su usuario"; } catch { }
+            try { this.txtUsername.PlaceholderText = "Registre un usuario"; } catch { }
             this.userBorder.Controls.Add(this.txtUsername);
 
             y += this.userBorder.Height + gap;
-
+            //y += this.passBorder.Height + gap;
             //contraseña conteiner
             this.passBorder = new Panel()
             {
@@ -207,7 +232,6 @@ namespace MyWinFormsApp
                 BackColor = Color.Transparent
             };
             this.passBorder.Controls.Add(this.passIcon);
-
             this.txtPassword = new TextBox()
             {
                 BorderStyle = BorderStyle.None,
@@ -220,13 +244,50 @@ namespace MyWinFormsApp
             };
             try { this.txtPassword.PlaceholderText = "Contraseña"; } catch { }
             this.passBorder.Controls.Add(this.txtPassword);
+            y += this.passBorder.Height + gap;
+            //confirmar contraseña conteiner
+            var confirmPassBorder = new Panel()
+            {
+                BackColor = Color.White,
+                Size = new Size(controlWidth, inputH),
+                Location = new Point(leftPadding, y)
+            };
+            confirmPassBorder.Paint += InputBorder_Paint;
+            this.rightPanel.Controls.Add(confirmPassBorder);
+            //icom pass
+            var confirmPassIcon = new Label()
+            {
+                Text = "🔒",
+                AutoSize = false,
+                Size = new Size(iconW, inputH),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(8, 0),
+                Font = new Font("Segoe UI Emoji", 14),
+                BackColor = Color.Transparent
+            };
+            confirmPassBorder.Controls.Add(confirmPassIcon);
 
-            y += this.passBorder.Height + 16;
+            // Add confirm password textbox
+            this.txtConfirmPassword = new TextBox()
+            {
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 11F),
+                UseSystemPasswordChar = true,
+                ForeColor = Color.FromArgb(30, 30, 30),
+                BackColor = Color.White,
+                Location = new Point(8 + iconW + 8, (inputH - 20) / 2),
+                Size = new Size(controlWidth - (8 + iconW + 16), 20)
+            };
+            try { this.txtConfirmPassword.PlaceholderText = "Confirmar contraseña"; } catch { }
+            confirmPassBorder.Controls.Add(this.txtConfirmPassword);
+            y += confirmPassBorder.Height + gap;
+            y += confirmPassBorder.Height + gap;
+            // Continue with the button and rest of the form...
 
             // Login button (degradado)
             this.btnOk = new Button()
             {
-                Text = "INICIAR SESIÓN",
+                Text = "Registrarse",
                 Size = new Size(controlWidth, 42),
                 Location = new Point(leftPadding, y),
                 ForeColor = Color.White,
@@ -234,10 +295,10 @@ namespace MyWinFormsApp
             };
             this.btnOk.FlatAppearance.BorderSize = 0;
             this.btnOk.Paint += BtnOk_Paint;
-            this.btnOk.Click += btnOk_Click;
+            this.btnOk.Click += new EventHandler(this.btnOk_Click); // Añade esta línea aquí
             this.rightPanel.Controls.Add(this.btnOk);
 
-            y += this.btnOk.Height + 16;
+
             var dp = new Panel()
             {
                 Size = new Size(controlWidth, 40),
@@ -246,79 +307,11 @@ namespace MyWinFormsApp
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
 
-            //recuerdame
-            this.chkRemember = new CheckBox()
-            {
-                Text = "Recuérdame",
-                AutoSize = true,
-                Location = new Point(4, 10),
-                Font = new Font("Segoe UI", 9F),
-                BackColor = Color.Transparent
-            };
-            dp.Controls.Add(this.chkRemember);
-
-            // olvidaste la contraseña
-            this.lnkForgot = new LinkLabel()
-            {
-                Text = "Registra un usuario",
-                AutoSize = true,
-                Font = new Font("Segoe UI", 9F),
-                Location = new Point(dp.Width - 160, 12),
-                Size = new Size(160, 20),
-                LinkColor = Color.FromArgb(0x0F, 0x5F, 0x7A),
-                ActiveLinkColor = Color.FromArgb(0x11, 0x7A, 0xA1),
-                LinkBehavior = LinkBehavior.HoverUnderline
-            };
-
-            // Add click handler to open RegistroForm
-            this.lnkForgot.Click += (s, e) =>
-            {
-                var registroForm = new RegistroForm();
-                registroForm.ShowDialog(this);
-            };
-
-            dp.Controls.Add(this.lnkForgot);
-            this.rightPanel.Controls.Add(dp);
-            //----------------------------------
-            y += dp.Height + 20;
-            this.footerLabel = new Label()
-            {
-                Text = "Copyright © 2025 GICELL.",
-                AutoSize = false,
-                TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = Color.FromArgb(80, 80, 80),
-                Font = new Font("Segoe UI", 9F),
-                Size = new Size(controlWidth, 30),
-                Location = new Point(leftPadding, y),
-                BackColor = Color.Transparent
-            };
-            this.rightPanel.Controls.Add(this.footerLabel);
-
-            // Ensure proper Z-order
-            dp.BringToFront();
-            this.lnkForgot.BringToFront();
-            this.footerLabel.BringToFront();
-
-
-
-            // Cancel button (aligned bottom-right of card)
-            this.btnCancel = new Button()
-            {
-                Text = "Cancelar",
-                Size = new Size(88, 32),
-                Location = new Point(this.mainCard.Width - 16 - 88, this.mainCard.Height - 16 - 32),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.Black,
-            };
-            this.btnCancel.FlatAppearance.BorderColor = Color.Black;
-            this.btnCancel.FlatAppearance.BorderSize = 1;
-            this.btnCancel.Click += btnCancel_Click;
-            this.mainCard.Controls.Add(this.btnCancel);
 
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
 
         // Dibujar borde redondeado y ligero brillo en la tarjeta
         private void MainCard_Paint(object sender, PaintEventArgs e)

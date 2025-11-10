@@ -69,8 +69,7 @@ namespace MyWinFormsApp
                 MessageBox.Show($"Error cargando fondo:\n{ex.Message}\nRuta probada: {Environment.CurrentDirectory}", "Fondo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-        // ...existing code...
-        //------
+
 
         private void LoadLogoSafe()
         {

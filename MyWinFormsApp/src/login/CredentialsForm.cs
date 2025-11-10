@@ -12,7 +12,7 @@ namespace MyWinFormsApp
         {
             InitializeComponent();
             if (!string.IsNullOrEmpty(roleTitle))
-                this.Text = $"Credenciales";
+                this.Text = $"GICELL";
         }
 
         private void btnOk_Click(object sender, EventArgs e)

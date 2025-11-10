@@ -1,4 +1,3 @@
-// ...existing code...
 using System;
 using System.Windows.Forms;
 using System.Drawing;
@@ -33,13 +32,11 @@ namespace MyWinFormsApp
             this.panelSubMenu5 = new Panel();
             this.btnInventario = new Button();
             //-------------------------------
-
             // MainForm
             this.SuspendLayout();
             this.ClientSize = new Size(800, 450);
             this.Text = "GICELL - Sistema de Monitoreo de Reparaciones de Dispositivos";
             this.StartPosition = FormStartPosition.CenterScreen;
-
             // panel de la izquierda
             this.panelLeft.Dock = DockStyle.Left;
             this.panelLeft.Width = 180;
@@ -66,7 +63,6 @@ namespace MyWinFormsApp
                 b.BackColor = Color.White;
                 b.ForeColor = Color.Black;
                 b.UseVisualStyleBackColor = false; // para que BackColor se aplique
-
                 this.panelLeft.Controls.Add(b);
             }
 
@@ -123,10 +119,6 @@ namespace MyWinFormsApp
             this.btnInventario.Click += BtnInventario_Click;
             this.panelSubMenu5.Controls.Add(this.btnInventario);
             //aqui termina el submenu del5 
-            // panelContent
-
-
-            // lblContent
             this.lblContent.AutoSize = false;
             this.lblContent.TextAlign = ContentAlignment.MiddleCenter;
             this.lblContent.Dock = DockStyle.Fill;

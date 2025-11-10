@@ -30,10 +30,10 @@ namespace MyWinFormsApp
             this.MaximizeBox = false;
             this.MinimizeBox = true;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Text = "Inicio de sesión";
-
+            //this.Text = "Inicio de sesión";
             // permitir que el formulario muestre imagen de fondo y se adapte
-            this.BackgroundImageLayout = ImageLayout.Stretch;
+            // this.BackgroundImageLayout = ImageLayout.Stretch;
+            this.BackColor = Color.FromArgb(0x10, 0x28, 0x44);
             this.BackColor = Color.White;
 
             // layout
@@ -102,7 +102,6 @@ namespace MyWinFormsApp
 
             this.ResumeLayout(false);
         }
-        // ...existing code...
+
     }
 }
-// ...existing code...
