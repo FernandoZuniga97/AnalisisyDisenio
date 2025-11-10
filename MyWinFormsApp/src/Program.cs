@@ -3,13 +3,24 @@ using System.Windows.Forms;
 
 namespace MyWinFormsApp
 {
-    internal static class Program
+    static class Program
     {
         [STAThread]
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-            Application.Run(new TipoDeFallasForm ());
+
+            using (var login = new LoginForm())
+            {
+                if (login.ShowDialog() == DialogResult.OK)
+                {
+                    bool isEmployee = login.SelectedRole == LoginForm.UserRole.Employee;
+                    var main = new MainForm(isEmployee);
+                    main.WindowState = FormWindowState.Maximized; // <-- maximizar después del login
+                    Application.Run(main);
+                }
+            }
         }
     }
 }
+
