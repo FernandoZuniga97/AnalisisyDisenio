@@ -6,24 +6,17 @@ namespace MyWinFormsApp
 {
     public partial class MainForm : Form
     {
-        // --- Soporte para flags usados dentro de lambdas ---
         public class BoolRef
         {
             public bool Value;
             public BoolRef(bool v) => Value = v;
         }
 
-        // Flags correctos
         private BoolRef isSubMenu1Expanded = new BoolRef(false);
         private BoolRef isSubMenu5Expanded = new BoolRef(false);
-
-        // Control actual cargado dentro del panelContent
         private Control currentContent = null;
-
-        // Indica si es empleado o cliente
         private readonly bool _isEmployee;
 
-        // Animación de botones
         private Timer _animTimer;
         private Button _animButton;
         private int _animStep;
@@ -37,26 +30,16 @@ namespace MyWinFormsApp
             ConfigureModules();
         }
 
-        // ================================
-        // CONFIGURACIÓN DE MÓDULOS
-        // ================================
         private void ConfigureModules()
         {
-            // Mostrar módulos 1-4 solo para empleados
             btnModule1.Visible = btnModule2.Visible =
             btnModule3.Visible = btnModule4.Visible = _isEmployee;
-
-            btnModule5.Visible = true; // Siempre visible
+            btnModule5.Visible = true;
 
             if (!_isEmployee)
-            {
                 panelLeft.Width = 140;
-            }
         }
 
-        // ================================
-        // CARGA DE MÓDULOS (Botones 2-4)
-        // ================================
         private void ModuleButton_Click(object sender, EventArgs e)
         {
             if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int n))
@@ -65,9 +48,6 @@ namespace MyWinFormsApp
                 lblContent.Text = "Hola mundo";
         }
 
-        // ================================
-        // ANIMACIÓN DEL EFECTO CLICK
-        // ================================
         private void InitializeAnimation()
         {
             _animTimer = new Timer();
@@ -121,14 +101,10 @@ namespace MyWinFormsApp
             return Color.FromArgb(r, g, bl);
         }
 
-        // =====================================================
-        //         SISTEMA DE SUBMENÚS EN CASCADA
-        // =====================================================
         private void ToggleSubMenuExclusive(Panel panelToToggle, BoolRef flag, int targetHeight)
         {
             Panel[] allPanels = { panelSubMenu1, panelSubMenu5 };
 
-            // Cerrar todos menos el panel clickeado
             foreach (var p in allPanels)
             {
                 if (p == null) continue;
@@ -142,7 +118,6 @@ namespace MyWinFormsApp
                 }
             }
 
-            // ---- EXPANDIR ----
             if (!flag.Value)
             {
                 panelToToggle.Height = 0;
@@ -158,13 +133,10 @@ namespace MyWinFormsApp
                         flag.Value = true;
                     }
                     else
-                    {
                         panelToToggle.Height += 4;
-                    }
                 };
                 t.Start();
             }
-            // ---- CONTRAER ----
             else
             {
                 Timer t = new Timer { Interval = 10 };
@@ -178,86 +150,83 @@ namespace MyWinFormsApp
                         flag.Value = false;
                     }
                     else
-                    {
                         panelToToggle.Height -= 4;
-                    }
                 };
                 t.Start();
             }
         }
 
-        // =====================================================
-        //  SUBMENÚ 1 — REGISTRO DE MANTENIMIENTO
-        // =====================================================
         private void BtnMantenimiento_Click(object sender, EventArgs e)
         {
-            int target = 40; // altura del submenú
-            ToggleSubMenuExclusive(panelSubMenu1, isSubMenu1Expanded, target);
+            ToggleSubMenuExclusive(panelSubMenu1, isSubMenu1Expanded, 40);
         }
 
         private void BtnDnR_Click(object sender, EventArgs e)
         {
-            try
+            if (currentContent != null)
             {
-                if (currentContent != null)
-                {
-                    panelContent.Controls.Remove(currentContent);
-                    currentContent.Dispose();
-                    currentContent = null;
-                }
-
-                var form = new RDdispositivosnorepaForm();
-                form.TopLevel = false;
-                form.FormBorderStyle = FormBorderStyle.None;
-                form.Dock = DockStyle.Fill;
-
-                panelContent.Controls.Add(form);
-                currentContent = form;
-
-                form.Show();
-                lblContent.Visible = false;
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar dispositivos no reparados: {ex.Message}");
-            }
+
+            var form = new RDdispositivosnorepaForm();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
         }
 
-        // =====================================================
-        //  SUBMENÚ 5 — ADMINISTRACIÓN GENERAL
-        // =====================================================
         private void BtnAdministracion_Click(object sender, EventArgs e)
         {
-            int target = 40;
-            ToggleSubMenuExclusive(panelSubMenu5, isSubMenu5Expanded, target);
+            ToggleSubMenuExclusive(panelSubMenu5, isSubMenu5Expanded, 80); // ALTURA AJUSTADA PARA DOS BOTONES
         }
 
         private void BtnInventario_Click(object sender, EventArgs e)
         {
-            try
+            if (currentContent != null)
             {
-                if (currentContent != null)
-                {
-                    panelContent.Controls.Remove(currentContent);
-                    currentContent.Dispose();
-                    currentContent = null;
-                }
-
-                var form = new InventarioPartesForm();
-                form.TopLevel = false;
-                form.FormBorderStyle = FormBorderStyle.None;
-                form.Dock = DockStyle.Fill;
-
-                panelContent.Controls.Add(form);
-                currentContent = form;
-
-                form.Show();
-                lblContent.Visible = false;
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
             }
-            catch (Exception ex)
+
+            var form = new InventarioPartesForm();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
+        }
+
+        private void BtnTipoFallas_Click(object sender, EventArgs e)
+        {
+            if (currentContent != null)
             {
-                MessageBox.Show($"Error al cargar inventario: {ex.Message}");
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
             }
+
+            var form = new TipoDeFallasForm();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
         }
     }
 }
