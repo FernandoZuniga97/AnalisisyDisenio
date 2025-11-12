@@ -33,6 +33,9 @@ namespace MyWinFormsApp
 
         private Button btnReparacionPorEstado; // nuevo botón de submenú
 
+        private Button btnTiempoPromedioReparacion;
+
+
         //submenu del modulo 4
         // Submenú del módulo 5
         private Button btnInventario;
@@ -66,6 +69,8 @@ namespace MyWinFormsApp
             this.btnInventario = new Button();
             this.btnTipoFallas = new Button(); // NUEVO BOTÓN
             this.btnReparacionPorEstado = new Button(); // <-- agrega esto
+            this.btnTiempoPromedioReparacion = new Button(); // 🔹 NUEVO
+
 
 
             this.SuspendLayout();
@@ -121,8 +126,12 @@ namespace MyWinFormsApp
             panelSubMenu1.Controls.Add(btnDnR);
 
             // ======== SUBMENÚ 2 ========
-            ConfigureSubButton(btnReparacionPorEstado, "Reparaciones por Estado", BtnReparacionPorEstado_Click);
-            panelSubMenu2.Controls.Add(btnReparacionPorEstado);
+            // ======== SUBMENÚ 2 ========
+ConfigureSubButton(btnReparacionPorEstado, "Reparaciones por Estado", BtnReparacionPorEstado_Click);
+ConfigureSubButton(btnTiempoPromedioReparacion, "Tiempo promedio en reparación", BtnTiempoPromedioReparacion_Click);
+panelSubMenu2.Controls.Add(btnTiempoPromedioReparacion);
+panelSubMenu2.Controls.Add(btnReparacionPorEstado);
+
 
 
             // ======== SUBMENÚ 3 ========
