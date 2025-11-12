@@ -316,7 +316,7 @@ namespace MyWinFormsApp.src.modulo4
 
                         BaseColor rowColor = esFilaTotal
                             ? new BaseColor( 230, 230, 230 )
-                            : (row.Index % 2 == 0 ? BaseColor.WHITE : BaseColor.LIGHT_GRAY);
+                            : (row.Index % 2 == 0 ? BaseColor.WHITE : BaseColor.GRAY);
 
                         foreach ( DataGridViewCell cell in row.Cells )
                         {
@@ -326,17 +326,17 @@ namespace MyWinFormsApp.src.modulo4
 
                             if ( esFilaTotal )
                             {
-                                // 🔹 Si es la fila de TOTAL, dejar el valor tal cual
+                                // Si es la fila de TOTAL, dejar el valor tal cual
                                 cellText = cellValue.ToString();
                             }
                             else if ( columnHeader.Contains( "(L.)" ) )
                             {
-                                // 🔹 Si es una celda de monto normal, formatearla
+                                // Si es una celda de monto normal, formatearla
                                 if ( decimal.TryParse( cellValue.ToString(), out decimal amount ) )
                                 {
                                     string formattedAmount = amount.ToString( "N2" );
                                     int totalWidth = 18;
-                                    cellText = "L." + formattedAmount.PadLeft( totalWidth - 2 );
+                                    cellText = "L." + formattedAmount.PadLeft( totalWidth );
                                 }
                                 else
                                 {
@@ -345,11 +345,11 @@ namespace MyWinFormsApp.src.modulo4
                             }
                             else
                             {
-                                // 🔹 Cualquier otro texto
+                                // Cualquier otro texto
                                 cellText = cellValue.ToString();
                             }
 
-                            // 🔹 Fuente según si es fila total o no
+                            // Fuente según si es fila total o no
                             var font = esFilaTotal
                                 ? new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 12, iTextSharp.text.Font.BOLD )
                                 : new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 10 );
