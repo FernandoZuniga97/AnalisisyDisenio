@@ -84,11 +84,12 @@ namespace MyWinFormsApp
             // ------------------
             btnExportar = new Button()
             {
-                Text = "Imprimir Reporte",
+                Text = "Generar PDF",
                 Dock = DockStyle.Bottom,
-                Height = 30, // Reducido para mejor look and feel
-                BackColor = ColorTranslator.FromHtml("#009933"),
+                Height = 40, // Reducido para mejor look and feel
+                BackColor = ColorTranslator.FromHtml("#0070C0"),
                 ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
             btnExportar.FlatAppearance.BorderSize = 0;

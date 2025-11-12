@@ -93,7 +93,9 @@ namespace MyWinFormsApp
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Width = 100,
                 Height = 100,
-                Anchor = AnchorStyles.Left | AnchorStyles.Top
+                Anchor = AnchorStyles.None,
+                Dock = DockStyle.Left,
+                Margin = new Padding(25, 0, 0, 0)
             };
 
             try

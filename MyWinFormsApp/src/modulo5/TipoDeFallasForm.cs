@@ -22,6 +22,7 @@ namespace MyWinFormsApp
         private Label lblPeriodo;
         private DataGridView dgvFallas;
         private Chart chartFallas;
+        private Panel separatorLine;
         private SplitContainer splitContainer;
         private Button btnExportar;
         private ComboBox cmbTrimestre;
@@ -49,7 +50,9 @@ namespace MyWinFormsApp
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                AutoScroll = true,
+                Padding = new Padding(8)
             };
             Controls.Add(contenedorReporte);
 
@@ -63,7 +66,32 @@ namespace MyWinFormsApp
                 BackColor = ColorTranslator.FromHtml("#002060")
             };
             contenedorReporte.Controls.Add(headerPanel);
-
+            separatorLine = new Panel()
+            {
+                Height = 17,
+                BackColor = Color.White,
+                Dock = DockStyle.Top,
+                Margin = new Padding(0, 15, 0, 15)
+            };
+            contenedorReporte.Controls.Add(separatorLine);
+            separatorLine.BringToFront();
+            // ------------------
+            // BOTÓN EXPORTAR
+            // ------------------
+            btnExportar = new Button()
+            {
+                Text = "Generar PDF",
+                Dock = DockStyle.Bottom,
+                Height = 40,
+                BackColor = ColorTranslator.FromHtml("#0070C0"),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            btnExportar.FlatAppearance.BorderSize = 0;
+            btnExportar.Click += BtnExportar_Click;
+            contenedorReporte.Controls.Add(btnExportar);
+            btnExportar.BringToFront();
             // ------------------
             // TITLE PANEL
             // ------------------
@@ -79,15 +107,17 @@ namespace MyWinFormsApp
             PictureBox logo = new PictureBox()
             {
                 Image = Image.FromFile(
-                    Path.Combine(
-                        AppDomain.CurrentDomain.BaseDirectory,
+                Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
                         "..\\..\\..\\src\\login\\Image\\logo_g.jpg"
                     )
                 ),
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Width = 150,
-                Height = 150,
-                Anchor = AnchorStyles.Left | AnchorStyles.Top
+                Width = 100,
+                Height = 100,
+                Anchor = AnchorStyles.None,
+                Dock = DockStyle.Left,
+                Margin = new Padding(25, 0, 0, 0)
             };
             titlePanel.Controls.Add(logo, 0, 0);
 
@@ -124,8 +154,6 @@ namespace MyWinFormsApp
             };
 
             headerPanel.Controls.Add(lblPeriodo);
-
-
             textoPanel.Controls.Add(lblPeriodo);
             textoPanel.Controls.Add(lblSubtitulo);
             textoPanel.Controls.Add(lblTitulo);
@@ -153,7 +181,9 @@ namespace MyWinFormsApp
             cmbTrimestre.Top = 10;
             cmbTrimestre.Left = headerPanel.Width - cmbTrimestre.Width - 20;
             cmbTrimestre.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-
+            cmbTrimestre.BackColor = Color.White;
+            cmbTrimestre.ForeColor = Color.Black;
+            cmbTrimestre.FlatStyle = FlatStyle.Flat;
             headerPanel.Controls.Add(cmbTrimestre);
             cmbTrimestre.BringToFront();
 
@@ -191,14 +221,20 @@ namespace MyWinFormsApp
                 EnableHeadersVisualStyles = false,
                 RowHeadersVisible = false,
                 DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter },
-                CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
-                GridColor = Color.White
+                //CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
+                GridColor = Color.White, // Estilo de TipoDeFallasForm
+                AllowUserToResizeColumns = false,
+                AllowUserToResizeRows = false,
+                AllowUserToOrderColumns = false,
+                ScrollBars = ScrollBars.Vertical, // Cambiado a Vertical para paginación
+                CellBorderStyle = DataGridViewCellBorderStyle.Single
             };
             dgvFallas.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
             dgvFallas.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvFallas.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgvFallas.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             dgvFallas.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            dgvFallas.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F0F0F0");
 
             dgvFallas.Paint += (s, e) =>
             {
@@ -249,23 +285,7 @@ namespace MyWinFormsApp
             chartFallas.Series.Add(serie);
             splitContainer.Panel2.Controls.Add(chartFallas);
 
-            // ------------------
-            // BOTÓN EXPORTAR
-            // ------------------
-            btnExportar = new Button()
-            {
-                Text = "Generar PDF",
-                Dock = DockStyle.Bottom,
-                Height = 40,
-                BackColor = ColorTranslator.FromHtml("#0070C0"),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
-            };
-            btnExportar.FlatAppearance.BorderSize = 0;
-            btnExportar.Click += BtnExportar_Click;
-            contenedorReporte.Controls.Add(btnExportar);
-            btnExportar.BringToFront();
+
 
             Load += TipoDeFallasForm_Load;
         }
