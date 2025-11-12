@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using MyWinFormsApp.src.modulo4;
 
 namespace MyWinFormsApp
 {
@@ -13,6 +14,7 @@ namespace MyWinFormsApp
         }
 
         private BoolRef isSubMenu1Expanded = new BoolRef(false);
+        private BoolRef isSubMenu4Expanded = new BoolRef(false);
         private BoolRef isSubMenu5Expanded = new BoolRef(false);
         private Control currentContent = null;
         private readonly bool _isEmployee;
@@ -103,7 +105,7 @@ namespace MyWinFormsApp
 
         private void ToggleSubMenuExclusive(Panel panelToToggle, BoolRef flag, int targetHeight)
         {
-            Panel[] allPanels = { panelSubMenu1, panelSubMenu5 };
+            Panel[] allPanels = { panelSubMenu1, panelSubMenu4, panelSubMenu5 };
 
             foreach (var p in allPanels)
             {
@@ -114,6 +116,7 @@ namespace MyWinFormsApp
                     p.Visible = false;
                     p.Height = 0;
                     if (p == panelSubMenu1) isSubMenu1Expanded.Value = false;
+                    if (p == panelSubMenu4) isSubMenu4Expanded.Value = false;
                     if (p == panelSubMenu5) isSubMenu5Expanded.Value = false;
                 }
             }
@@ -155,12 +158,12 @@ namespace MyWinFormsApp
                 t.Start();
             }
         }
-
+        //bottones 1
         private void BtnMantenimiento_Click(object sender, EventArgs e)
         {
-            ToggleSubMenuExclusive(panelSubMenu1, isSubMenu1Expanded, 40);
+            ToggleSubMenuExclusive(panelSubMenu1, isSubMenu1Expanded, 80);
         }
-
+        //sub menu de botones del modulo 1
         private void BtnDnR_Click(object sender, EventArgs e)
         {
             if (currentContent != null)
@@ -181,7 +184,77 @@ namespace MyWinFormsApp
             form.Show();
             lblContent.Visible = false;
         }
+        //parte de 2 del asub menu
+        private void BtnDnryr_Click(object sender, EventArgs e)
+        {
+            if (currentContent != null)
+            {
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
+            }
 
+            var form = new DispositivosnRyRForm();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
+        }
+        //termina sub menu del modulo 1
+        //bototones 4
+        private void Anto3_Click(object sender, EventArgs e)
+        {
+            ToggleSubMenuExclusive(panelSubMenu4, isSubMenu4Expanded, 80);
+        }
+        //sub menu de botones del modulo 1
+        private void BtnMante_Click(object sender, EventArgs e)
+        {
+            if (currentContent != null)
+            {
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
+            }
+
+            var form = new ReporteMantenimiento();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
+        }
+        //parte de 2 del asub menu
+        private void BtnExce_Click(object sender, EventArgs e)
+        {
+            if (currentContent != null)
+            {
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
+            }
+
+            var form = new ReporteExcepcion();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
+        }
+
+        //botones 5
         private void BtnAdministracion_Click(object sender, EventArgs e)
         {
             ToggleSubMenuExclusive(panelSubMenu5, isSubMenu5Expanded, 80); // ALTURA AJUSTADA PARA DOS BOTONES

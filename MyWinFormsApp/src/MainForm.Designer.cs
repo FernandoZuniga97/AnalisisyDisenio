@@ -26,7 +26,11 @@ namespace MyWinFormsApp
 
         // Submenú del módulo 1
         private Button btnDnR;
-
+        private Button btnDnryr;
+        //submenu del modulo 4
+        private Button btnMante;
+        private Button btnExce;
+        //submenu del modulo 4
         // Submenú del módulo 5
         private Button btnInventario;
         private Button btnTipoFallas; // NUEVO BOTÓN
@@ -52,7 +56,10 @@ namespace MyWinFormsApp
             this.panelSubMenu5 = new Panel();
 
             // Crear botones de submenú
+            this.btnMante = new Button();
+            this.btnExce = new Button();
             this.btnDnR = new Button();
+            this.btnDnryr = new Button();
             this.btnInventario = new Button();
             this.btnTipoFallas = new Button(); // NUEVO BOTÓN
 
@@ -87,12 +94,12 @@ namespace MyWinFormsApp
             // ======== CONFIGURACIÓN DE BOTONES ========
             ConfigureMainButton(btnModule1, "Registro de mantenimiento", BtnMantenimiento_Click);
             ConfigureMainButton(btnModule2, "Actualización de estado", ModuleButton_Click);
-            ConfigureMainButton(btnModule3, "Reporte de reparación", ModuleButton_Click);
+            ConfigureMainButton(btnModule3, "Reporte de reparación", Anto3_Click);
             ConfigureMainButton(btnModule4, "Línea de tiempo", ModuleButton_Click);
             ConfigureMainButton(btnModule5, "Administración general", BtnAdministracion_Click);
 
             btnModule2.Tag = 2;
-            btnModule3.Tag = 3;
+            // btnModule3.Tag = 3;
             btnModule4.Tag = 4;
 
             // ======== CONFIGURACIÓN DE SUBMENÚS ========
@@ -104,8 +111,14 @@ namespace MyWinFormsApp
 
             // ======== SUBMENÚ 1 ========
             ConfigureSubButton(btnDnR, "Dispositivos no reparados", BtnDnR_Click);
+            ConfigureSubButton(btnDnryr, "Dispositivos reparados y no reparados", BtnDnryr_Click);
+            panelSubMenu1.Controls.Add(btnDnryr);
             panelSubMenu1.Controls.Add(btnDnR);
-
+            // ======== SUBMENÚ 3 ========
+            ConfigureSubButton(btnMante, "Mantenimiento Dispositivos", BtnMante_Click);
+            ConfigureSubButton(btnExce, "Reporte de excepción", BtnExce_Click);
+            panelSubMenu4.Controls.Add(btnMante);
+            panelSubMenu4.Controls.Add(btnExce);
             // ======== SUBMENÚ 5 ========
             ConfigureSubButton(btnInventario, "Inventario", BtnInventario_Click);
             ConfigureSubButton(btnTipoFallas, "Tipo de fallas", BtnTipoFallas_Click); // NUEVO BOTÓN
