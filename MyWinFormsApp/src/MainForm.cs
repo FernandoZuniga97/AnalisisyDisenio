@@ -2,6 +2,8 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using MyWinFormsApp.src.modulo4;
+using MyWinFormsApp.src.modulo2;
+
 
 namespace MyWinFormsApp
 {
@@ -14,6 +16,7 @@ namespace MyWinFormsApp
         }
 
         private BoolRef isSubMenu1Expanded = new BoolRef(false);
+        private BoolRef isSubMenu2Expanded = new BoolRef(false);
         private BoolRef isSubMenu4Expanded = new BoolRef(false);
         private BoolRef isSubMenu5Expanded = new BoolRef(false);
         private Control currentContent = null;
@@ -105,7 +108,7 @@ namespace MyWinFormsApp
 
         private void ToggleSubMenuExclusive(Panel panelToToggle, BoolRef flag, int targetHeight)
         {
-            Panel[] allPanels = { panelSubMenu1, panelSubMenu4, panelSubMenu5 };
+            Panel[] allPanels = { panelSubMenu1, panelSubMenu2, panelSubMenu4, panelSubMenu5 };
 
             foreach (var p in allPanels)
             {
@@ -115,7 +118,9 @@ namespace MyWinFormsApp
                 {
                     p.Visible = false;
                     p.Height = 0;
+
                     if (p == panelSubMenu1) isSubMenu1Expanded.Value = false;
+                    if (p == panelSubMenu2) isSubMenu2Expanded.Value = false;
                     if (p == panelSubMenu4) isSubMenu4Expanded.Value = false;
                     if (p == panelSubMenu5) isSubMenu5Expanded.Value = false;
                 }
@@ -158,11 +163,14 @@ namespace MyWinFormsApp
                 t.Start();
             }
         }
+
         //bottones 1
         private void BtnMantenimiento_Click(object sender, EventArgs e)
         {
             ToggleSubMenuExclusive(panelSubMenu1, isSubMenu1Expanded, 80);
         }
+
+
         //sub menu de botones del modulo 1
         private void BtnDnR_Click(object sender, EventArgs e)
         {
@@ -301,5 +309,60 @@ namespace MyWinFormsApp
             form.Show();
             lblContent.Visible = false;
         }
+
+        // BOTÓN "Actualización de estado"
+        private void BtnActualizacion_Click(object sender, EventArgs e)
+        {
+            ToggleSubMenuExclusive(panelSubMenu2, isSubMenu2Expanded, 90);
+        }
+
+        // SUBMENÚ: Reparaciones por Estado
+        private void BtnReparacionPorEstado_Click(object sender, EventArgs e)
+        {
+            if (currentContent != null)
+            {
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
+            }
+
+            var form = new ReparacionPorEstadoForm();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
+        }
+
+        // SUBMENÚ: Tiempo Promedio en Reparación
+private void BtnTiempoPromedioReparacion_Click(object sender, EventArgs e)
+{
+    if (currentContent != null)
+    {
+        panelContent.Controls.Remove(currentContent);
+        currentContent.Dispose();
+        currentContent = null;
     }
+
+    var form = new TiempoPromedioReparacionForm();
+    form.TopLevel = false;
+    form.FormBorderStyle = FormBorderStyle.None;
+    form.Dock = DockStyle.Fill;
+
+    panelContent.Controls.Add(form);
+    currentContent = form;
+
+    form.Show();
+    lblContent.Visible = false;
+}
+
+
+
+
+    }
+    
 }

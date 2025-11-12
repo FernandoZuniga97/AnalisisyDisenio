@@ -13,7 +13,7 @@ namespace MyWinFormsApp
         private Label lblTitulo;
         private Label lblSubtitulo;
         private Label lblFecha;
-        private Label lblPaginaDebajoTabla;
+
 
         private Panel headerPanel;
         private Panel separatorLine;
@@ -91,9 +91,11 @@ namespace MyWinFormsApp
             PictureBox logo = new PictureBox()
             {
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Width = 150,
-                Height = 150,
-                Anchor = AnchorStyles.Left | AnchorStyles.Top
+                Width = 100,
+                Height = 100,
+                Anchor = AnchorStyles.None,
+                Dock = DockStyle.Left,
+                Margin = new Padding(25, 0, 0, 0)
             };
 
             try
@@ -166,7 +168,7 @@ namespace MyWinFormsApp
             dgvInventario = new DataGridView()
             {
                 Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 ReadOnly = true,
                 BackgroundColor = Color.White,
                 BorderStyle = BorderStyle.None,
@@ -180,6 +182,15 @@ namespace MyWinFormsApp
                 ScrollBars = ScrollBars.Vertical
             };
 
+            dgvInventario.RowPrePaint += (s, e) =>
+{
+    if (e.RowIndex % 2 == 0) // filas pares
+        dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightGray;
+    else
+        dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
+};
+
+
             dgvInventario.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
             dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgvInventario.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
@@ -188,17 +199,7 @@ namespace MyWinFormsApp
             Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
             panelTabla.Controls.Add(dgvInventario);
 
-            lblPaginaDebajoTabla = new Label()
-            {
-                Name = "lblPaginaDebajoTabla",
-                Text = $"Pag. {paginaActual} de {totalPaginas}",
-                AutoSize = true,
-                Dock = DockStyle.Bottom,
-                TextAlign = ContentAlignment.MiddleRight,
-                Padding = new Padding(0, 0, 10, 0),
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
-            };
-            panelTabla.Controls.Add(lblPaginaDebajoTabla);
+
 
             // Botones
             btnAgregar = new Button() { Text = "Agregar Parte", Dock = DockStyle.Bottom, Height = 30, BackColor = ColorTranslator.FromHtml("#0070C0"), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
@@ -235,6 +236,10 @@ namespace MyWinFormsApp
         {
             lista = new List<Parte>()
             {
+               new Parte { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
+               new Parte { ID="P-002", Nombre="Puerto de carga tipo C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=8, Unidad="unidades", CostoUnitario=180m, ValorTotal=1440m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
+               new Parte { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
+               new Parte { ID="P-004", Nombre="Pasta térmica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=120m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
                new Parte { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
 new Parte { ID="P-002", Nombre="Puerto de carga tipo C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=8, Unidad="unidades", CostoUnitario=180m, ValorTotal=1440m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
 new Parte { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
@@ -280,7 +285,7 @@ new Parte { ID="P-042", Nombre="Puerto USB-C Mini", Categoria="Conectores", Prov
 new Parte { ID="P-043", Nombre="Batería iPhone 13 Pro", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=11, Unidad="unidades", CostoUnitario=650m, ValorTotal=7150m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
 new Parte { ID="P-044", Nombre="Pasta térmica avanzada", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=180m, ValorTotal=3600m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
 new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=10, Unidad="unidades", CostoUnitario=450m, ValorTotal=4500m, EstadoStock="Suficiente", Observaciones="Popular" }
-};
+ };
 
             MostrarPagina();
         }
@@ -299,19 +304,47 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             dgvInventario.DataSource = null;
             dgvInventario.DataSource = registros;
 
-            // Colorear filas pares
+            dgvInventario.GridColor = Color.White;
+            dgvInventario.CellBorderStyle = DataGridViewCellBorderStyle.Single;
+
+            if (dgvInventario.Columns.Count > 0)
+            {
+                dgvInventario.Columns["ID"].HeaderText = "Código";
+                dgvInventario.Columns["Nombre"].HeaderText = "Nombre de la Parte";
+                dgvInventario.Columns["Categoria"].HeaderText = "Categoría";
+                dgvInventario.Columns["Proveedor"].HeaderText = "Proveedor";
+                dgvInventario.Columns["CantidadActual"].HeaderText = "Cantidad";
+                dgvInventario.Columns["Unidad"].HeaderText = "Unidad";
+                dgvInventario.Columns["CostoUnitario"].HeaderText = "Costo Unitario";
+                dgvInventario.Columns["ValorTotal"].HeaderText = "Valor Total ";
+                dgvInventario.Columns["EstadoStock"].HeaderText = "Estado del Stock";
+                dgvInventario.Columns["Observaciones"].HeaderText = "Observaciones";
+
+                dgvInventario.Columns["CostoUnitario"].DefaultCellStyle.Format = "'L' #,##0.00";
+                dgvInventario.Columns["ValorTotal"].DefaultCellStyle.Format = "'L' #,##0.00";
+                dgvInventario.Columns["CostoUnitario"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                dgvInventario.Columns["ValorTotal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            }
+
             for (int i = 0; i < dgvInventario.Rows.Count; i++)
             {
                 dgvInventario.Rows[i].DefaultCellStyle.BackColor = (i % 2 == 1) ? Color.LightGray : Color.White;
             }
 
-            lblPaginaDebajoTabla.Text = $"Pag. {paginaActual} de {totalPaginas}";
+
 
             var widths = new Dictionary<string, int>
             {
-                ["ID"] = 80, ["Nombre"] = 300, ["Categoria"] = 140, ["Proveedor"] = 160,
-                ["CantidadActual"] = 110, ["Unidad"] = 90, ["CostoUnitario"] = 120, ["ValorTotal"] = 120,
-                ["EstadoStock"] = 140, ["Observaciones"] = 240
+                ["ID"] = 80,
+                ["Nombre"] = 300,
+                ["Categoria"] = 140,
+                ["Proveedor"] = 160,
+                ["CantidadActual"] = 110,
+                ["Unidad"] = 90,
+                ["CostoUnitario"] = 120,
+                ["ValorTotal"] = 120,
+                ["EstadoStock"] = 140,
+                ["Observaciones"] = 240
             };
 
             int totalWidth = 0;
@@ -331,6 +364,26 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
 
             contenedorReporte.AutoScrollMinSize = new Size(Math.Max(totalWidth + 40, this.Width), 0);
             lblPagina.Text = $"Pag. {paginaActual} de {totalPaginas}";
+
+            // === Línea amarilla bajo encabezados ===
+            Panel lineaAmarilla = new Panel()
+            {
+                BackColor = Color.Gold,
+                Height = 3,
+                Width = dgvInventario.Width,
+                Left = dgvInventario.Left,
+                Top = dgvInventario.Top + dgvInventario.ColumnHeadersHeight,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            };
+            var existente = dgvInventario.Parent.Controls.OfType<Panel>().FirstOrDefault(p => p.BackColor == Color.Gold);
+            if (existente != null) dgvInventario.Parent.Controls.Remove(existente);
+            dgvInventario.Parent.Controls.Add(lineaAmarilla);
+            lineaAmarilla.BringToFront();
+            dgvInventario.SizeChanged += (s, e) =>
+            {
+                lineaAmarilla.Width = dgvInventario.Width;
+                lineaAmarilla.Top = dgvInventario.Top + dgvInventario.ColumnHeadersHeight;
+            };
         }
 
         private void BtnPaginaAnterior_Click(object sender, EventArgs e)
@@ -343,7 +396,6 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             if (paginaActual < totalPaginas) { paginaActual++; MostrarPagina(); }
         }
 
-        // ----------------- Imprimir -----------------
         private void BtnImprimir_Click(object sender, EventArgs e)
         {
             PrintDocument printDoc = new PrintDocument();
@@ -361,20 +413,22 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
 
         private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
         {
+            // --- Captura header ---
             Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
             headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
 
             Bitmap separatorBitmap = new Bitmap(separatorLine.Width, separatorLine.Height);
             separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
 
+            // --- Captura DataGridView ---
             int tablaWidth = dgvInventario.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
             int tablaHeight = dgvInventario.ColumnHeadersHeight + dgvInventario.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
-
             Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
             using (Graphics g = Graphics.FromImage(dgvBitmap))
             {
                 g.Clear(Color.White);
                 int xPos = 0;
+
                 // Cabecera
                 for (int i = 0; i < dgvInventario.Columns.Count; i++)
                 {
@@ -382,7 +436,6 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
                     Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvInventario.ColumnHeadersHeight);
                     using (Brush backBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.BackColor))
                         g.FillRectangle(backBrush, headerRect);
-
                     using (Brush foreBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor))
                     {
                         StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
@@ -392,11 +445,14 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
                     xPos += col.Width;
                 }
 
-                int yPos = dgvInventario.ColumnHeadersHeight;
+                // --- Línea amarilla debajo de encabezado ---
+                g.FillRectangle(Brushes.Gold, 0, dgvInventario.ColumnHeadersHeight, tablaWidth, 3);
+
+                int yPos = dgvInventario.ColumnHeadersHeight + 3; // Ajusta por línea amarilla
                 foreach (DataGridViewRow row in dgvInventario.Rows)
                 {
                     xPos = 0;
-                    int filaIndex = dgvInventario.Rows.IndexOf(row); // <--- índice de fila
+                    int filaIndex = dgvInventario.Rows.IndexOf(row);
                     for (int i = 0; i < row.Cells.Count; i++)
                     {
                         var cell = row.Cells[i];
@@ -408,7 +464,8 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
                             StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
                             g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect, sf);
                         }
-                        g.DrawRectangle(Pens.Black, cellRect);
+                        using (Pen whitePen = new Pen(Color.White))
+                            g.DrawRectangle(whitePen, cellRect);
                         xPos += cell.OwningColumn.Width;
                     }
                     yPos += row.Height;
