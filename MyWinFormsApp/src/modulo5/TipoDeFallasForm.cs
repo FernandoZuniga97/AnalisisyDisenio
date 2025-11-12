@@ -17,7 +17,7 @@ namespace MyWinFormsApp
         private Panel headerPanel;
         private Label lblTitulo;
         private Label lblSubtitulo;
-        private Label lblFecha;
+        // private Label lblFecha;
         private Label lblTotal;
         private Label lblPeriodo;
         private DataGridView dgvFallas;
@@ -114,16 +114,16 @@ namespace MyWinFormsApp
             };
 
             lblPeriodo = new Label()
-{
-    Text = "",
-    Font = new Font("Segoe UI", 10, FontStyle.Italic),
-    ForeColor = Color.White,
-    TextAlign = ContentAlignment.MiddleCenter, // Centrado
-    Dock = DockStyle.Top,   // Ocupa todo el ancho del header
-    Height = 30
-};
+            {
+                Text = "",
+                Font = new Font("Segoe UI", 10, FontStyle.Italic),
+                ForeColor = Color.White,
+                TextAlign = ContentAlignment.MiddleCenter, // Centrado
+                Dock = DockStyle.Top,   // Ocupa todo el ancho del header
+                Height = 30
+            };
 
-headerPanel.Controls.Add(lblPeriodo);
+            headerPanel.Controls.Add(lblPeriodo);
 
 
             textoPanel.Controls.Add(lblPeriodo);

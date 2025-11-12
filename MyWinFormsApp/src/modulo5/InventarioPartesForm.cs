@@ -13,7 +13,7 @@ namespace MyWinFormsApp
         private Label lblTitulo;
         private Label lblSubtitulo;
         private Label lblFecha;
-     
+
 
         private Panel headerPanel;
         private Panel separatorLine;
@@ -91,8 +91,8 @@ namespace MyWinFormsApp
             PictureBox logo = new PictureBox()
             {
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Width = 150,
-                Height = 150,
+                Width = 100,
+                Height = 100,
                 Anchor = AnchorStyles.Left | AnchorStyles.Top
             };
 
@@ -197,7 +197,7 @@ namespace MyWinFormsApp
             Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
             panelTabla.Controls.Add(dgvInventario);
 
-           
+
 
             // Botones
             btnAgregar = new Button() { Text = "Agregar Parte", Dock = DockStyle.Bottom, Height = 30, BackColor = ColorTranslator.FromHtml("#0070C0"), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
@@ -329,13 +329,20 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
                 dgvInventario.Rows[i].DefaultCellStyle.BackColor = (i % 2 == 1) ? Color.LightGray : Color.White;
             }
 
-          
+
 
             var widths = new Dictionary<string, int>
             {
-                ["ID"] = 80, ["Nombre"] = 300, ["Categoria"] = 140, ["Proveedor"] = 160,
-                ["CantidadActual"] = 110, ["Unidad"] = 90, ["CostoUnitario"] = 120, ["ValorTotal"] = 120,
-                ["EstadoStock"] = 140, ["Observaciones"] = 240
+                ["ID"] = 80,
+                ["Nombre"] = 300,
+                ["Categoria"] = 140,
+                ["Proveedor"] = 160,
+                ["CantidadActual"] = 110,
+                ["Unidad"] = 90,
+                ["CostoUnitario"] = 120,
+                ["ValorTotal"] = 120,
+                ["EstadoStock"] = 140,
+                ["Observaciones"] = 240
             };
 
             int totalWidth = 0;
