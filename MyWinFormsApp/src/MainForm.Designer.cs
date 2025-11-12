@@ -30,6 +30,9 @@ namespace MyWinFormsApp
         //submenu del modulo 4
         private Button btnMante;
         private Button btnExce;
+
+        private Button btnReparacionPorEstado; // nuevo botón de submenú
+
         //submenu del modulo 4
         // Submenú del módulo 5
         private Button btnInventario;
@@ -62,6 +65,8 @@ namespace MyWinFormsApp
             this.btnDnryr = new Button();
             this.btnInventario = new Button();
             this.btnTipoFallas = new Button(); // NUEVO BOTÓN
+            this.btnReparacionPorEstado = new Button(); // <-- agrega esto
+
 
             this.SuspendLayout();
 
@@ -93,7 +98,7 @@ namespace MyWinFormsApp
 
             // ======== CONFIGURACIÓN DE BOTONES ========
             ConfigureMainButton(btnModule1, "Registro de mantenimiento", BtnMantenimiento_Click);
-            ConfigureMainButton(btnModule2, "Actualización de estado", ModuleButton_Click);
+            ConfigureMainButton(btnModule2, "Actualización de estado", BtnActualizacion_Click);
             ConfigureMainButton(btnModule3, "Reporte de reparación", Anto3_Click);
             ConfigureMainButton(btnModule4, "Línea de tiempo", ModuleButton_Click);
             ConfigureMainButton(btnModule5, "Administración general", BtnAdministracion_Click);
@@ -114,6 +119,12 @@ namespace MyWinFormsApp
             ConfigureSubButton(btnDnryr, "Dispositivos reparados y no reparados", BtnDnryr_Click);
             panelSubMenu1.Controls.Add(btnDnryr);
             panelSubMenu1.Controls.Add(btnDnR);
+
+            // ======== SUBMENÚ 2 ========
+            ConfigureSubButton(btnReparacionPorEstado, "Reparaciones por Estado", BtnReparacionPorEstado_Click);
+            panelSubMenu2.Controls.Add(btnReparacionPorEstado);
+
+
             // ======== SUBMENÚ 3 ========
             ConfigureSubButton(btnMante, "Mantenimiento Dispositivos", BtnMante_Click);
             ConfigureSubButton(btnExce, "Reporte de excepción", BtnExce_Click);
