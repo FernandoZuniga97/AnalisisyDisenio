@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace MyWinFormsApp
@@ -9,6 +10,7 @@ namespace MyWinFormsApp
         private Panel panelLeft;
         private Panel panelContent;
         private Label lblContent;
+        private Panel panelSpacerTop;
 
         // Botones principales
         private Button btnModule1;
@@ -16,6 +18,9 @@ namespace MyWinFormsApp
         private Button btnModule3;
         private Button btnModule4;
         private Button btnModule5;
+        private PictureBox pbProfile; // Para la foto de perfil
+        private Label lblUserRole;     // Para el rol: Administrador/Empleado
+        private Button btnLogout;
 
         // Submenús
         private Panel panelSubMenu1;
@@ -43,6 +48,7 @@ namespace MyWinFormsApp
             this.panelLeft = new Panel();
             this.panelContent = new Panel();
             this.lblContent = new Label();
+            this.panelSpacerTop = new Panel();
 
             // Crear botones principales
             this.btnModule1 = new Button();
@@ -50,7 +56,9 @@ namespace MyWinFormsApp
             this.btnModule3 = new Button();
             this.btnModule4 = new Button();
             this.btnModule5 = new Button();
-
+            this.pbProfile = new PictureBox();
+            this.lblUserRole = new Label();
+            this.btnLogout = new Button();
             // Crear submenús
             this.panelSubMenu1 = new Panel();
             this.panelSubMenu2 = new Panel();
@@ -66,7 +74,6 @@ namespace MyWinFormsApp
             this.btnInventario = new Button();
             this.btnTipoFallas = new Button(); // NUEVO BOTÓN
             this.btnReparacionPorEstado = new Button(); // <-- agrega esto
-
 
             this.SuspendLayout();
 
@@ -91,11 +98,48 @@ namespace MyWinFormsApp
 
             // ======== LABEL PRINCIPAL ========
             this.lblContent.Dock = DockStyle.Fill;
-            this.lblContent.Text = "Seleccione un módulo";
-            this.lblContent.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            this.lblContent.Text = "Bienvenido a GICELL";
+            this.lblContent.Font = new Font("Segoe UI", 25, FontStyle.Bold);
+            this.lblContent.ForeColor = Color.FromArgb(0, 70, 140);
+            this.lblContent.BackColor = Color.White;
             this.lblContent.TextAlign = ContentAlignment.MiddleCenter;
             this.panelContent.Controls.Add(this.lblContent);
-
+            // ======== PANEL ESPACIADOR SUPERIOR ========
+            this.panelSpacerTop.Dock = DockStyle.Top;
+            this.panelSpacerTop.Height = 65; // Altura del margen que quieres (15px)
+            this.panelSpacerTop.BackColor = Color.FromArgb(0, 70, 140);
+            this.panelLeft.Controls.Add(this.panelSpacerTop);
+            //-------------------
+            // ======== ÁREA DE PERFIL Y ROL (NUEVO) ========
+            this.pbProfile.Dock = DockStyle.Top;
+            this.pbProfile.SizeMode = PictureBoxSizeMode.Zoom;
+            this.pbProfile.Size = new Size(80, 80);
+            this.pbProfile.Image = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "src", "login", "Image", "perfil.jpg"));
+            //this.pbProfile.Padding = new Padding(0, 55, 0, 0);
+            this.pbProfile.Height = 110;
+            this.pbProfile.BackColor = Color.FromArgb(0, 70, 140);
+            this.panelLeft.Controls.Add(this.pbProfile);
+            // Etiqueta de rol de usuario
+            this.lblUserRole.Dock = DockStyle.Top;
+            this.lblUserRole.TextAlign = ContentAlignment.MiddleCenter;
+            this.lblUserRole.Height = 30;
+            this.lblUserRole.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            this.lblUserRole.BackColor = Color.FromArgb(0, 70, 140);
+            this.lblUserRole.ForeColor = Color.White;
+            this.lblUserRole.Text = _isEmployee ? "Empleado" : "Administrador";
+            this.panelLeft.Controls.Add(this.lblUserRole);
+            //Cerrar boton confi
+            // ======== CONFIGURACIÓN DEL BOTÓN DE CERRAR SESIÓN ========
+            this.btnLogout.Text = "Cerrar Sesión";
+            this.btnLogout.Dock = DockStyle.Bottom; // DockStyle.Bottom lo ancla al final
+            this.btnLogout.Height = 45;
+            this.btnLogout.FlatStyle = FlatStyle.Flat;
+            this.btnLogout.FlatAppearance.BorderSize = 0;
+            this.btnLogout.BackColor = Color.FromArgb(140, 0, 0); // Rojo oscuro para advertencia
+            this.btnLogout.ForeColor = Color.White;
+            this.btnLogout.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            this.btnLogout.Click += LogoutButton_Click;
+            this.panelLeft.Controls.Add(this.btnLogout);
             // ======== CONFIGURACIÓN DE BOTONES ========
             ConfigureMainButton(btnModule1, "Registro de mantenimiento", BtnMantenimiento_Click);
             ConfigureMainButton(btnModule2, "Actualización de estado", BtnActualizacion_Click);
@@ -128,14 +172,16 @@ namespace MyWinFormsApp
             // ======== SUBMENÚ 3 ========
             ConfigureSubButton(btnMante, "Mantenimiento Dispositivos", BtnMante_Click);
             ConfigureSubButton(btnExce, "Reporte de excepción", BtnExce_Click);
-            panelSubMenu4.Controls.Add(btnMante);
-            panelSubMenu4.Controls.Add(btnExce);
+            panelSubMenu3.Controls.Add(btnMante);
+            panelSubMenu3.Controls.Add(btnExce);
             // ======== SUBMENÚ 5 ========
             ConfigureSubButton(btnInventario, "Inventario", BtnInventario_Click);
             ConfigureSubButton(btnTipoFallas, "Tipo de fallas", BtnTipoFallas_Click); // NUEVO BOTÓN
             panelSubMenu5.Controls.Add(btnTipoFallas);
             panelSubMenu5.Controls.Add(btnInventario);
-
+            //ORden pa usuario bb
+            //panelLeft.Controls.Add(this.lblUserRole);
+            //panelLeft.Controls.Add(this.pbProfile);
             // ======== ORDEN DE CONTROLES ========
             panelLeft.Controls.Add(panelSubMenu5);
             panelLeft.Controls.Add(btnModule5);
@@ -147,21 +193,29 @@ namespace MyWinFormsApp
             panelLeft.Controls.Add(btnModule2);
             panelLeft.Controls.Add(panelSubMenu1);
             panelLeft.Controls.Add(btnModule1);
-
+            this.panelLeft.Controls.Add(this.lblUserRole);
+            this.panelLeft.Controls.Add(this.pbProfile);
+            this.panelLeft.Controls.Add(this.panelSpacerTop);
+            this.panelLeft.Controls.Add(this.btnLogout);
             this.ResumeLayout(false);
         }
 
         private void ConfigureMainButton(Button btn, string text, EventHandler action)
         {
             btn.Text = text;
-            btn.Height = 55;
+            btn.Height = 65;
             btn.Dock = DockStyle.Top;
+            btn.TextAlign = ContentAlignment.TopCenter;
             btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderSize = 0;
+            btn.Margin = new Padding(0, 5, 0, 5);
+            btn.FlatAppearance.BorderSize = 5;
+            btn.FlatAppearance.BorderColor = Color.FromArgb(0, 70, 140);
             btn.BackColor = Color.White;
             btn.ForeColor = Color.Black;
+            // btn.FlatAppearance.BorderSize = 0;
             btn.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            btn.Click += AnimateButton_Click;
+            btn.Click += (sender, e) => HandleButtonClick(btn);
+            // btn.Click += AnimateButton_Click;
             btn.Click += action;
         }
 
@@ -178,12 +232,15 @@ namespace MyWinFormsApp
             btn.Text = text;
             btn.Dock = DockStyle.Top;
             btn.Height = 40;
-            btn.TextAlign = ContentAlignment.MiddleLeft;
-            btn.Padding = new Padding(20, 0, 0, 0);
+            btn.Font = new Font("Segoe UI", 9, FontStyle.Regular);
+            btn.TextAlign = ContentAlignment.TopCenter;
+            //btn.Padding = new Padding(13, 7, 9, 7);
             btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderSize = 0;
-            btn.BackColor = Color.FromArgb(220, 225, 250);
-            btn.Click += AnimateButton_Click;
+            btn.FlatAppearance.BorderSize = 2;
+            btn.FlatAppearance.BorderColor = Color.FromArgb(0, 70, 140);
+            btn.BackColor = Color.WhiteSmoke;
+            btn.Click += (sender, e) => HandleSubButtonClick(btn);
+            //  btn.Click += AnimateButton_Click;
             btn.Click += action;
         }
     }
