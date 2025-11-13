@@ -10,9 +10,10 @@ namespace MyWinFormsApp.src.modulo2
 {
     public class TiempoPromedioReparacionForm : Form
     {
-        private Panel contenedorReporte;
+        private TableLayoutPanel mainLayout;
         private Panel headerPanel;
         private Label lblTitulo;
+        private Label lblSubtitulo;
         private Label lblPeriodo;
         private Chart chartTiempos;
 
@@ -31,72 +32,117 @@ namespace MyWinFormsApp.src.modulo2
             BackColor = Color.White;
             StartPosition = FormStartPosition.CenterScreen;
 
-            contenedorReporte = new Panel()
+            // Main layout: fila 0 = header (altura fija), fila 1 = contenido (relleno)
+            mainLayout = new TableLayoutPanel()
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.White
+                ColumnCount = 1,
+                RowCount = 2
             };
-            Controls.Add(contenedorReporte);
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 140)); // header height
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // content
+            Controls.Add(mainLayout);
 
-            // ---------- ENCABEZADO ----------
-            headerPanel = new Panel()
-            {
-                Dock = DockStyle.Top,
-                Height = 120,
-                BackColor = ColorTranslator.FromHtml("#002060")
-            };
-            contenedorReporte.Controls.Add(headerPanel);
+           // ---------- ENCABEZADO ----------
+headerPanel = new Panel()
+{
+    Dock = DockStyle.Fill,
+    BackColor = ColorTranslator.FromHtml("#002060")
+};
+mainLayout.Controls.Add(headerPanel, 0, 0);
 
-            PictureBox logo = new PictureBox()
-            {
-                Image = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\src\\login\\Image\\logo_g.jpg")),
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Location = new Point(20, 10),
-                Size = new Size(120, 100)
-            };
-            headerPanel.Controls.Add(logo);
+PictureBox logo = new PictureBox()
+{
+    Image = Image.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\src\\login\\Image\\logo_g.jpg")),
+    SizeMode = PictureBoxSizeMode.Zoom,
+    Location = new Point(20, 15),
+    Size = new Size(120, 110)
+};
+headerPanel.Controls.Add(logo);
 
-            lblTitulo = new Label()
-            {
-                Text = "Tiempo promedio en reparación",
-                Font = new Font("Century Gothic", 20, FontStyle.Bold),
-                ForeColor = Color.White,
-                Location = new Point(180, 25),
-                AutoSize = true
-            };
-            headerPanel.Controls.Add(lblTitulo);
+// --- Panel centrado para los textos ---
+Panel panelTextos = new Panel()
+{
+    BackColor = Color.Transparent,
+    AutoSize = true
+};
+headerPanel.Controls.Add(panelTextos);
 
-            lblPeriodo = new Label()
-            {
-                Text = "Periodo: (25/09/25 - 25/10/25)",
-                Font = new Font("Century Gothic", 10, FontStyle.Italic),
-                ForeColor = Color.White,
-                Location = new Point(180, 70),
-                AutoSize = true
-            };
-            headerPanel.Controls.Add(lblPeriodo);
+// --- Título ---
+lblTitulo = new Label()
+{
+    Text = "IMPORTACIONES GICELL",
+    Font = new Font("Century Gothic", 22, FontStyle.Bold),
+    ForeColor = Color.White,
+    TextAlign = ContentAlignment.MiddleCenter,
+    AutoSize = true
+};
+panelTextos.Controls.Add(lblTitulo);
 
-            // ---------- CONTENEDOR PRINCIPAL ----------
+// --- Subtítulo ---
+lblSubtitulo = new Label()
+{
+    Text = "Tiempo Promedio en Reparación",
+    Font = new Font("Century Gothic", 13, FontStyle.Italic),
+    ForeColor = Color.White,
+    TextAlign = ContentAlignment.MiddleCenter,
+    AutoSize = true,
+    Location = new Point(0, lblTitulo.Bottom + 5)
+};
+panelTextos.Controls.Add(lblSubtitulo);
+
+// --- Periodo ---
+lblPeriodo = new Label()
+{
+    Text = "Periodo: (25/09/25 - 25/10/25)",
+    Font = new Font("Century Gothic", 10, FontStyle.Italic),
+    ForeColor = Color.White,
+    TextAlign = ContentAlignment.MiddleCenter,
+    AutoSize = true,
+    Location = new Point(0, lblSubtitulo.Bottom + 5)
+};
+panelTextos.Controls.Add(lblPeriodo);
+
+// --- Centrar el panel de textos dentro del encabezado ---
+panelTextos.Location = new Point(
+    (headerPanel.Width - panelTextos.PreferredSize.Width) / 2,
+    (headerPanel.Height - panelTextos.PreferredSize.Height) / 2
+);
+
+// --- Mantener centrado si se redimensiona ---
+headerPanel.Resize += (s, e) =>
+{
+    panelTextos.Location = new Point(
+        (headerPanel.Width - panelTextos.PreferredSize.Width) / 2,
+        (headerPanel.Height - panelTextos.PreferredSize.Height) / 2
+    );
+};
+
+
+            // ---------- CONTENIDO (SplitContainer) ----------
             SplitContainer splitContainer = new SplitContainer()
             {
                 Dock = DockStyle.Fill,
                 Orientation = Orientation.Vertical,
                 SplitterDistance = 750
             };
-            contenedorReporte.Controls.Add(splitContainer);
+            // se agrega a la segunda fila del mainLayout
+            mainLayout.Controls.Add(splitContainer, 0, 1);
 
             Panel panelIzquierdo = new Panel()
             {
                 Dock = DockStyle.Fill,
                 AutoScroll = true,
-                BackColor = Color.White
+                BackColor = Color.White,
+                Padding = new Padding(10) // padding general para que no quede pegado
             };
             splitContainer.Panel1.Controls.Add(panelIzquierdo);
 
             Panel panelDerecho = new Panel()
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.White
+                BackColor = Color.White,
+                Padding = new Padding(10)
             };
             splitContainer.Panel2.Controls.Add(panelDerecho);
 
@@ -186,7 +232,6 @@ namespace MyWinFormsApp.src.modulo2
             };
             contInterno.Controls.Add(lblHeader);
 
-            // Crear DataGridView
             DataGridView dgv = new DataGridView()
             {
                 Dock = DockStyle.Top,
