@@ -114,42 +114,29 @@ namespace MyWinFormsApp
 
         private void ToggleSubMenuExclusive(Panel panelToToggle, BoolRef flag, int targetHeight)
         {
-            Panel[] allPanels = { panelSubMenu1, panelSubMenu2, panelSubMenu3, panelSubMenu4, panelSubMenu5 };
+            Panel[] allPanels = { panelSubMenu1, panelSubMenu2, panelSubMenu4, panelSubMenu5 };
 
-            Button associatedButton = null;
-            if (panelToToggle == panelSubMenu1) associatedButton = btnModule1;
-            else if (panelToToggle == panelSubMenu2) associatedButton = btnModule2;
-            else if (panelToToggle == panelSubMenu3) associatedButton = btnModule3;
-            else if (panelToToggle == panelSubMenu4) associatedButton = btnModule4;
-            else if (panelToToggle == panelSubMenu5) associatedButton = btnModule5;
-
-            // 1. **CLAVE**: Reinicia todos los colores a Blanco ANTES de verificar el estado.
-            ResetAllMainButtons();
-            ResetAllSubButtons();
-
-            // Colapsar todos los demás paneles.
             foreach (var p in allPanels)
             {
                 if (p == null) continue;
+
                 if (p != panelToToggle)
                 {
                     p.Visible = false;
                     p.Height = 0;
-                    // ... (Lógica de flags de submenú) ...
+
+                    if (p == panelSubMenu1) isSubMenu1Expanded.Value = false;
+                    if (p == panelSubMenu2) isSubMenu2Expanded.Value = false;
+                    if (p == panelSubMenu4) isSubMenu4Expanded.Value = false;
+                    if (p == panelSubMenu5) isSubMenu5Expanded.Value = false;
                 }
             }
 
             if (!flag.Value)
             {
-                // ABRIENDO: Aplica el color gris para mantener el estado "activo".
-                if (associatedButton != null)
-                    associatedButton.BackColor = Color.LightGray; // Gris claro para el botón principal
-
                 panelToToggle.Height = 0;
                 panelToToggle.Visible = true;
-                panelToToggle.BackColor = Color.FromArgb(200, 200, 200); // Gris oscuro para el submenú
 
-                // ... (Lógica del Timer para expandir) ...
                 Timer t = new Timer { Interval = 10 };
                 t.Tick += (s, e) =>
                 {
@@ -166,13 +153,6 @@ namespace MyWinFormsApp
             }
             else
             {
-                // CERRANDO: Restablece solo el color del botón que se está cerrando.
-                if (associatedButton != null)
-                    associatedButton.BackColor = Color.White; // Vuelve a blanco el botón que se cierra
-
-                panelToToggle.BackColor = Color.FromArgb(235, 240, 255); // Vuelve al color base el submenú
-
-                // ... (Lógica del Timer para colapsar) ...
                 Timer t = new Timer { Interval = 10 };
                 t.Tick += (s, e) =>
                 {
@@ -188,60 +168,6 @@ namespace MyWinFormsApp
                 };
                 t.Start();
             }
-        }
-        //---------
-        private void HandleSubButtonClick(Button selectedSubButton)
-        {
-
-            ResetAllSubButtons();
-            selectedSubButton.BackColor = Color.FromArgb(200, 200, 200);
-        }
-        //------------
-        private void HandleButtonClick(Button selectedButton)
-        {
-
-            ResetAllMainButtons();
-            selectedButton.BackColor = ColorTranslator.FromHtml("#F0F0F0");
-        }
-        //---------------
-        private void ResetAllSubButtons()
-        {
-            // Reestablece el color de todos los botones de submenú a su color base (WhiteSmoke)
-            Color baseBtnColor = Color.WhiteSmoke;
-            // Submenú 1
-            btnDnR.BackColor = baseBtnColor;
-            btnDnryr.BackColor = baseBtnColor;
-
-            // Submenú 2 (si aplica)
-            btnReparacionPorEstado.BackColor = baseBtnColor;
-
-            // Submenú 3
-            btnMante.BackColor = baseBtnColor;
-            btnExce.BackColor = baseBtnColor;
-
-            // Submenú 5
-            btnInventario.BackColor = baseBtnColor;
-            btnTipoFallas.BackColor = baseBtnColor;
-        }
-        //-------------
-        private void ResetAllMainButtons()
-        {
-            // Restablece el color de todos los botones principales a Blanco
-            btnModule1.BackColor = Color.White;
-            btnModule2.BackColor = Color.White;
-            btnModule3.BackColor = Color.White;
-            btnModule4.BackColor = Color.White;
-            btnModule5.BackColor = Color.White;
-
-            // Restablece el color de fondo de todos los paneles de submenú a su color base claro
-            // Este es el color Color.FromArgb(235, 240, 255) que configuraste para los paneles
-            Color baseSubMenuColor = Color.FromArgb(235, 240, 255);
-
-            panelSubMenu1.BackColor = baseSubMenuColor;
-            panelSubMenu2.BackColor = baseSubMenuColor;
-            panelSubMenu3.BackColor = baseSubMenuColor;
-            panelSubMenu4.BackColor = baseSubMenuColor;
-            panelSubMenu5.BackColor = baseSubMenuColor;
         }
 
         //bottones 1
@@ -393,7 +319,7 @@ namespace MyWinFormsApp
         // BOTÓN "Actualización de estado"
         private void BtnActualizacion_Click(object sender, EventArgs e)
         {
-            ToggleSubMenuExclusive(panelSubMenu2, isSubMenu2Expanded, 50);
+            ToggleSubMenuExclusive(panelSubMenu2, isSubMenu2Expanded, 90);
         }
 
         // SUBMENÚ: Reparaciones por Estado
@@ -418,26 +344,30 @@ namespace MyWinFormsApp
             lblContent.Visible = false;
         }
 
-        private void LogoutButton_Click(object sender, EventArgs e)
+        // SUBMENÚ: Tiempo Promedio en Reparación
+        private void BtnTiempoPromedioReparacion_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show(
-                "¿Estás seguro que deseas cerrar sesión?",
-                "Confirmación de Cierre de Sesión",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (result == DialogResult.Yes)
+            if (currentContent != null)
             {
-                // Oculta el formulario actual (MainForm)
-                this.Hide();
-                var loginForm = new CredentialsForm();
-                CenterToScreen();
-                loginForm.Show();
-                this.Close();
+                panelContent.Controls.Remove(currentContent);
+                currentContent.Dispose();
+                currentContent = null;
             }
-            // Si es No, no hace nada y se mantiene en el formulario.
+
+            var form = new TiempoPromedioReparacionForm();
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
+
+            panelContent.Controls.Add(form);
+            currentContent = form;
+
+            form.Show();
+            lblContent.Visible = false;
         }
+
+
+
 
     }
 
