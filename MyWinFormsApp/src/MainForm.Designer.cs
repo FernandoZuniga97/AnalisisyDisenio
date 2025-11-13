@@ -143,7 +143,7 @@ namespace MyWinFormsApp
             this.btnLogout.BackColor = Color.FromArgb(140, 0, 0); // Rojo oscuro para advertencia
             this.btnLogout.ForeColor = Color.White;
             this.btnLogout.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            this.btnLogout.Click += LogoutButton_Click;
+            //this.btnLogout.Click += LogoutButton_Click;
             this.panelLeft.Controls.Add(this.btnLogout);
             // ======== CONFIGURACIÓN DE BOTONES ========
             ConfigureMainButton(btnModule1, "Registro de mantenimiento", BtnMantenimiento_Click);
@@ -171,10 +171,10 @@ namespace MyWinFormsApp
 
             // ======== SUBMENÚ 2 ========
             // ======== SUBMENÚ 2 ========
-ConfigureSubButton(btnReparacionPorEstado, "Reparaciones por Estado", BtnReparacionPorEstado_Click);
-ConfigureSubButton(btnTiempoPromedioReparacion, "Tiempo promedio en reparación", BtnTiempoPromedioReparacion_Click);
-panelSubMenu2.Controls.Add(btnTiempoPromedioReparacion);
-panelSubMenu2.Controls.Add(btnReparacionPorEstado);
+            ConfigureSubButton(btnReparacionPorEstado, "Reparaciones por Estado", BtnReparacionPorEstado_Click);
+            ConfigureSubButton(btnTiempoPromedioReparacion, "Tiempo promedio en reparación", BtnTiempoPromedioReparacion_Click);
+            panelSubMenu2.Controls.Add(btnTiempoPromedioReparacion);
+            panelSubMenu2.Controls.Add(btnReparacionPorEstado);
 
 
 
@@ -223,7 +223,7 @@ panelSubMenu2.Controls.Add(btnReparacionPorEstado);
             btn.ForeColor = Color.Black;
             // btn.FlatAppearance.BorderSize = 0;
             btn.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            btn.Click += (sender, e) => HandleButtonClick(btn);
+            // btn.Click += (sender, e) => HandleButtonClick(btn);
             // btn.Click += AnimateButton_Click;
             btn.Click += action;
         }
@@ -248,7 +248,7 @@ panelSubMenu2.Controls.Add(btnReparacionPorEstado);
             btn.FlatAppearance.BorderSize = 2;
             btn.FlatAppearance.BorderColor = Color.FromArgb(0, 70, 140);
             btn.BackColor = Color.WhiteSmoke;
-            btn.Click += (sender, e) => HandleSubButtonClick(btn);
+            //btn.Click += (sender, e) => HandleSubButtonClick(btn);
             //  btn.Click += AnimateButton_Click;
             btn.Click += action;
         }
