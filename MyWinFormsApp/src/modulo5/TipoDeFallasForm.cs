@@ -27,6 +27,8 @@ namespace MyWinFormsApp
         private Button btnExportar;
         private ComboBox cmbTrimestre;
 
+        int currentPage = 1;
+
         public TipoDeFallasForm()
         {
             InitializeComponent();
@@ -407,73 +409,95 @@ namespace MyWinFormsApp
         }
 
         private void PrintDoc_PrintPageFallas(object sender, PrintPageEventArgs e)
+{
+    // Capturar header
+    Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
+    headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
+
+    // Capturar tabla
+    int tablaWidth = dgvFallas.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
+    int tablaHeight = dgvFallas.ColumnHeadersHeight + dgvFallas.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
+    Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
+    using (Graphics g = Graphics.FromImage(dgvBitmap))
+    {
+        g.Clear(Color.White);
+        int xPos = 0;
+        for (int i = 0; i < dgvFallas.Columns.Count; i++)
         {
-            // Capturar header
-            Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
-            headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
-
-            // Capturar tabla
-            int tablaWidth = dgvFallas.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
-            int tablaHeight = dgvFallas.ColumnHeadersHeight + dgvFallas.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
-            Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
-            using (Graphics g = Graphics.FromImage(dgvBitmap))
-            {
-                g.Clear(Color.White);
-                int xPos = 0;
-                for (int i = 0; i < dgvFallas.Columns.Count; i++)
-                {
-                    var col = dgvFallas.Columns[i];
-                    Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvFallas.ColumnHeadersHeight);
-                    using (Brush backBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.BackColor))
-                        g.FillRectangle(backBrush, headerRect);
-                    using (Brush foreBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.ForeColor))
-                        g.DrawString(col.HeaderText, dgvFallas.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                    g.DrawRectangle(Pens.Black, headerRect);
-                    xPos += col.Width;
-                }
-
-                int yPos = dgvFallas.ColumnHeadersHeight;
-                foreach (DataGridViewRow row in dgvFallas.Rows)
-                {
-                    xPos = 0;
-                    for (int i = 0; i < row.Cells.Count; i++)
-                    {
-                        var cell = row.Cells[i];
-                        Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
-                        using (Brush backBrush = new SolidBrush(row.Index % 2 == 1 ? Color.LightGray : Color.White))
-                            g.FillRectangle(backBrush, cellRect);
-                        using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
-                            g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                        g.DrawRectangle(Pens.White, cellRect);
-                        xPos += cell.OwningColumn.Width;
-                    }
-                    yPos += row.Height;
-                }
-            }
-
-            // Capturar gráfico
-            Bitmap chartBitmap = new Bitmap(chartFallas.Width, chartFallas.Height);
-            chartFallas.DrawToBitmap(chartBitmap, new Rectangle(0, 0, chartFallas.Width, chartFallas.Height));
-
-            // Combinar todo
-            int totalWidth = Math.Max(headerBitmap.Width, Math.Max(dgvBitmap.Width, chartBitmap.Width));
-            int totalHeight = headerBitmap.Height + dgvBitmap.Height + chartBitmap.Height + 20;
-
-            Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
-            using (Graphics g = Graphics.FromImage(printBitmap))
-            {
-                g.Clear(Color.White);
-                g.DrawImage(headerBitmap, 0, 0);
-                g.DrawImage(dgvBitmap, 0, headerBitmap.Height);
-                g.DrawImage(chartBitmap, 0, headerBitmap.Height + dgvBitmap.Height + 10);
-            }
-
-            // Escalar y dibujar
-            float scale = Math.Min((float)e.MarginBounds.Width / printBitmap.Width, (float)e.MarginBounds.Height / printBitmap.Height);
-            int printWidth = (int)(printBitmap.Width * scale);
-            int printHeight = (int)(printBitmap.Height * scale);
-            e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
+            var col = dgvFallas.Columns[i];
+            Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvFallas.ColumnHeadersHeight);
+            using (Brush backBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.BackColor))
+                g.FillRectangle(backBrush, headerRect);
+            using (Brush foreBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.ForeColor))
+                g.DrawString(col.HeaderText, dgvFallas.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect,
+                             new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+            g.DrawRectangle(Pens.Black, headerRect);
+            xPos += col.Width;
         }
+
+        int yPos = dgvFallas.ColumnHeadersHeight;
+        foreach (DataGridViewRow row in dgvFallas.Rows)
+        {
+            xPos = 0;
+            for (int i = 0; i < row.Cells.Count; i++)
+            {
+                var cell = row.Cells[i];
+                Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
+                using (Brush backBrush = new SolidBrush(row.Index % 2 == 1 ? Color.LightGray : Color.White))
+                    g.FillRectangle(backBrush, cellRect);
+                using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
+                    g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect,
+                                 new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                g.DrawRectangle(Pens.White, cellRect);
+                xPos += cell.OwningColumn.Width;
+            }
+            yPos += row.Height;
+        }
+    }
+
+    // Capturar gráfico
+    Bitmap chartBitmap = new Bitmap(chartFallas.Width, chartFallas.Height);
+    chartFallas.DrawToBitmap(chartBitmap, new Rectangle(0, 0, chartFallas.Width, chartFallas.Height));
+
+    // Combinar todo
+    int totalWidth = Math.Max(headerBitmap.Width, Math.Max(dgvBitmap.Width, chartBitmap.Width));
+    int totalHeight = headerBitmap.Height + dgvBitmap.Height + chartBitmap.Height + 20;
+
+    Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
+    using (Graphics g = Graphics.FromImage(printBitmap))
+    {
+        g.Clear(Color.White);
+        g.DrawImage(headerBitmap, 0, 0);
+        g.DrawImage(dgvBitmap, 0, headerBitmap.Height);
+        g.DrawImage(chartBitmap, 0, headerBitmap.Height + dgvBitmap.Height + 10);
+    }
+
+    // Escalar y dibujar
+    float scale = Math.Min((float)e.MarginBounds.Width / printBitmap.Width, (float)e.MarginBounds.Height / printBitmap.Height);
+    int printWidth = (int)(printBitmap.Width * scale);
+    int printHeight = (int)(printBitmap.Height * scale);
+    e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
+
+    // ============================
+    // NUMERO DE PÁGINA ABAJO DERECHA
+    // ============================
+
+    string pageText = $"Pag. {currentPage}";
+    using (Font pageFont = new Font("Segoe UI", 9))
+    {
+        SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
+
+        float x = e.MarginBounds.Right - textSize.Width; // Derecha
+        float y = e.MarginBounds.Bottom + 10;            // Abajo de la tabla/gráfico
+
+        e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, y);
+    }
+
+    // Si no hay más páginas
+    currentPage++;
+    e.HasMorePages = false;
+}
+
     }
 
     public class TipoFalla
