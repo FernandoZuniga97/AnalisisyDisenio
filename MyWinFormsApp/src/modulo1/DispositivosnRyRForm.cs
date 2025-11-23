@@ -409,8 +409,8 @@ namespace MyWinFormsApp
             chartFallas.Series["Frecuencia"].Points.AddXY("Reparables", data.Where(f => f.Tipo == "Reparables").Sum(f => f.Frecuencia));
 
             // Asignar colores específicos
-            chartFallas.Series["Frecuencia"].Points[0].Color = Color.Gold; // Color para No Reparables
-            chartFallas.Series["Frecuencia"].Points[1].Color = ColorTranslator.FromHtml("#002060");// Color para Reparables
+            chartFallas.Series["Frecuencia"].Points[0].Color = ColorTranslator.FromHtml("#F2DA3F"); // Color para No Reparables
+            chartFallas.Series["Frecuencia"].Points[1].Color = ColorTranslator.FromHtml("#6280BA");// Color para Reparables
 
             // Mostrar total
             int total = data.Sum(f => f.Frecuencia);
