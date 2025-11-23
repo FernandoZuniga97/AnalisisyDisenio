@@ -35,6 +35,15 @@ namespace MyWinFormsApp
         private void InitializeComponent()
         {
             // ------------------
+            // ESTILOS UNIFORMES
+            // ------------------
+            var buttonBaseStyle = new Font("Segoe UI", 9, FontStyle.Bold);
+            var buttonHeight = 30;
+            // Margen uniforme a la izquierda para separación cuando el flujo es RightToLeft
+            var actionControlMargin = new Padding(10, 0, 0, 0);
+
+
+            // ------------------
             // FORM
             // ------------------
             Text = "Dispositivos no reparados y reparados";
@@ -60,7 +69,7 @@ namespace MyWinFormsApp
             Controls.Add(contenedorReporte);
 
             // ------------------
-            // HEADER PANEL
+            // HEADER PANEL (ENCABEZADO)
             // ------------------
             headerPanel = new Panel()
             {
@@ -70,6 +79,25 @@ namespace MyWinFormsApp
             };
             contenedorReporte.Controls.Add(headerPanel);
 
+            // ------------------
+            // PANEL DE ACCIÓN (FlowLayoutPanel para alinear a la derecha)
+            // Se inserta después del header y antes del separador
+            // ------------------
+            FlowLayoutPanel panelBotonesAccion = new FlowLayoutPanel()
+            {
+                Dock = DockStyle.Top, // Colocar debajo del headerPanel
+                Height = 40,
+                BackColor = Color.White,
+                // Padding a la derecha para separarlo del borde del contenedor
+                Padding = new Padding(0, 5, 10, 5),
+                FlowDirection = FlowDirection.RightToLeft, // Flujo de derecha a izquierda (alinea a la derecha)
+                WrapContents = false
+            };
+            contenedorReporte.Controls.Add(panelBotonesAccion);
+
+            // ------------------
+            // SEPARATOR LINE
+            // ------------------
             separatorLine = new Panel()
             {
                 Height = 17,
@@ -78,24 +106,54 @@ namespace MyWinFormsApp
                 Margin = new Padding(0, 15, 0, 15)
             };
             contenedorReporte.Controls.Add(separatorLine);
-            separatorLine.BringToFront();
+            separatorLine.BringToFront(); // Mantenemos el separador visible
+
             // ------------------
-            // BOTÓN EXPORTAR A PDF / IMPRIMIR (Implementación similar a TipoDeFallasForm)
+            // CONFIGURACIÓN DE cmbMes (Lista de meses)
             // ------------------
-            btnExportar = new Button()
+            cmbMes = new ComboBox()
             {
-                Text = "Generar PDF",
-                Dock = DockStyle.Bottom,
-                Height = 40, // Reducido para mejor look and feel
-                BackColor = ColorTranslator.FromHtml("#0070C0"),
+                Width = 160,
+                Height = buttonHeight, // Altura ajustada
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = buttonBaseStyle, // Fuente ajustada
+                Margin = new Padding(0), // Sin margen, será el control más a la derecha
+                BackColor = Color.White,
+                ForeColor = Color.Black,
+
+                FlatStyle = FlatStyle.Flat
+            };
+            cmbMes.Items.AddRange(new string[]
+            {
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+            });
+            cmbMes.SelectedIndex = 0;
+            cmbMes.SelectedIndexChanged += CmbMes_SelectedIndexChanged;
+
+
+            // ------------------
+            // BOTÓN EXPORTAR A PDF (Reconfigurado a "Graficar PDF")
+            // ------------------
+            btnExportar = new Button() // Re-inicializar el botón con nuevas propiedades
+            {
+                Text = "Graficar PDF",
+                Width = 120,
+                Height = buttonHeight,
+                BackColor = Color.FromArgb(0, 128, 255),
                 ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = buttonBaseStyle,
+                Margin = actionControlMargin
             };
             btnExportar.FlatAppearance.BorderSize = 0;
             btnExportar.Click += BtnExportar_Click;
-            contenedorReporte.Controls.Add(btnExportar);
-            //btnExportar.BringToFront();
+
+
+            // Agregar controles al FlowLayoutPanel en ORDEN INVERSO (para que cboMeses quede a la derecha)
+            panelBotonesAccion.Controls.Add(cmbMes); // 1. ComboBox (Será el de más a la derecha)
+            panelBotonesAccion.Controls.Add(btnExportar); // 2. Botón Graficar PDF (Queda a la izquierda del ComboBox)
+
+
             contentPanel = new Panel()
             {
                 Dock = DockStyle.Fill,
@@ -174,38 +232,6 @@ namespace MyWinFormsApp
 
 
             // ------------------
-            // COMBOBOX MES (Implementación similar a cmbTrimestre de TipoDeFallasForm)
-            // ------------------
-            cmbMes = new ComboBox()
-            {
-                Width = 160,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
-            };
-            cmbMes.Items.AddRange(new string[]
-            {
-                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-            });
-            cmbMes.SelectedIndex = 0;
-
-            cmbMes.Top = 10;
-            cmbMes.Left = headerPanel.Width - cmbMes.Width - 20;
-            cmbMes.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            cmbMes.BackColor = Color.White;
-            cmbMes.ForeColor = Color.Black;
-            cmbMes.FlatStyle = FlatStyle.Flat;
-            headerPanel.Controls.Add(cmbMes);
-            cmbMes.BringToFront();
-
-            headerPanel.Resize += (s, e) =>
-            {
-                cmbMes.Left = headerPanel.Width - cmbMes.Width - 20;
-            };
-
-            cmbMes.SelectedIndexChanged += CmbMes_SelectedIndexChanged;
-
-            // ------------------
             // SPLIT CONTAINER (TABLA ARRIBA, GRAFICA ABAJO)
             // ------------------
             splitContainer = new SplitContainer()
@@ -216,8 +242,19 @@ namespace MyWinFormsApp
                 IsSplitterFixed = false
             };
             contenedorReporte.Controls.Add(splitContainer);
-            splitContainer.BringToFront();
+            //splitContainer.BringToFront();
+            // 1. Añadir el contenido principal (FILL) primero.
+            contenedorReporte.Controls.Add(splitContainer);
 
+            // 2. Añadir la línea separadora (TOP) - Visualmente encima del Splitter
+            contenedorReporte.Controls.Add(separatorLine);
+            // ELIMINADA: separatorLine.BringToFront();
+
+            // 3. Añadir el panel de botones (TOP) - Visualmente encima del Separador
+            contenedorReporte.Controls.Add(panelBotonesAccion);
+
+            // 4. Añadir el Header (TOP) - Visualmente encima de todo (en el tope)
+            contenedorReporte.Controls.Add(headerPanel);
             // ------------------
             // DATAGRIDVIEW
             // ------------------
