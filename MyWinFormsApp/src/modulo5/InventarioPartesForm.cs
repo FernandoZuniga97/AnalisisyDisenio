@@ -62,20 +62,64 @@ namespace MyWinFormsApp
                 BackColor = ColorTranslator.FromHtml("#002060")
             };
 
-            contentPanel = new Panel()
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.White,
-                Padding = new Padding(0, 15, 0, 15)
-            };
+          contentPanel = new Panel()
+{
+    Dock = DockStyle.Fill,
+    BackColor = Color.White,
+    Padding = new Padding(0, 15, 0, 15)
+};
 
-            separatorLine = new Panel()
-            {
-                Height = 3,
-                BackColor = Color.White,
-                Dock = DockStyle.Top,
-                Margin = new Padding(0, 15, 0, 15)
-            };
+// --------------------------
+// Panel blanco superior con botones
+// --------------------------
+separatorLine = new Panel()
+{
+    Height = 50,
+    BackColor = Color.White,
+    Dock = DockStyle.Top,
+    Padding = new Padding(10)
+};
+
+// Botones
+btnAgregar = new Button() { Text = "Agregar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 112, 192), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+btnEliminar = new Button() { Text = "Eliminar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 84, 153), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+btnEditar = new Button() { Text = "Editar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 128, 255), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+btnImprimir = new Button() { Text = "Imprimir", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 65, 130), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+
+// Eventos
+btnAgregar.Click += BtnAgregar_Click;
+btnEliminar.Click += BtnEliminar_Click;
+btnEditar.Click += BtnEditar_Click;
+btnImprimir.Click += BtnImprimir_Click;
+
+// FlowLayoutPanel para alinear botones a la derecha
+FlowLayoutPanel flp = new FlowLayoutPanel()
+{
+    Dock = DockStyle.Right, // <- aquí estaba el error, no DockStyle.Fill
+    FlowDirection = FlowDirection.LeftToRight, // botón más a la derecha primero
+    AutoSize = true,
+    WrapContents = false
+};
+
+flp.Controls.AddRange(new Control[] { btnAgregar, btnEliminar, btnEditar, btnImprimir });
+separatorLine.Controls.Add(flp);
+
+
+// --------------------------
+// Panel para la tabla (DataGridView)
+// --------------------------
+Panel panelTabla = new Panel()
+{
+    Dock = DockStyle.Fill,
+    BackColor = Color.White,
+    Padding = new Padding(0)
+};
+panelTabla.Controls.Add(dgvInventario); // tu DataGridView
+
+// Agregar al contentPanel: primero la tabla, luego la línea con botones arriba
+contentPanel.Controls.Add(panelTabla);
+contentPanel.Controls.Add(separatorLine);
+
 
             // Panel título y logo
             TableLayoutPanel titlePanel = new TableLayoutPanel()
@@ -196,20 +240,9 @@ namespace MyWinFormsApp
             dgvInventario.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgvInventario.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
 
-            Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
+         //   Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
+            
             panelTabla.Controls.Add(dgvInventario);
-
-
-
-            // Botones
-            btnAgregar = new Button() { Text = "Agregar Parte", Dock = DockStyle.Bottom, Height = 30, BackColor = ColorTranslator.FromHtml("#0070C0"), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            btnAgregar.Click += BtnAgregar_Click;
-            btnEliminar = new Button() { Text = "Eliminar Parte", Dock = DockStyle.Bottom, Height = 30, BackColor = Color.Red, ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            btnEliminar.Click += BtnEliminar_Click;
-            btnEditar = new Button() { Text = "Editar Parte", Dock = DockStyle.Bottom, Height = 30, BackColor = ColorTranslator.FromHtml("#E1E11F"), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            btnEditar.Click += BtnEditar_Click;
-            btnImprimir = new Button() { Text = "Imprimir", Dock = DockStyle.Bottom, Height = 30, BackColor = ColorTranslator.FromHtml("#009933"), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-            btnImprimir.Click += BtnImprimir_Click;
 
             Panel panelPaginacion = new Panel() { Dock = DockStyle.Bottom, Height = 35, BackColor = Color.White };
             btnPaginaAnterior = new Button() { Text = "<", Width = 35, Height = 25, Left = 10, Top = 5 }; btnPaginaAnterior.Click += BtnPaginaAnterior_Click;
@@ -217,13 +250,11 @@ namespace MyWinFormsApp
             lblPagina = new Label() { Text = "Pag. 1 de 1", AutoSize = true, Left = 120, Top = 10 };
             panelPaginacion.Controls.AddRange(new Control[] { btnPaginaAnterior, btnPaginaSiguiente, lblPagina });
 
-            contentPanel.Controls.Add(separatorLine);
+
             contentPanel.Controls.Add(panelTabla);
+            contentPanel.Controls.Add(separatorLine);
             contentPanel.Controls.Add(panelPaginacion);
-            contentPanel.Controls.Add(btnAgregar);
-            contentPanel.Controls.Add(btnEliminar);
-            contentPanel.Controls.Add(btnEditar);
-            contentPanel.Controls.Add(btnImprimir);
+        
 
             contenedorReporte.Controls.Add(contentPanel);
             contenedorReporte.Controls.Add(headerPanel);
@@ -236,11 +267,7 @@ namespace MyWinFormsApp
         {
             lista = new List<Parte>()
             {
-               new Parte { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-               new Parte { ID="P-002", Nombre="Puerto de carga tipo C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=8, Unidad="unidades", CostoUnitario=180m, ValorTotal=1440m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-               new Parte { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
-               new Parte { ID="P-004", Nombre="Pasta térmica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=120m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-               new Parte { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
+ new Parte { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
 new Parte { ID="P-002", Nombre="Puerto de carga tipo C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=8, Unidad="unidades", CostoUnitario=180m, ValorTotal=1440m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
 new Parte { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
 new Parte { ID="P-004", Nombre="Pasta térmica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=120m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
@@ -411,214 +438,360 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             preview.ShowDialog();
         }
 
-        private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
+       private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
+{
+    // --- Ocultar botones antes de imprimir ---
+    btnAgregar.Visible = false;
+    btnEliminar.Visible = false;
+    btnEditar.Visible = false;
+    btnImprimir.Visible = false;
+
+    // --- Captura header ---
+    Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
+    headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
+
+    Bitmap separatorBitmap = new Bitmap(separatorLine.Width, separatorLine.Height);
+    separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
+
+    // --- Captura DataGridView ---
+    int tablaWidth = dgvInventario.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
+    int tablaHeight = dgvInventario.ColumnHeadersHeight + dgvInventario.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
+    Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
+
+    using (Graphics g = Graphics.FromImage(dgvBitmap))
+    {
+        g.Clear(Color.White);
+        int xPos = 0;
+
+        // Encabezado
+        for (int i = 0; i < dgvInventario.Columns.Count; i++)
         {
-            // --- Captura header ---
-            Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
-            headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
+            var col = dgvInventario.Columns[i];
+            Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvInventario.ColumnHeadersHeight);
 
-            Bitmap separatorBitmap = new Bitmap(separatorLine.Width, separatorLine.Height);
-            separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
+            using (Brush backBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.BackColor))
+                g.FillRectangle(backBrush, headerRect);
 
-            // --- Captura DataGridView ---
-            int tablaWidth = dgvInventario.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
-            int tablaHeight = dgvInventario.ColumnHeadersHeight + dgvInventario.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
-            Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
-            using (Graphics g = Graphics.FromImage(dgvBitmap))
+            using (Brush foreBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor))
             {
-                g.Clear(Color.White);
-                int xPos = 0;
-
-                // Cabecera
-                for (int i = 0; i < dgvInventario.Columns.Count; i++)
-                {
-                    var col = dgvInventario.Columns[i];
-                    Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvInventario.ColumnHeadersHeight);
-                    using (Brush backBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.BackColor))
-                        g.FillRectangle(backBrush, headerRect);
-                    using (Brush foreBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor))
-                    {
-                        StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                        g.DrawString(col.HeaderText, dgvInventario.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect, sf);
-                    }
-                    g.DrawRectangle(Pens.Black, headerRect);
-                    xPos += col.Width;
-                }
-
-                // --- Línea amarilla debajo de encabezado ---
-                g.FillRectangle(Brushes.Gold, 0, dgvInventario.ColumnHeadersHeight, tablaWidth, 3);
-
-                int yPos = dgvInventario.ColumnHeadersHeight + 3; // Ajusta por línea amarilla
-                foreach (DataGridViewRow row in dgvInventario.Rows)
-                {
-                    xPos = 0;
-                    int filaIndex = dgvInventario.Rows.IndexOf(row);
-                    for (int i = 0; i < row.Cells.Count; i++)
-                    {
-                        var cell = row.Cells[i];
-                        Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
-                        using (Brush backBrush = new SolidBrush(filaIndex % 2 == 1 ? Color.LightGray : Color.White))
-                            g.FillRectangle(backBrush, cellRect);
-                        using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
-                        {
-                            StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                            g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect, sf);
-                        }
-                        using (Pen whitePen = new Pen(Color.White))
-                            g.DrawRectangle(whitePen, cellRect);
-                        xPos += cell.OwningColumn.Width;
-                    }
-                    yPos += row.Height;
-                }
+                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                g.DrawString(col.HeaderText, dgvInventario.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect, sf);
             }
 
-            Label lblPaginaPrint = new Label()
-            {
-                Text = $"Pag. {paginaActual} de {totalPaginas}",
-                Width = dgvBitmap.Width,
-                Height = 25,
-                TextAlign = ContentAlignment.MiddleCenter
-            };
-            Bitmap paginaBitmap = new Bitmap(lblPaginaPrint.Width, lblPaginaPrint.Height);
-            lblPaginaPrint.DrawToBitmap(paginaBitmap, new Rectangle(0, 0, lblPaginaPrint.Width, lblPaginaPrint.Height));
-
-            int totalWidth = Math.Max(headerBitmap.Width, dgvBitmap.Width);
-            int totalHeight = headerBitmap.Height + separatorBitmap.Height + paginaBitmap.Height + dgvBitmap.Height;
-
-            Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
-            using (Graphics g = Graphics.FromImage(printBitmap))
-            {
-                g.Clear(Color.White);
-                g.DrawImage(headerBitmap, 0, 0);
-                g.DrawImage(separatorBitmap, 0, headerBitmap.Height);
-                g.DrawImage(paginaBitmap, 0, headerBitmap.Height + separatorBitmap.Height);
-                g.DrawImage(dgvBitmap, 0, headerBitmap.Height + separatorBitmap.Height + paginaBitmap.Height);
-            }
-
-            float scale = Math.Min(
-                (float)e.MarginBounds.Width / printBitmap.Width,
-                (float)e.MarginBounds.Height / printBitmap.Height
-            );
-
-            int printWidth = (int)(printBitmap.Width * scale);
-            int printHeight = (int)(printBitmap.Height * scale);
-
-            e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
+            g.DrawRectangle(Pens.Black, headerRect);
+            xPos += col.Width;
         }
+
+        // Línea amarilla
+        g.FillRectangle(Brushes.Gold, 0, dgvInventario.ColumnHeadersHeight, tablaWidth, 3);
+
+        int yPos = dgvInventario.ColumnHeadersHeight + 3;
+
+        foreach (DataGridViewRow row in dgvInventario.Rows)
+        {
+            xPos = 0;
+            int filaIndex = dgvInventario.Rows.IndexOf(row);
+
+            for (int i = 0; i < row.Cells.Count; i++)
+            {
+                var cell = row.Cells[i];
+                Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
+
+                using (Brush backBrush = new SolidBrush(filaIndex % 2 == 1 ? Color.LightGray : Color.White))
+                    g.FillRectangle(backBrush, cellRect);
+
+                using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
+                {
+                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+                    g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect, sf);
+                }
+
+                g.DrawRectangle(Pens.White, cellRect);
+                xPos += cell.OwningColumn.Width;
+            }
+
+            yPos += row.Height;
+        }
+    }
+
+    // ---------------------------------------
+    // ESCALADO Y DIBUJO
+    // ---------------------------------------
+
+    int totalWidth = Math.Max(headerBitmap.Width, dgvBitmap.Width);
+    int totalHeight = headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height + 30; // espacio extra para número página
+
+    Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
+    using (Graphics g = Graphics.FromImage(printBitmap))
+    {
+        g.Clear(Color.White);
+        g.DrawImage(headerBitmap, 0, 0);
+        g.DrawImage(separatorBitmap, 0, headerBitmap.Height);
+        g.DrawImage(dgvBitmap, 0, headerBitmap.Height + separatorBitmap.Height);
+    }
+
+    float scale = Math.Min(
+        (float)e.MarginBounds.Width / printBitmap.Width,
+        (float)e.MarginBounds.Height / printBitmap.Height
+    );
+
+    int printWidth = (int)(printBitmap.Width * scale);
+    int printHeight = (int)(printBitmap.Height * scale);
+
+    e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
+
+    // ---------------------------------------
+    // NUMERO DE PÁGINA DEBAJO DE LA TABLA
+    // ---------------------------------------
+
+    float tablaAlturaEscalada = (headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height) * scale;
+    float yNumeroPagina = e.MarginBounds.Top + tablaAlturaEscalada + 5; // debajo de la tabla
+
+    string pageText = $"Pag. {paginaActual} de {totalPaginas}";
+    using (Font pageFont = new Font("Segoe UI", 9))
+    {
+        SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
+        float x = e.MarginBounds.Right - textSize.Width; // derecha
+        e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, yNumeroPagina);
+    }
+
+    // --- Volver a mostrar botones ---
+    btnAgregar.Visible = true;
+    btnEliminar.Visible = true;
+    btnEditar.Visible = true;
+    btnImprimir.Visible = true;
+}
+
+
 
         private void BtnAgregar_Click(object sender, EventArgs e) => AgregarEditarParte(null);
-        private void BtnEditar_Click(object sender, EventArgs e)
-        {
-            if (dgvInventario.CurrentRow == null) return;
-            int index = dgvInventario.CurrentRow.Index;
-            Parte parte = lista[index];
-            AgregarEditarParte(parte);
-        }
+       private void BtnEditar_Click(object sender, EventArgs e)
+{
+    if (dgvInventario.CurrentRow == null) return;
+
+    int rowIndex = dgvInventario.CurrentRow.Index;
+    int listaIndex = (paginaActual - 1) * registrosPorPagina + rowIndex; // <- CORRECCIÓN
+
+    Parte parte = lista[listaIndex];
+    AgregarEditarParte(parte);
+}
 
         private void BtnEliminar_Click(object sender, EventArgs e)
+{
+    if (dgvInventario.CurrentRow != null)
+    {
+        int rowIndex = dgvInventario.CurrentRow.Index;
+        int listaIndex = (paginaActual - 1) * registrosPorPagina + rowIndex; // <- CORRECCIÓN
+
+        string id = lista[listaIndex].ID;
+        DialogResult result = MessageBox.Show($"¿Está seguro de borrar el registro '{id}'?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        if (result == DialogResult.Yes)
         {
-            if (dgvInventario.CurrentRow != null)
-            {
-                string id = dgvInventario.CurrentRow.Cells["ID"].Value.ToString();
-                DialogResult result = MessageBox.Show($"¿Está seguro de borrar el registro '{id}'?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (result == DialogResult.Yes)
-                {
-                    lista.RemoveAt(dgvInventario.CurrentRow.Index);
-                    MostrarPagina();
-                }
-            }
+            lista.RemoveAt(listaIndex);
+            MostrarPagina();
         }
+    }
+}
+
 
         private void AgregarEditarParte(Parte parte)
+{
+    bool esEditar = parte != null;
+    Form form = new Form()
+    {
+        Width = 400,
+        Height = 500,
+        Text = esEditar ? "Editar Parte" : "Agregar Nueva Parte",
+        FormBorderStyle = FormBorderStyle.FixedDialog,
+        StartPosition = FormStartPosition.CenterParent
+    };
+
+    Panel panel = new Panel() { Dock = DockStyle.Fill, AutoScroll = true };
+    form.Controls.Add(panel);
+
+    int labelWidth = 120;
+    int controlWidth = 200;
+    int top = 20;
+    int gap = 40;
+
+    // -------------------------------
+    // Nombre
+    Label lblNombre = new Label() { Text = "Nombre", Left = 20, Top = top, Width = labelWidth };
+    TextBox txtNombre = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.Nombre : "" };
+    top += gap;
+
+    // -------------------------------
+    // Categoría (ComboBox)
+    Label lblCategoria = new Label() { Text = "Categoría", Left = 20, Top = top, Width = labelWidth };
+    ComboBox cbCategoria = new ComboBox() { Left = 150, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
+    cbCategoria.Items.AddRange(new string[] { "Pantallas", "Conectores", "Baterías", "Insumos", "Accesorios" });
+    if (esEditar) cbCategoria.SelectedItem = parte.Categoria;
+    top += gap;
+
+    // -------------------------------
+    // Proveedor (ComboBox)
+    Label lblProveedor = new Label() { Text = "Proveedor", Left = 20, Top = top, Width = labelWidth };
+    ComboBox cbProveedor = new ComboBox() { Left = 150, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
+    cbProveedor.Items.AddRange(new string[] { "G-Tech Supply", "ElectroParts", "MobilePro", "Tecnocell", "TechWorld" });
+    if (esEditar) cbProveedor.SelectedItem = parte.Proveedor;
+    top += gap;
+
+    // -------------------------------
+    // Cantidad actual
+    Label lblCantidad = new Label() { Text = "Cantidad", Left = 20, Top = top, Width = labelWidth };
+    TextBox txtCantidad = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.CantidadActual.ToString() : "" };
+    top += gap;
+
+    // -------------------------------
+    // Unidad (ComboBox)
+    Label lblUnidad = new Label() { Text = "Unidad", Left = 20, Top = top, Width = labelWidth };
+    ComboBox cbUnidad = new ComboBox() { Left = 150, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
+    cbUnidad.Items.AddRange(new string[] { "unidades", "tubos", "cajas" });
+    if (esEditar) cbUnidad.SelectedItem = parte.Unidad;
+    top += gap;
+
+    // -------------------------------
+    // Costo unitario
+    Label lblCosto = new Label() { Text = "Costo Unitario", Left = 20, Top = top, Width = labelWidth };
+    TextBox txtCosto = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.CostoUnitario.ToString() : "" };
+    top += gap;
+
+    // -------------------------------
+    // Observaciones
+    Label lblObservaciones = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
+    TextBox txtObservaciones = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.Observaciones : "" };
+    top += gap;
+
+    // -------------------------------
+    // Botón Guardar
+    Button btnGuardar = new Button() { Text = "Guardar", Left = 150, Top = top + 10, Width = 100 };
+    btnGuardar.Click += (s, e) =>
+    {
+        // -------------------
+        // VALIDACIONES
+        // -------------------
+
+        // Nombre
+        if (string.IsNullOrWhiteSpace(txtNombre.Text) || txtNombre.Text.Length < 3)
         {
-            bool esEditar = parte != null;
-            Form form = new Form()
-            {
-                Width = 400,
-                Height = 450,
-                Text = esEditar ? "Editar Parte" : "Agregar Nueva Parte",
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition = FormStartPosition.CenterParent
-            };
-
-            Panel panel = new Panel() { Dock = DockStyle.Fill, AutoScroll = true };
-            form.Controls.Add(panel);
-
-            int labelWidth = 120;
-            int textBoxWidth = 200;
-            int top = 20;
-            int gap = 40;
-
-            Label lblNombre = new Label() { Text = "Nombre", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtNombre = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.Nombre : "" };
-            top += gap;
-
-            Label lblCategoria = new Label() { Text = "Categoría", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCategoria = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.Categoria : "" };
-            top += gap;
-
-            Label lblProveedor = new Label() { Text = "Proveedor", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtProveedor = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.Proveedor : "" };
-            top += gap;
-
-            Label lblCantidad = new Label() { Text = "Cantidad", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCantidad = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.CantidadActual.ToString() : "" };
-            top += gap;
-
-            Label lblUnidad = new Label() { Text = "Unidad", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtUnidad = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.Unidad : "" };
-            top += gap;
-
-            Label lblCosto = new Label() { Text = "Costo Unitario", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCosto = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.CostoUnitario.ToString() : "" };
-            top += gap;
-
-            Label lblObservaciones = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtObservaciones = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = esEditar ? parte.Observaciones : "" };
-            top += gap;
-
-            Button btnGuardar = new Button() { Text = "Guardar", Left = 150, Top = top + 10, Width = 100 };
-            btnGuardar.Click += (s, e) =>
-            {
-                if (!esEditar)
-                {
-                    Parte nueva = new Parte
-                    {
-                        ID = $"P-{++contadorID:D3}",
-                        Nombre = txtNombre.Text,
-                        Categoria = txtCategoria.Text,
-                        Proveedor = txtProveedor.Text,
-                        CantidadActual = int.Parse(txtCantidad.Text),
-                        Unidad = txtUnidad.Text,
-                        CostoUnitario = decimal.Parse(txtCosto.Text),
-                        ValorTotal = decimal.Parse(txtCantidad.Text) * decimal.Parse(txtCosto.Text),
-                        EstadoStock = "Suficiente",
-                        Observaciones = txtObservaciones.Text
-                    };
-                    lista.Add(nueva);
-                }
-                else
-                {
-                    parte.Nombre = txtNombre.Text;
-                    parte.Categoria = txtCategoria.Text;
-                    parte.Proveedor = txtProveedor.Text;
-                    parte.CantidadActual = int.Parse(txtCantidad.Text);
-                    parte.Unidad = txtUnidad.Text;
-                    parte.CostoUnitario = decimal.Parse(txtCosto.Text);
-                    parte.ValorTotal = parte.CantidadActual * parte.CostoUnitario;
-                    parte.Observaciones = txtObservaciones.Text;
-                }
-
-                MostrarPagina();
-                form.Close();
-            };
-
-            panel.Controls.AddRange(new Control[] { lblNombre, txtNombre, lblCategoria, txtCategoria,
-                lblProveedor, txtProveedor, lblCantidad, txtCantidad, lblUnidad, txtUnidad, lblCosto, txtCosto,
-                lblObservaciones, txtObservaciones, btnGuardar });
-
-            form.ShowDialog();
+            MessageBox.Show("El nombre es obligatorio y debe tener al menos 3 caracteres.");
+            return;
         }
+
+        // Categoría
+        if (cbCategoria.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccione una categoría válida.");
+            return;
+        }
+
+        // Proveedor
+        if (cbProveedor.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccione un proveedor válido.");
+            return;
+        }
+
+        // Cantidad
+        if (!int.TryParse(txtCantidad.Text, out int cantidad) || cantidad < 0)
+        {
+            MessageBox.Show("Ingrese una cantidad válida (entero ≥ 0).");
+            return;
+        }
+
+        // Unidad
+        if (cbUnidad.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccione una unidad válida.");
+            return;
+        }
+
+        // Costo unitario
+        if (!decimal.TryParse(txtCosto.Text, out decimal costo) || costo <= 0)
+        {
+            MessageBox.Show("Ingrese un costo unitario válido (>0).");
+            return;
+        }
+
+        // Observaciones
+        if (txtObservaciones.Text.Length > 200)
+        {
+            MessageBox.Show("Observaciones no puede tener más de 200 caracteres.");
+            return;
+        }
+
+        // -------------------
+        // CREAR O EDITAR PARTE
+        // -------------------
+        decimal valorTotal = cantidad * costo;
+        string estadoStock = cantidad == 0 ? "Agotado" : (cantidad < 5 ? "Bajo" : "Normal");
+
+        if (!esEditar)
+        {
+                     // -------------------
+                    // CALCULAR NUEVO ID AUTOMÁTICO
+                    // -------------------
+                    int maxID = 0;
+                    if (lista.Count > 0)
+                    {
+                        maxID = lista.Max(p =>
+    {
+        if (p.ID.StartsWith("P-") && int.TryParse(p.ID.Substring(2), out int num))
+            return num;
+        return 0;
+    });
+                    }
+                    string nuevoID = $"P-{maxID + 1:D3}";
+
+
+
+            Parte nueva = new Parte
+            {
+                ID = nuevoID,
+                Nombre = txtNombre.Text,
+                Categoria = cbCategoria.SelectedItem.ToString(),
+                Proveedor = cbProveedor.SelectedItem.ToString(),
+                CantidadActual = cantidad,
+                Unidad = cbUnidad.SelectedItem.ToString(),
+                CostoUnitario = costo,
+                ValorTotal = valorTotal,
+                EstadoStock = estadoStock,
+                Observaciones = txtObservaciones.Text
+            };
+            lista.Add(nueva);
+        }
+        else
+        {
+            parte.Nombre = txtNombre.Text;
+            parte.Categoria = cbCategoria.SelectedItem.ToString();
+            parte.Proveedor = cbProveedor.SelectedItem.ToString();
+            parte.CantidadActual = cantidad;
+            parte.Unidad = cbUnidad.SelectedItem.ToString();
+            parte.CostoUnitario = costo;
+            parte.ValorTotal = valorTotal;
+            parte.EstadoStock = estadoStock;
+            parte.Observaciones = txtObservaciones.Text;
+        }
+
+        MostrarPagina();
+        form.Close();
+    };
+
+    panel.Controls.AddRange(new Control[]
+    {
+        lblNombre, txtNombre,
+        lblCategoria, cbCategoria,
+        lblProveedor, cbProveedor,
+        lblCantidad, txtCantidad,
+        lblUnidad, cbUnidad,
+        lblCosto, txtCosto,
+        lblObservaciones, txtObservaciones,
+        btnGuardar
+    });
+
+    form.ShowDialog();
+}
+
     }
 
     public class Parte
