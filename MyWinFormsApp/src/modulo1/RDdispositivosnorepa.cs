@@ -76,6 +76,16 @@ namespace MyWinFormsApp
                 Dock = DockStyle.Top,
                 Margin = new Padding(0, 15, 0, 15)
             };
+            // los botones arriba
+            FlowLayoutPanel panelBotonesAccion = new FlowLayoutPanel()
+            {
+                Dock = DockStyle.Top, // Colocar en la parte superior del contentPanel
+                Height = 40, // Altura ajustada
+                BackColor = Color.White,
+                Padding = new Padding(10, 5, 10, 5), // Relleno interno
+                FlowDirection = FlowDirection.RightToLeft, // Alinear de izquierda a derecha
+                WrapContents = false // Asegurar que no se envuelvan a la siguiente línea
+            };
 
             TableLayoutPanel titlePanel = new TableLayoutPanel()
             {
@@ -210,49 +220,59 @@ namespace MyWinFormsApp
 
             Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
             panelTabla.Controls.Add(dgDnRepa);
-
+            //-------------
+            // Propiedades base para los botones
+            var buttonBaseStyle = new Font("Segoe UI", 9, FontStyle.Bold);
+            var buttonWidth = 120;
+            var buttonHeight = 30;
+            // Usamos un margen uniforme (por ejemplo, 0, 0, 10, 0) para separarlos
+            var buttonMargin = new Padding(0, 0, 10, 0);
             // --- Botones de Acción ---
             btnAgregar = new Button()
             {
-                Text = "Agregar Dispositivo",
-                Dock = DockStyle.Bottom,
-                Height = 30, // Reducido para mejor look and feel
-                BackColor = ColorTranslator.FromHtml("#0070C0"),
+                Text = "Agregar",
+                Width = buttonWidth, // Ancho reducido
+                Height = buttonHeight, // Altura ajustada
+                BackColor = Color.FromArgb(0, 112, 192),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = buttonBaseStyle,
+                Margin = buttonMargin
             };
             btnAgregar.Click += BtnAgregar_Click;
 
             btnEliminar = new Button()
             {
-                Text = "Eliminar Dispositivo",
-                Dock = DockStyle.Bottom,
-                Height = 30,
-                BackColor = Color.Red,
+                Text = "Eliminar",
+                Width = buttonWidth,
+                Height = buttonHeight,
+                BackColor = Color.FromArgb(0, 84, 153),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = buttonBaseStyle,
+                Margin = buttonMargin // Aplicar margen uniforme
             };
             btnEliminar.Click += BtnEliminar_Click;
 
             btnEditar = new Button()
             {
-                Text = "Editar Dispositivo",
-                Dock = DockStyle.Bottom,
-                Height = 30,
-                BackColor = ColorTranslator.FromHtml("#E1E11F"),
+                Text = "Editar",
+                Width = buttonWidth,
+                Height = buttonHeight,
+                BackColor = Color.FromArgb(0, 128, 255),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = buttonBaseStyle,
+                Margin = buttonMargin
             };
             btnEditar.Click += BtnEditar_Click;
 
             btnImprimir = new Button()
             {
                 Text = "Imprimir",
-                Dock = DockStyle.Bottom,
-                Height = 30,
-                BackColor = ColorTranslator.FromHtml("#009933"),
+                Width = buttonWidth,
+                Height = buttonHeight,
+                BackColor = Color.FromArgb(0, 65, 130),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+                Font = buttonBaseStyle,
+                Margin = new Padding(0)
             };
             btnImprimir.Click += BtnImprimir_Click;
 
@@ -266,13 +286,16 @@ namespace MyWinFormsApp
             panelPaginacion.Controls.AddRange(new Control[] { btnPaginaAnterior, btnPaginaSiguiente, lblPagina });
 
 
-            contentPanel.Controls.Add(separatorLine);
+            // Agregar los botones al FlowLayoutPanel
+            panelBotonesAccion.Controls.Add(btnImprimir);
+            panelBotonesAccion.Controls.Add(btnEditar);
+            panelBotonesAccion.Controls.Add(btnEliminar);
+            panelBotonesAccion.Controls.Add(btnAgregar);
+            // Agregar controles al contentPanel
+            contentPanel.Controls.Add(panelPaginacion);
             contentPanel.Controls.Add(panelTabla);
-            contentPanel.Controls.Add(panelPaginacion); // Añadir paginación
-            contentPanel.Controls.Add(btnAgregar);
-            contentPanel.Controls.Add(btnEliminar);
-            contentPanel.Controls.Add(btnEditar);
-            contentPanel.Controls.Add(btnImprimir); // Añadir botón de imprimir
+            contentPanel.Controls.Add(panelBotonesAccion);
+            contentPanel.Controls.Add(separatorLine);
 
             contenedorReporte.Controls.Add(contentPanel);
             contenedorReporte.Controls.Add(headerPanel);
