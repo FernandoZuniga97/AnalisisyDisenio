@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing.Printing;
+using MyWinFormsApp.Database;
 
 namespace MyWinFormsApp
 {
     public class InventarioPartesForm : Form
     {
+        // UI
         private Label lblTitulo;
         private Label lblSubtitulo;
         private Label lblFecha;
-
-
         private Panel headerPanel;
         private Panel separatorLine;
         private DataGridView dgvInventario;
@@ -33,8 +34,11 @@ namespace MyWinFormsApp
         private int registrosPorPagina = 20;
         private int totalPaginas = 1;
 
-        private List<Parte> lista;
-        private int contadorID = 4;
+        // Cache de datos (para paginar fácilmente)
+        private List<ParteDb> lista = new List<ParteDb>();
+
+        // Tabla DB
+        private const string TableName = "[dbo].[InventarioP]";
 
         public InventarioPartesForm()
         {
@@ -52,7 +56,8 @@ namespace MyWinFormsApp
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
-                Padding = new Padding(8)
+                Padding = new Padding(8),
+                AutoScroll = true
             };
 
             headerPanel = new Panel()
@@ -62,66 +67,87 @@ namespace MyWinFormsApp
                 BackColor = ColorTranslator.FromHtml("#002060")
             };
 
-          contentPanel = new Panel()
-{
-    Dock = DockStyle.Fill,
-    BackColor = Color.White,
-    Padding = new Padding(0, 15, 0, 15)
-};
+            contentPanel = new Panel()
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
+                Padding = new Padding(0, 15, 0, 15)
+            };
 
-// --------------------------
-// Panel blanco superior con botones
-// --------------------------
-separatorLine = new Panel()
-{
-    Height = 50,
-    BackColor = Color.White,
-    Dock = DockStyle.Top,
-    Padding = new Padding(10)
-};
+            separatorLine = new Panel()
+            {
+                Height = 50,
+                BackColor = Color.White,
+                Dock = DockStyle.Top,
+                Padding = new Padding(10)
+            };
 
-// Botones
-btnAgregar = new Button() { Text = "Agregar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 112, 192), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-btnEliminar = new Button() { Text = "Eliminar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 84, 153), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-btnEditar = new Button() { Text = "Editar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 128, 255), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-btnImprimir = new Button() { Text = "Imprimir", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 65, 130), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+            // Botones
+            btnAgregar = new Button() { Text = "Agregar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 112, 192), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+            btnEliminar = new Button() { Text = "Eliminar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 84, 153), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+            btnEditar = new Button() { Text = "Editar Parte", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 128, 255), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+            btnImprimir = new Button() { Text = "Imprimir", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 65, 130), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
 
-// Eventos
-btnAgregar.Click += BtnAgregar_Click;
-btnEliminar.Click += BtnEliminar_Click;
-btnEditar.Click += BtnEditar_Click;
-btnImprimir.Click += BtnImprimir_Click;
+            btnAgregar.Click += BtnAgregar_Click;
+            btnEliminar.Click += BtnEliminar_Click;
+            btnEditar.Click += BtnEditar_Click;
+            btnImprimir.Click += BtnImprimir_Click;
 
-// FlowLayoutPanel para alinear botones a la derecha
-FlowLayoutPanel flp = new FlowLayoutPanel()
-{
-    Dock = DockStyle.Right, // <- aquí estaba el error, no DockStyle.Fill
-    FlowDirection = FlowDirection.LeftToRight, // botón más a la derecha primero
-    AutoSize = true,
-    WrapContents = false
-};
+            FlowLayoutPanel flp = new FlowLayoutPanel()
+            {
+                Dock = DockStyle.Right,
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                WrapContents = false
+            };
+            flp.Controls.AddRange(new Control[] { btnAgregar, btnEliminar, btnEditar, btnImprimir });
+            separatorLine.Controls.Add(flp);
 
-flp.Controls.AddRange(new Control[] { btnAgregar, btnEliminar, btnEditar, btnImprimir });
-separatorLine.Controls.Add(flp);
+            // DataGridView (estilo conservado del original)
+            dgvInventario = new DataGridView()
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ReadOnly = true,
+                BackgroundColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                ColumnHeadersHeight = 35,
+                EnableHeadersVisualStyles = false,
+                RowHeadersVisible = false,
+                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter },
+                AllowUserToResizeColumns = false,
+                AllowUserToResizeRows = false,
+                AllowUserToOrderColumns = false,
+                ScrollBars = ScrollBars.Vertical,
+                GridColor = Color.White,
+                CellBorderStyle = DataGridViewCellBorderStyle.Single,
+                RowTemplate = { MinimumHeight = 35 }
+            };
 
+            dgvInventario.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
+            dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dgvInventario.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgvInventario.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgvInventario.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F0F0F0");
 
-// --------------------------
-// Panel para la tabla (DataGridView)
-// --------------------------
-Panel panelTabla = new Panel()
-{
-    Dock = DockStyle.Fill,
-    BackColor = Color.White,
-    Padding = new Padding(0)
-};
-panelTabla.Controls.Add(dgvInventario); // tu DataGridView
+            dgvInventario.RowPrePaint += (s, e) =>
+            {
+                if (e.RowIndex % 2 == 0)
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F0F0F0");
+                else
+                    dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
+            };
 
-// Agregar al contentPanel: primero la tabla, luego la línea con botones arriba
-contentPanel.Controls.Add(panelTabla);
-contentPanel.Controls.Add(separatorLine);
+            Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
+            panelTabla.Controls.Add(dgvInventario);
 
+            Panel panelPaginacion = new Panel() { Dock = DockStyle.Bottom, Height = 35, BackColor = Color.White };
+            btnPaginaAnterior = new Button() { Text = "<", Width = 35, Height = 25, Left = 10, Top = 5 }; btnPaginaAnterior.Click += BtnPaginaAnterior_Click;
+            btnPaginaSiguiente = new Button() { Text = ">", Width = 35, Height = 25, Left = 60, Top = 5 }; btnPaginaSiguiente.Click += BtnPaginaSiguiente_Click;
+            lblPagina = new Label() { Text = "Pag. 1 de 1", AutoSize = true, Left = 120, Top = 10 };
+            panelPaginacion.Controls.AddRange(new Control[] { btnPaginaAnterior, btnPaginaSiguiente, lblPagina });
 
-            // Panel título y logo
+            // Title panel and logo (kept from original)
             TableLayoutPanel titlePanel = new TableLayoutPanel()
             {
                 Dock = DockStyle.Fill,
@@ -161,11 +187,7 @@ contentPanel.Controls.Add(separatorLine);
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error loading logo: {ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            catch { /* non-fatal */ }
 
             titlePanel.Controls.Add(logo, 0, 0);
 
@@ -208,53 +230,10 @@ contentPanel.Controls.Add(separatorLine);
             titlePanel.Controls.Add(textoPanel, 1, 0);
             headerPanel.Controls.Add(titlePanel);
 
-            // DataGridView
-            dgvInventario = new DataGridView()
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                ReadOnly = true,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.None,
-                ColumnHeadersHeight = 35,
-                EnableHeadersVisualStyles = false,
-                RowHeadersVisible = false,
-                DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter },
-                AllowUserToResizeColumns = false,
-                AllowUserToResizeRows = false,
-                AllowUserToOrderColumns = false,
-                ScrollBars = ScrollBars.Vertical
-            };
-
-            dgvInventario.RowPrePaint += (s, e) =>
-{
-    if (e.RowIndex % 2 == 0) // filas pares
-        dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightGray;
-    else
-        dgvInventario.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
-};
-
-
-            dgvInventario.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
-            dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dgvInventario.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            dgvInventario.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-
-         //   Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
-            
-            panelTabla.Controls.Add(dgvInventario);
-
-            Panel panelPaginacion = new Panel() { Dock = DockStyle.Bottom, Height = 35, BackColor = Color.White };
-            btnPaginaAnterior = new Button() { Text = "<", Width = 35, Height = 25, Left = 10, Top = 5 }; btnPaginaAnterior.Click += BtnPaginaAnterior_Click;
-            btnPaginaSiguiente = new Button() { Text = ">", Width = 35, Height = 25, Left = 60, Top = 5 }; btnPaginaSiguiente.Click += BtnPaginaSiguiente_Click;
-            lblPagina = new Label() { Text = "Pag. 1 de 1", AutoSize = true, Left = 120, Top = 10 };
-            panelPaginacion.Controls.AddRange(new Control[] { btnPaginaAnterior, btnPaginaSiguiente, lblPagina });
-
-
+            // assemble
             contentPanel.Controls.Add(panelTabla);
             contentPanel.Controls.Add(separatorLine);
             contentPanel.Controls.Add(panelPaginacion);
-        
 
             contenedorReporte.Controls.Add(contentPanel);
             contenedorReporte.Controls.Add(headerPanel);
@@ -265,58 +244,60 @@ contentPanel.Controls.Add(separatorLine);
 
         private void InventarioPartesForm_Load(object sender, EventArgs e)
         {
-            lista = new List<Parte>()
-            {
- new Parte { ID="P-001", Nombre="Pantalla iPhone 12", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=12, Unidad="unidades", CostoUnitario=2500m, ValorTotal=30000m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-new Parte { ID="P-002", Nombre="Puerto de carga tipo C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=8, Unidad="unidades", CostoUnitario=180m, ValorTotal=1440m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-new Parte { ID="P-003", Nombre="Batería Samsung A52", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=15, Unidad="unidades", CostoUnitario=600m, ValorTotal=9000m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-004", Nombre="Pasta térmica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=120m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-new Parte { ID="P-005", Nombre="Pantalla Samsung S21", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=10, Unidad="unidades", CostoUnitario=2800m, ValorTotal=28000m, EstadoStock="Suficiente", Observaciones="Alta demanda" },
-new Parte { ID="P-006", Nombre="Puerto Lightning", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=5, Unidad="unidades", CostoUnitario=200m, ValorTotal=1000m, EstadoStock="Bajo", Observaciones="Pocas unidades disponibles" },
-new Parte { ID="P-007", Nombre="Batería iPhone 11", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=20, Unidad="unidades", CostoUnitario=550m, ValorTotal=11000m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-008", Nombre="Cargador inalámbrico", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=12, Unidad="unidades", CostoUnitario=300m, ValorTotal=3600m, EstadoStock="Suficiente", Observaciones="Popular" },
-new Parte { ID="P-009", Nombre="Pantalla Xiaomi Mi 10", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=7, Unidad="unidades", CostoUnitario=2400m, ValorTotal=16800m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-new Parte { ID="P-010", Nombre="Conector USB-C Micro", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=18, Unidad="unidades", CostoUnitario=150m, ValorTotal=2700m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-011", Nombre="Batería Huawei P30", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=9, Unidad="unidades", CostoUnitario=620m, ValorTotal=5580m, EstadoStock="Bajo", Observaciones="Rotación rápida" },
-new Parte { ID="P-012", Nombre="Pasta térmica profesional", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=15, Unidad="tubos", CostoUnitario=150m, ValorTotal=2250m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-new Parte { ID="P-013", Nombre="Pantalla iPhone 13", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=14, Unidad="unidades", CostoUnitario=2600m, ValorTotal=36400m, EstadoStock="Suficiente", Observaciones="Alta demanda" },
-new Parte { ID="P-014", Nombre="Cable HDMI", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=25, Unidad="unidades", CostoUnitario=120m, ValorTotal=3000m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-015", Nombre="Batería iPhone 12", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=17, Unidad="unidades", CostoUnitario=580m, ValorTotal=9860m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-new Parte { ID="P-016", Nombre="Cargador rápido USB-C", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=20, Unidad="unidades", CostoUnitario=350m, ValorTotal=7000m, EstadoStock="Suficiente", Observaciones="Popular" },
-new Parte { ID="P-017", Nombre="Pantalla OnePlus 9", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=6, Unidad="unidades", CostoUnitario=2300m, ValorTotal=13800m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-new Parte { ID="P-018", Nombre="Conector Lightning", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=12, Unidad="unidades", CostoUnitario=180m, ValorTotal=2160m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-019", Nombre="Batería Samsung Note 20", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=11, Unidad="unidades", CostoUnitario=640m, ValorTotal=7040m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-020", Nombre="Pasta térmica básica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=30, Unidad="tubos", CostoUnitario=100m, ValorTotal=3000m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-new Parte { ID="P-021", Nombre="Pantalla Motorola G9", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=8, Unidad="unidades", CostoUnitario=2200m, ValorTotal=17600m, EstadoStock="Suficiente", Observaciones="Alta demanda" },
-new Parte { ID="P-022", Nombre="Cable USB-C", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=30, Unidad="unidades", CostoUnitario=140m, ValorTotal=4200m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-023", Nombre="Batería LG G8", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=13, Unidad="unidades", CostoUnitario=600m, ValorTotal=7800m, EstadoStock="Suficiente", Observaciones="Rotación rápida" },
-new Parte { ID="P-024", Nombre="Cargador portátil 10.000mAh", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=10, Unidad="unidades", CostoUnitario=400m, ValorTotal=4000m, EstadoStock="Suficiente", Observaciones="Popular" },
-new Parte { ID="P-025", Nombre="Pantalla iPhone SE", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=9, Unidad="unidades", CostoUnitario=2100m, ValorTotal=18900m, EstadoStock="Suficiente", Observaciones="Alta demanda" },
-new Parte { ID="P-026", Nombre="Puerto micro USB", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=20, Unidad="unidades", CostoUnitario=130m, ValorTotal=2600m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-027", Nombre="Batería Xiaomi Mi 11", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=16, Unidad="unidades", CostoUnitario=610m, ValorTotal=9760m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-new Parte { ID="P-028", Nombre="Pasta térmica premium", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=18, Unidad="tubos", CostoUnitario=200m, ValorTotal=3600m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-new Parte { ID="P-029", Nombre="Pantalla Huawei P40", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=5, Unidad="unidades", CostoUnitario=2500m, ValorTotal=12500m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-new Parte { ID="P-030", Nombre="Cable HDMI 2.1", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=14, Unidad="unidades", CostoUnitario=180m, ValorTotal=2520m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-031", Nombre="Batería Oppo Reno 5", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=12, Unidad="unidades", CostoUnitario=590m, ValorTotal=7080m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-032", Nombre="Cargador inalámbrico Qi", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=8, Unidad="unidades", CostoUnitario=350m, ValorTotal=2800m, EstadoStock="Suficiente", Observaciones="Popular" },
-new Parte { ID="P-033", Nombre="Pantalla Nokia 5.4", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=6, Unidad="unidades", CostoUnitario=2000m, ValorTotal=12000m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-new Parte { ID="P-034", Nombre="Conector USB-A", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=22, Unidad="unidades", CostoUnitario=120m, ValorTotal=2640m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-035", Nombre="Batería Realme 8", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=14, Unidad="unidades", CostoUnitario=570m, ValorTotal=7980m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-new Parte { ID="P-036", Nombre="Pasta térmica básica", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=25, Unidad="tubos", CostoUnitario=110m, ValorTotal=2750m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-new Parte { ID="P-037", Nombre="Pantalla Sony Xperia 10", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=7, Unidad="unidades", CostoUnitario=2100m, ValorTotal=14700m, EstadoStock="Suficiente", Observaciones="Alta demanda" },
-new Parte { ID="P-038", Nombre="Cable USB-C 2m", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=30, Unidad="unidades", CostoUnitario=150m, ValorTotal=4500m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-039", Nombre="Batería Samsung A72", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=10, Unidad="unidades", CostoUnitario=630m, ValorTotal=6300m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-new Parte { ID="P-040", Nombre="Cargador rápido 20W", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=12, Unidad="unidades", CostoUnitario=400m, ValorTotal=4800m, EstadoStock="Suficiente", Observaciones="Popular" },
-new Parte { ID="P-041", Nombre="Pantalla LG V60", Categoria="Pantallas", Proveedor="G-Tech Supply", CantidadActual=5, Unidad="unidades", CostoUnitario=2400m, ValorTotal=12000m, EstadoStock="Bajo", Observaciones="Solicitar reposición" },
-new Parte { ID="P-042", Nombre="Puerto USB-C Mini", Categoria="Conectores", Proveedor="ElectroParts", CantidadActual=15, Unidad="unidades", CostoUnitario=160m, ValorTotal=2400m, EstadoStock="Suficiente", Observaciones="-" },
-new Parte { ID="P-043", Nombre="Batería iPhone 13 Pro", Categoria="Baterías", Proveedor="MobilePro", CantidadActual=11, Unidad="unidades", CostoUnitario=650m, ValorTotal=7150m, EstadoStock="Suficiente", Observaciones="Rotación alta" },
-new Parte { ID="P-044", Nombre="Pasta térmica avanzada", Categoria="Insumos", Proveedor="Tecnocell", CantidadActual=20, Unidad="tubos", CostoUnitario=180m, ValorTotal=3600m, EstadoStock="Suficiente", Observaciones="Uso frecuente" },
-new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Accesorios", Proveedor="TechWorld", CantidadActual=10, Unidad="unidades", CostoUnitario=450m, ValorTotal=4500m, EstadoStock="Suficiente", Observaciones="Popular" }
- };
-
+            CargarDesdeBD();
             MostrarPagina();
         }
 
+        // -------------------------
+        // Cargar desde DB (cache)
+        // -------------------------
+        private void CargarDesdeBD()
+        {
+            lista.Clear();
+            string sql = $@"SELECT Id, Codigo, NombreParte, Categoria, Proveedor, Cantidad, Unidad, CostoUnitario, Observaciones, ValorTotal
+                            FROM {TableName}
+                            ORDER BY Id ASC";
+            try
+            {
+                using (SqlConnection conn = DbConfig.GetConnection())
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    using (SqlDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            var p = new ParteDb
+                            {
+                                Id = r.GetInt32(0),
+                                Codigo = r.IsDBNull(1) ? "" : r.GetString(1),
+                                NombreParte = r.IsDBNull(2) ? "" : r.GetString(2),
+                                Categoria = r.IsDBNull(3) ? "" : r.GetString(3),
+                                Proveedor = r.IsDBNull(4) ? "" : r.GetString(4),
+                                Cantidad = r.IsDBNull(5) ? 0 : r.GetInt32(5),
+                                Unidad = r.IsDBNull(6) ? "" : r.GetString(6),
+                                CostoUnitario = r.IsDBNull(7) ? 0m : r.GetDecimal(7),
+                                Observaciones = r.IsDBNull(8) ? "" : r.GetString(8),
+                                ValorTotal = r.IsDBNull(9) ? 0m : r.GetDecimal(9)
+                            };
+                            lista.Add(p);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error cargando inventario: {ex.Message}", "Error de BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            totalPaginas = (int)Math.Ceiling((double)lista.Count / registrosPorPagina);
+            if (totalPaginas == 0) totalPaginas = 1;
+            if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        }
+
+        // -------------------------
+        // Mostrar (sin Id visible)
+        // -------------------------
         private void MostrarPagina()
         {
             totalPaginas = (int)Math.Ceiling((double)lista.Count / registrosPorPagina);
@@ -326,25 +307,40 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             var registros = lista
                 .Skip((paginaActual - 1) * registrosPorPagina)
                 .Take(registrosPorPagina)
+                .Select(x => new
+                {
+                    x.Codigo,            // mostramos Código (P-001...)
+                    x.NombreParte,
+                    x.Categoria,
+                    x.Proveedor,
+                    x.Cantidad,
+                    x.Unidad,
+                    CostoUnitario = x.CostoUnitario,
+                    ValorTotal = x.ValorTotal,
+                    x.Observaciones,
+                    _HiddenId = x.Id    // mantenemos id en el datasource pero nombre no es "Id"
+                })
                 .ToList();
 
             dgvInventario.DataSource = null;
             dgvInventario.DataSource = registros;
+            dgvInventario.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
-            dgvInventario.GridColor = Color.White;
-            dgvInventario.CellBorderStyle = DataGridViewCellBorderStyle.Single;
-
+            // Aplicar nombres de encabezado y estilos, mantener el id oculto y no mostrar "Id"
             if (dgvInventario.Columns.Count > 0)
             {
-                dgvInventario.Columns["ID"].HeaderText = "Código";
-                dgvInventario.Columns["Nombre"].HeaderText = "Nombre de la Parte";
+                // Aseguramos que la columna con Id interno quede oculta (nombre: _HiddenId)
+                if (dgvInventario.Columns.Contains("_HiddenId"))
+                    dgvInventario.Columns["_HiddenId"].Visible = false;
+
+                dgvInventario.Columns["Codigo"].HeaderText = "Código";
+                dgvInventario.Columns["NombreParte"].HeaderText = "Nombre de la Parte";
                 dgvInventario.Columns["Categoria"].HeaderText = "Categoría";
                 dgvInventario.Columns["Proveedor"].HeaderText = "Proveedor";
-                dgvInventario.Columns["CantidadActual"].HeaderText = "Cantidad";
+                dgvInventario.Columns["Cantidad"].HeaderText = "Cantidad";
                 dgvInventario.Columns["Unidad"].HeaderText = "Unidad";
                 dgvInventario.Columns["CostoUnitario"].HeaderText = "Costo Unitario";
-                dgvInventario.Columns["ValorTotal"].HeaderText = "Valor Total ";
-                dgvInventario.Columns["EstadoStock"].HeaderText = "Estado del Stock";
+                dgvInventario.Columns["ValorTotal"].HeaderText = "Valor Total";
                 dgvInventario.Columns["Observaciones"].HeaderText = "Observaciones";
 
                 dgvInventario.Columns["CostoUnitario"].DefaultCellStyle.Format = "'L' #,##0.00";
@@ -353,24 +349,17 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
                 dgvInventario.Columns["ValorTotal"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             }
 
-            for (int i = 0; i < dgvInventario.Rows.Count; i++)
-            {
-                dgvInventario.Rows[i].DefaultCellStyle.BackColor = (i % 2 == 1) ? Color.LightGray : Color.White;
-            }
-
-
-
+            // Anchos fijos (copiado estilo original)
             var widths = new Dictionary<string, int>
             {
-                ["ID"] = 80,
-                ["Nombre"] = 300,
+                ["Codigo"] = 100,
+                ["NombreParte"] = 300,
                 ["Categoria"] = 140,
                 ["Proveedor"] = 160,
-                ["CantidadActual"] = 110,
+                ["Cantidad"] = 110,
                 ["Unidad"] = 90,
                 ["CostoUnitario"] = 120,
                 ["ValorTotal"] = 120,
-                ["EstadoStock"] = 140,
                 ["Observaciones"] = 240
             };
 
@@ -389,15 +378,19 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
                 }
             }
 
-            contenedorReporte.AutoScrollMinSize = new Size(Math.Max(totalWidth + 40, this.Width), 0);
-            lblPagina.Text = $"Pag. {paginaActual} de {totalPaginas}";
+            // Alternado de filas ya aplicado en RowPrePaint; reforzarlo
+            for (int i = 0; i < dgvInventario.Rows.Count; i++)
+            {
+                dgvInventario.Rows[i].DefaultCellStyle.BackColor = (i % 2 == 1) ? ColorTranslator.FromHtml("#F0F0F0") : Color.White;
+            }
 
-            // === Línea amarilla bajo encabezados ===
+            // Línea amarilla bajo encabezados (usa solo ancho visible)
+            int tablaVisibleWidth = dgvInventario.Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).Sum(c => c.Width);
             Panel lineaAmarilla = new Panel()
             {
                 BackColor = Color.Gold,
                 Height = 3,
-                Width = dgvInventario.Width,
+                Width = tablaVisibleWidth,
                 Left = dgvInventario.Left,
                 Top = dgvInventario.Top + dgvInventario.ColumnHeadersHeight,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
@@ -408,9 +401,14 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             lineaAmarilla.BringToFront();
             dgvInventario.SizeChanged += (s, e) =>
             {
-                lineaAmarilla.Width = dgvInventario.Width;
                 lineaAmarilla.Top = dgvInventario.Top + dgvInventario.ColumnHeadersHeight;
             };
+
+            contenedorReporte.AutoScrollMinSize = new Size(Math.Max(totalWidth + 40, this.Width), 0);
+
+            lblPagina.Text = $"Pag. {paginaActual} de {totalPaginas}";
+            btnPaginaAnterior.Enabled = paginaActual > 1;
+            btnPaginaSiguiente.Enabled = paginaActual < totalPaginas;
         }
 
         private void BtnPaginaAnterior_Click(object sender, EventArgs e)
@@ -423,6 +421,9 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             if (paginaActual < totalPaginas) { paginaActual++; MostrarPagina(); }
         }
 
+        // -------------------------
+        // Impresión (oculta Id)
+        // -------------------------
         private void BtnImprimir_Click(object sender, EventArgs e)
         {
             PrintDocument printDoc = new PrintDocument();
@@ -438,373 +439,483 @@ new Parte { ID="P-045", Nombre="Cargador inalámbrico rápido", Categoria="Acces
             preview.ShowDialog();
         }
 
-       private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
-{
-    // --- Ocultar botones antes de imprimir ---
-    btnAgregar.Visible = false;
-    btnEliminar.Visible = false;
-    btnEditar.Visible = false;
-    btnImprimir.Visible = false;
-
-    // --- Captura header ---
-    Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
-    headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
-
-    Bitmap separatorBitmap = new Bitmap(separatorLine.Width, separatorLine.Height);
-    separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
-
-    // --- Captura DataGridView ---
-    int tablaWidth = dgvInventario.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
-    int tablaHeight = dgvInventario.ColumnHeadersHeight + dgvInventario.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
-    Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
-
-    using (Graphics g = Graphics.FromImage(dgvBitmap))
-    {
-        g.Clear(Color.White);
-        int xPos = 0;
-
-        // Encabezado
-        for (int i = 0; i < dgvInventario.Columns.Count; i++)
+        private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
         {
-            var col = dgvInventario.Columns[i];
-            Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvInventario.ColumnHeadersHeight);
+            Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
+            headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
+            Bitmap separatorBitmap = new Bitmap(separatorLine.Width, separatorLine.Height);
+            separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
 
-            using (Brush backBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.BackColor))
-                g.FillRectangle(backBrush, headerRect);
+            int tablaWidth = dgvInventario.Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).Sum(c => c.Width);
+            int tablaHeight = dgvInventario.ColumnHeadersHeight + dgvInventario.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
+            Bitmap dgvBitmap = new Bitmap(Math.Max(1, tablaWidth), Math.Max(1, tablaHeight));
 
-            using (Brush foreBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor))
+            using (Graphics g = Graphics.FromImage(dgvBitmap))
             {
-                StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                g.DrawString(col.HeaderText, dgvInventario.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect, sf);
-            }
+                g.Clear(Color.White);
+                int xPos = 0;
 
-            g.DrawRectangle(Pens.Black, headerRect);
-            xPos += col.Width;
-        }
-
-        // Línea amarilla
-        g.FillRectangle(Brushes.Gold, 0, dgvInventario.ColumnHeadersHeight, tablaWidth, 3);
-
-        int yPos = dgvInventario.ColumnHeadersHeight + 3;
-
-        foreach (DataGridViewRow row in dgvInventario.Rows)
-        {
-            xPos = 0;
-            int filaIndex = dgvInventario.Rows.IndexOf(row);
-
-            for (int i = 0; i < row.Cells.Count; i++)
-            {
-                var cell = row.Cells[i];
-                Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
-
-                using (Brush backBrush = new SolidBrush(filaIndex % 2 == 1 ? Color.LightGray : Color.White))
-                    g.FillRectangle(backBrush, cellRect);
-
-                using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
+                // Encabezados (solo visibles)
+                for (int i = 0; i < dgvInventario.Columns.Count; i++)
                 {
-                    StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                    g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect, sf);
+                    var col = dgvInventario.Columns[i];
+                    if (!col.Visible) continue;
+
+                    Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvInventario.ColumnHeadersHeight);
+                    using (Brush backBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.BackColor))
+                        g.FillRectangle(backBrush, headerRect);
+                    using (Brush foreBrush = new SolidBrush(dgvInventario.ColumnHeadersDefaultCellStyle.ForeColor))
+                        g.DrawString(col.HeaderText, dgvInventario.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+
+                    g.DrawRectangle(Pens.Black, headerRect);
+                    xPos += col.Width;
                 }
 
-                g.DrawRectangle(Pens.White, cellRect);
-                xPos += cell.OwningColumn.Width;
+                // Línea amarilla
+                g.FillRectangle(Brushes.Gold, 0, dgvInventario.ColumnHeadersHeight, tablaWidth, 3);
+
+                int yPos = dgvInventario.ColumnHeadersHeight + 3;
+
+                // Filas
+                foreach (DataGridViewRow row in dgvInventario.Rows)
+                {
+                    xPos = 0;
+                    int filaIndex = dgvInventario.Rows.IndexOf(row);
+
+                    for (int i = 0; i < row.Cells.Count; i++)
+                    {
+                        var col = dgvInventario.Columns[i];
+                        if (!col.Visible) continue;
+
+                        var cell = row.Cells[i];
+                        Rectangle cellRect = new Rectangle(xPos, yPos, col.Width, row.Height);
+                        using (Brush backBrush = new SolidBrush(filaIndex % 2 == 1 ? ColorTranslator.FromHtml("#F0F0F0") : Color.White))
+                            g.FillRectangle(backBrush, cellRect);
+
+                        using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
+                        {
+                            string valor = cell.FormattedValue?.ToString() ?? "";
+                            if (col.Name == "CostoUnitario" || col.Name == "ValorTotal")
+                            {
+                                g.DrawString(valor, cell.InheritedStyle.Font, foreBrush, cellRect, new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center });
+                            }
+                            else
+                            {
+                                g.DrawString(valor, cell.InheritedStyle.Font, foreBrush, cellRect, new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+                            }
+                        }
+
+                        g.DrawRectangle(Pens.White, cellRect);
+                        xPos += col.Width;
+                    }
+
+                    yPos += row.Height;
+                }
             }
 
-            yPos += row.Height;
+            int totalWidth = Math.Max(headerBitmap.Width, dgvBitmap.Width);
+            int totalHeight = headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height + 30;
+
+            Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
+            using (Graphics g = Graphics.FromImage(printBitmap))
+            {
+                g.Clear(Color.White);
+                g.DrawImage(headerBitmap, 0, 0);
+                g.DrawImage(separatorBitmap, 0, headerBitmap.Height);
+                g.DrawImage(dgvBitmap, 0, headerBitmap.Height + separatorBitmap.Height);
+            }
+
+            float scale = Math.Min(
+                (float)e.MarginBounds.Width / printBitmap.Width,
+                (float)e.MarginBounds.Height / printBitmap.Height
+            );
+
+            int printWidth = (int)(printBitmap.Width * scale);
+            int printHeight = (int)(printBitmap.Height * scale);
+
+            e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
+
+            // Número de página
+            string pageText = $"Pag. {paginaActual} de {totalPaginas}";
+            using (Font pageFont = new Font("Segoe UI", 9))
+            {
+                SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
+                float x = e.MarginBounds.Right - textSize.Width;
+                float y = e.MarginBounds.Top + (headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height) * scale + 5;
+                e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, y);
+            }
         }
-    }
 
-    // ---------------------------------------
-    // ESCALADO Y DIBUJO
-    // ---------------------------------------
+        // -------------------------
+        // CRUD
+        // -------------------------
+        private void BtnAgregar_Click(object sender, EventArgs e) => MostrarFormularioAgregarEditar(null);
 
-    int totalWidth = Math.Max(headerBitmap.Width, dgvBitmap.Width);
-    int totalHeight = headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height + 30; // espacio extra para número página
+        private void BtnEditar_Click(object sender, EventArgs e)
+        {
+            if (dgvInventario.CurrentRow == null) return;
 
-    Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
-    using (Graphics g = Graphics.FromImage(printBitmap))
-    {
-        g.Clear(Color.White);
-        g.DrawImage(headerBitmap, 0, 0);
-        g.DrawImage(separatorBitmap, 0, headerBitmap.Height);
-        g.DrawImage(dgvBitmap, 0, headerBitmap.Height + separatorBitmap.Height);
-    }
+            int rowIndex = dgvInventario.CurrentRow.Index;
+            int listaIndex = (paginaActual - 1) * registrosPorPagina + rowIndex;
+            if (listaIndex < 0 || listaIndex >= lista.Count) return;
 
-    float scale = Math.Min(
-        (float)e.MarginBounds.Width / printBitmap.Width,
-        (float)e.MarginBounds.Height / printBitmap.Height
-    );
-
-    int printWidth = (int)(printBitmap.Width * scale);
-    int printHeight = (int)(printBitmap.Height * scale);
-
-    e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
-
-    // ---------------------------------------
-    // NUMERO DE PÁGINA DEBAJO DE LA TABLA
-    // ---------------------------------------
-
-    float tablaAlturaEscalada = (headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height) * scale;
-    float yNumeroPagina = e.MarginBounds.Top + tablaAlturaEscalada + 5; // debajo de la tabla
-
-    string pageText = $"Pag. {paginaActual} de {totalPaginas}";
-    using (Font pageFont = new Font("Segoe UI", 9))
-    {
-        SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
-        float x = e.MarginBounds.Right - textSize.Width; // derecha
-        e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, yNumeroPagina);
-    }
-
-    // --- Volver a mostrar botones ---
-    btnAgregar.Visible = true;
-    btnEliminar.Visible = true;
-    btnEditar.Visible = true;
-    btnImprimir.Visible = true;
-}
-
-
-
-        private void BtnAgregar_Click(object sender, EventArgs e) => AgregarEditarParte(null);
-       private void BtnEditar_Click(object sender, EventArgs e)
-{
-    if (dgvInventario.CurrentRow == null) return;
-
-    int rowIndex = dgvInventario.CurrentRow.Index;
-    int listaIndex = (paginaActual - 1) * registrosPorPagina + rowIndex; // <- CORRECCIÓN
-
-    Parte parte = lista[listaIndex];
-    AgregarEditarParte(parte);
-}
+            var parte = lista[listaIndex];
+            MostrarFormularioAgregarEditar(parte);
+        }
 
         private void BtnEliminar_Click(object sender, EventArgs e)
-{
-    if (dgvInventario.CurrentRow != null)
-    {
-        int rowIndex = dgvInventario.CurrentRow.Index;
-        int listaIndex = (paginaActual - 1) * registrosPorPagina + rowIndex; // <- CORRECCIÓN
-
-        string id = lista[listaIndex].ID;
-        DialogResult result = MessageBox.Show($"¿Está seguro de borrar el registro '{id}'?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-        if (result == DialogResult.Yes)
         {
-            lista.RemoveAt(listaIndex);
-            MostrarPagina();
-        }
-    }
-}
+            if (dgvInventario.CurrentRow == null) return;
 
+            int rowIndex = dgvInventario.CurrentRow.Index;
+            int listaIndex = (paginaActual - 1) * registrosPorPagina + rowIndex;
+            if (listaIndex < 0 || listaIndex >= lista.Count) return;
 
-        private void AgregarEditarParte(Parte parte)
-{
-    bool esEditar = parte != null;
-    Form form = new Form()
-    {
-        Width = 400,
-        Height = 500,
-        Text = esEditar ? "Editar Parte" : "Agregar Nueva Parte",
-        FormBorderStyle = FormBorderStyle.FixedDialog,
-        StartPosition = FormStartPosition.CenterParent
-    };
+            var parte = lista[listaIndex];
+            var res = MessageBox.Show($"¿Eliminar la parte '{parte.Codigo} - {parte.NombreParte}'?", "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (res != DialogResult.Yes) return;
 
-    Panel panel = new Panel() { Dock = DockStyle.Fill, AutoScroll = true };
-    form.Controls.Add(panel);
-
-    int labelWidth = 120;
-    int controlWidth = 200;
-    int top = 20;
-    int gap = 40;
-
-    // -------------------------------
-    // Nombre
-    Label lblNombre = new Label() { Text = "Nombre", Left = 20, Top = top, Width = labelWidth };
-    TextBox txtNombre = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.Nombre : "" };
-    top += gap;
-
-    // -------------------------------
-    // Categoría (ComboBox)
-    Label lblCategoria = new Label() { Text = "Categoría", Left = 20, Top = top, Width = labelWidth };
-    ComboBox cbCategoria = new ComboBox() { Left = 150, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
-    cbCategoria.Items.AddRange(new string[] { "Pantallas", "Conectores", "Baterías", "Insumos", "Accesorios" });
-    if (esEditar) cbCategoria.SelectedItem = parte.Categoria;
-    top += gap;
-
-    // -------------------------------
-    // Proveedor (ComboBox)
-    Label lblProveedor = new Label() { Text = "Proveedor", Left = 20, Top = top, Width = labelWidth };
-    ComboBox cbProveedor = new ComboBox() { Left = 150, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
-    cbProveedor.Items.AddRange(new string[] { "G-Tech Supply", "ElectroParts", "MobilePro", "Tecnocell", "TechWorld" });
-    if (esEditar) cbProveedor.SelectedItem = parte.Proveedor;
-    top += gap;
-
-    // -------------------------------
-    // Cantidad actual
-    Label lblCantidad = new Label() { Text = "Cantidad", Left = 20, Top = top, Width = labelWidth };
-    TextBox txtCantidad = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.CantidadActual.ToString() : "" };
-    top += gap;
-
-    // -------------------------------
-    // Unidad (ComboBox)
-    Label lblUnidad = new Label() { Text = "Unidad", Left = 20, Top = top, Width = labelWidth };
-    ComboBox cbUnidad = new ComboBox() { Left = 150, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
-    cbUnidad.Items.AddRange(new string[] { "unidades", "tubos", "cajas" });
-    if (esEditar) cbUnidad.SelectedItem = parte.Unidad;
-    top += gap;
-
-    // -------------------------------
-    // Costo unitario
-    Label lblCosto = new Label() { Text = "Costo Unitario", Left = 20, Top = top, Width = labelWidth };
-    TextBox txtCosto = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.CostoUnitario.ToString() : "" };
-    top += gap;
-
-    // -------------------------------
-    // Observaciones
-    Label lblObservaciones = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
-    TextBox txtObservaciones = new TextBox() { Left = 150, Top = top, Width = controlWidth, Text = esEditar ? parte.Observaciones : "" };
-    top += gap;
-
-    // -------------------------------
-    // Botón Guardar
-    Button btnGuardar = new Button() { Text = "Guardar", Left = 150, Top = top + 10, Width = 100 };
-    btnGuardar.Click += (s, e) =>
-    {
-        // -------------------
-        // VALIDACIONES
-        // -------------------
-
-        // Nombre
-        if (string.IsNullOrWhiteSpace(txtNombre.Text) || txtNombre.Text.Length < 3)
-        {
-            MessageBox.Show("El nombre es obligatorio y debe tener al menos 3 caracteres.");
-            return;
-        }
-
-        // Categoría
-        if (cbCategoria.SelectedItem == null)
-        {
-            MessageBox.Show("Seleccione una categoría válida.");
-            return;
-        }
-
-        // Proveedor
-        if (cbProveedor.SelectedItem == null)
-        {
-            MessageBox.Show("Seleccione un proveedor válido.");
-            return;
-        }
-
-        // Cantidad
-        if (!int.TryParse(txtCantidad.Text, out int cantidad) || cantidad < 0)
-        {
-            MessageBox.Show("Ingrese una cantidad válida (entero ≥ 0).");
-            return;
-        }
-
-        // Unidad
-        if (cbUnidad.SelectedItem == null)
-        {
-            MessageBox.Show("Seleccione una unidad válida.");
-            return;
-        }
-
-        // Costo unitario
-        if (!decimal.TryParse(txtCosto.Text, out decimal costo) || costo <= 0)
-        {
-            MessageBox.Show("Ingrese un costo unitario válido (>0).");
-            return;
-        }
-
-        // Observaciones
-        if (txtObservaciones.Text.Length > 200)
-        {
-            MessageBox.Show("Observaciones no puede tener más de 200 caracteres.");
-            return;
-        }
-
-        // -------------------
-        // CREAR O EDITAR PARTE
-        // -------------------
-        decimal valorTotal = cantidad * costo;
-        string estadoStock = cantidad == 0 ? "Agotado" : (cantidad < 5 ? "Bajo" : "Normal");
-
-        if (!esEditar)
-        {
-                     // -------------------
-                    // CALCULAR NUEVO ID AUTOMÁTICO
-                    // -------------------
-                    int maxID = 0;
-                    if (lista.Count > 0)
-                    {
-                        maxID = lista.Max(p =>
-    {
-        if (p.ID.StartsWith("P-") && int.TryParse(p.ID.Substring(2), out int num))
-            return num;
-        return 0;
-    });
-                    }
-                    string nuevoID = $"P-{maxID + 1:D3}";
-
-
-
-            Parte nueva = new Parte
+            string sql = $"DELETE FROM {TableName} WHERE Id = @Id";
+            try
             {
-                ID = nuevoID,
-                Nombre = txtNombre.Text,
-                Categoria = cbCategoria.SelectedItem.ToString(),
-                Proveedor = cbProveedor.SelectedItem.ToString(),
-                CantidadActual = cantidad,
-                Unidad = cbUnidad.SelectedItem.ToString(),
-                CostoUnitario = costo,
-                ValorTotal = valorTotal,
-                EstadoStock = estadoStock,
-                Observaciones = txtObservaciones.Text
-            };
-            lista.Add(nueva);
+                using (SqlConnection conn = DbConfig.GetConnection())
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", parte.Id);
+                        int rows = cmd.ExecuteNonQuery();
+                        if (rows > 0)
+                        {
+                            MessageBox.Show("Registro eliminado.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            CargarDesdeBD();
+                            MostrarPagina();
+                        }
+                        else
+                        {
+                            MessageBox.Show("No se pudo eliminar el registro.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error eliminando: {ex.Message}", "Error de BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-        else
+
+        // Mostrar formulario de Agregar o Editar (comboboxes recreados cada vez)
+        private void MostrarFormularioAgregarEditar(ParteDb parte)
         {
-            parte.Nombre = txtNombre.Text;
-            parte.Categoria = cbCategoria.SelectedItem.ToString();
-            parte.Proveedor = cbProveedor.SelectedItem.ToString();
-            parte.CantidadActual = cantidad;
-            parte.Unidad = cbUnidad.SelectedItem.ToString();
-            parte.CostoUnitario = costo;
-            parte.ValorTotal = valorTotal;
-            parte.EstadoStock = estadoStock;
-            parte.Observaciones = txtObservaciones.Text;
+            bool esEditar = parte != null;
+
+            Form form = new Form()
+            {
+                Width = 420,
+                Height = 560,
+                Text = esEditar ? "Editar Parte" : "Agregar Nueva Parte",
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterParent
+            };
+
+            Panel panel = new Panel() { Dock = DockStyle.Fill, AutoScroll = true };
+            form.Controls.Add(panel);
+
+            int labelWidth = 130;
+            int controlWidth = 220;
+            int top = 20;
+            int gap = 45;
+
+            // Nombre
+            Label lblNombre = new Label() { Text = "Nombre", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtNombre = new TextBox() { Left = 160, Top = top, Width = controlWidth, Text = esEditar ? parte.NombreParte : "" };
+            top += gap;
+
+            // Categoría (ComboBox) - siempre crear nuevo combobox y llenar
+            Label lblCategoria = new Label() { Text = "Categoría", Left = 20, Top = top, Width = labelWidth };
+            ComboBox cbCategoria = new ComboBox() { Left = 160, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
+            var categorias = ObtenerValores("Categoria", new List<string>
+            {
+               "Pantallas", "Conectores", "Baterías", "Insumos", "Accesorios", "Otros"
+            });
+            cbCategoria.Items.Clear();
+            if (categorias.Any()) cbCategoria.Items.AddRange(categorias.ToArray());
+            else cbCategoria.Items.AddRange(new string[] { "Pantallas", "Conectores", "Baterías", "Insumos", "Accesorios", "Otros" });
+            if (esEditar && !string.IsNullOrWhiteSpace(parte.Categoria))
+            {
+                if (!cbCategoria.Items.Contains(parte.Categoria))
+                    cbCategoria.Items.Insert(0, parte.Categoria);
+                cbCategoria.SelectedItem = parte.Categoria;
+            }
+            top += gap;
+
+            // Proveedor (ComboBox)
+            Label lblProveedor = new Label() { Text = "Proveedor", Left = 20, Top = top, Width = labelWidth };
+            ComboBox cbProveedor = new ComboBox() { Left = 160, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
+            var proveedores = ObtenerValores("Proveedor", new List<string>
+                {
+                    "G-Tech Supply", "ElectroParts", "MobilePro", "Tecnocell", "TechWorld"
+                });
+
+            cbProveedor.Items.Clear();
+            if (proveedores.Any()) cbProveedor.Items.AddRange(proveedores.ToArray());
+            else cbProveedor.Items.AddRange(new string[] { "G-Tech Supply", "ElectroParts", "MobilePro", "Tecnocell", "TechWorld" });
+            if (esEditar && !string.IsNullOrWhiteSpace(parte.Proveedor))
+            {
+                if (!cbProveedor.Items.Contains(parte.Proveedor))
+                    cbProveedor.Items.Insert(0, parte.Proveedor);
+                cbProveedor.SelectedItem = parte.Proveedor;
+            }
+            top += gap;
+
+            // Cantidad
+            Label lblCantidad = new Label() { Text = "Cantidad", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtCantidad = new TextBox() { Left = 160, Top = top, Width = controlWidth, Text = esEditar ? parte.Cantidad.ToString() : "0" };
+            top += gap;
+
+            // Unidad (ComboBox)
+            Label lblUnidad = new Label() { Text = "Unidad", Left = 20, Top = top, Width = labelWidth };
+            ComboBox cbUnidad = new ComboBox() { Left = 160, Top = top, Width = controlWidth, DropDownStyle = ComboBoxStyle.DropDownList };
+            var unidades = ObtenerValores("Unidad", new List<string>
+            {
+                "unidades", "tubos", "cajas"
+            });
+
+            cbUnidad.Items.Clear();
+            if (unidades.Any()) cbUnidad.Items.AddRange(unidades.ToArray());
+            else cbUnidad.Items.AddRange(new string[] { "unidades", "tubos", "cajas" });
+            if (esEditar && !string.IsNullOrWhiteSpace(parte.Unidad))
+            {
+                if (!cbUnidad.Items.Contains(parte.Unidad))
+                    cbUnidad.Items.Insert(0, parte.Unidad);
+                cbUnidad.SelectedItem = parte.Unidad;
+            }
+            top += gap;
+
+            // Costo unitario
+            Label lblCosto = new Label() { Text = "Costo Unitario (L.)", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtCosto = new TextBox() { Left = 160, Top = top, Width = controlWidth, Text = esEditar ? parte.CostoUnitario.ToString("F2") : "0.00" };
+            top += gap;
+
+            // Observaciones
+            Label lblObservaciones = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
+            TextBox txtObservaciones = new TextBox() { Left = 160, Top = top, Width = controlWidth, Text = esEditar ? parte.Observaciones : "" };
+            top += gap;
+
+            // Guardar
+            Button btnGuardar = new Button() { Text = "Guardar", Left = 160, Top = top + 10, Width = 100 };
+            btnGuardar.Click += (s, e) =>
+            {
+                // Validaciones
+                if (string.IsNullOrWhiteSpace(txtNombre.Text) || txtNombre.Text.Length < 3)
+                {
+                    MessageBox.Show("Nombre obligatorio (>=3 caracteres).", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (cbCategoria.SelectedItem == null)
+                {
+                    MessageBox.Show("Seleccione una categoría.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (cbProveedor.SelectedItem == null)
+                {
+                    MessageBox.Show("Seleccione un proveedor.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (!int.TryParse(txtCantidad.Text, out int cantidad) || cantidad < 0)
+                {
+                    MessageBox.Show("Cantidad debe ser entero >= 0.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (cbUnidad.SelectedItem == null)
+                {
+                    MessageBox.Show("Seleccione una unidad.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (!decimal.TryParse(txtCosto.Text, out decimal costo) || costo < 0m)
+                {
+                    MessageBox.Show("Costo unitario inválido.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (txtObservaciones.Text.Length > 300)
+                {
+                    MessageBox.Show("Observaciones debe tener máximo 300 caracteres.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Guardar en BD
+                if (!esEditar)
+                {
+                    string sqlInsert = $@"INSERT INTO {TableName}
+                                            (Codigo, NombreParte, Categoria, Proveedor, Cantidad, Unidad, CostoUnitario, Observaciones)
+                                          VALUES
+                                            (@Codigo, @NombreParte, @Categoria, @Proveedor, @Cantidad, @Unidad, @CostoUnitario, @Observaciones);
+                                          SELECT SCOPE_IDENTITY();";
+                    try
+                    {
+                        int newId = -1;
+                        using (SqlConnection conn = DbConfig.GetConnection())
+                        {
+                            conn.Open();
+                            using (SqlCommand cmd = new SqlCommand(sqlInsert, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@Codigo", "TEMP");
+                                cmd.Parameters.AddWithValue("@NombreParte", txtNombre.Text.Trim());
+                                cmd.Parameters.AddWithValue("@Categoria", cbCategoria.SelectedItem.ToString());
+                                cmd.Parameters.AddWithValue("@Proveedor", cbProveedor.SelectedItem.ToString());
+                                cmd.Parameters.AddWithValue("@Cantidad", cantidad);
+                                cmd.Parameters.AddWithValue("@Unidad", cbUnidad.SelectedItem.ToString());
+                                cmd.Parameters.AddWithValue("@CostoUnitario", costo);
+                                cmd.Parameters.AddWithValue("@Observaciones", string.IsNullOrWhiteSpace(txtObservaciones.Text) ? (object)DBNull.Value : txtObservaciones.Text.Trim());
+
+                                object o = cmd.ExecuteScalar();
+                                if (o != null && o != DBNull.Value)
+                                    newId = Convert.ToInt32(o);
+                            }
+
+                            if (newId > 0)
+                            {
+                                string codigoGenerado = $"P-{newId:D3}"; // Opción A
+                                string sqlUpdate = $"UPDATE {TableName} SET Codigo = @Codigo WHERE Id = @Id";
+                                using (SqlCommand cmd2 = new SqlCommand(sqlUpdate, conn))
+                                {
+                                    cmd2.Parameters.AddWithValue("@Codigo", codigoGenerado);
+                                    cmd2.Parameters.AddWithValue("@Id", newId);
+                                    cmd2.ExecuteNonQuery();
+                                }
+
+                                MessageBox.Show("Parte agregada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                CargarDesdeBD();
+                                MostrarPagina();
+                                form.Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("No se pudo obtener el Id de la inserción.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al insertar: {ex.Message}", "Error de BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    string sqlUpdate = $@"UPDATE {TableName}
+                                          SET NombreParte = @NombreParte,
+                                              Categoria = @Categoria,
+                                              Proveedor = @Proveedor,
+                                              Cantidad = @Cantidad,
+                                              Unidad = @Unidad,
+                                              CostoUnitario = @CostoUnitario,
+                                              Observaciones = @Observaciones
+                                          WHERE Id = @Id";
+                    try
+                    {
+                        using (SqlConnection conn = DbConfig.GetConnection())
+                        {
+                            conn.Open();
+                            using (SqlCommand cmd = new SqlCommand(sqlUpdate, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@NombreParte", txtNombre.Text.Trim());
+                                cmd.Parameters.AddWithValue("@Categoria", cbCategoria.SelectedItem.ToString());
+                                cmd.Parameters.AddWithValue("@Proveedor", cbProveedor.SelectedItem.ToString());
+                                cmd.Parameters.AddWithValue("@Cantidad", cantidad);
+                                cmd.Parameters.AddWithValue("@Unidad", cbUnidad.SelectedItem.ToString());
+                                cmd.Parameters.AddWithValue("@CostoUnitario", costo);
+                                cmd.Parameters.AddWithValue("@Observaciones", string.IsNullOrWhiteSpace(txtObservaciones.Text) ? (object)DBNull.Value : txtObservaciones.Text.Trim());
+                                cmd.Parameters.AddWithValue("@Id", parte.Id);
+
+                                int rows = cmd.ExecuteNonQuery();
+                                if (rows > 0)
+                                {
+                                    MessageBox.Show("Parte actualizada correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    CargarDesdeBD();
+                                    MostrarPagina();
+                                    form.Close();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("No se actualizó ningún registro.", "Precaución", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al actualizar: {ex.Message}", "Error de BD", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }; // fin btnGuardar
+
+            panel.Controls.AddRange(new Control[]
+            {
+                lblNombre, txtNombre,
+                lblCategoria, cbCategoria,
+                lblProveedor, cbProveedor,
+                lblCantidad, txtCantidad,
+                lblUnidad, cbUnidad,
+                lblCosto, txtCosto,
+                lblObservaciones, txtObservaciones,
+                btnGuardar
+            });
+
+            form.ShowDialog();
         }
 
-        MostrarPagina();
-        form.Close();
-    };
+        // Obtener valores distintos para poblar comboboxes
+        private List<string> ObtenerValores(string columna, List<string> valoresBase)
+        {
+            var items = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-    panel.Controls.AddRange(new Control[]
-    {
-        lblNombre, txtNombre,
-        lblCategoria, cbCategoria,
-        lblProveedor, cbProveedor,
-        lblCantidad, txtCantidad,
-        lblUnidad, cbUnidad,
-        lblCosto, txtCosto,
-        lblObservaciones, txtObservaciones,
-        btnGuardar
-    });
+            // Agregar valores base INDEPENDIENTES de la BD
+            foreach (var item in valoresBase)
+                items.Add(item);
 
-    form.ShowDialog();
-}
+            // Ahora agregar valores de la BD
+            string sql = $@"SELECT DISTINCT [{columna}] 
+                    FROM {TableName} 
+                    WHERE [{columna}] IS NOT NULL 
+                    AND LTRIM(RTRIM([{columna}])) <> '' 
+                    ORDER BY [{columna}]";
 
-    }
+            try
+            {
+                using (SqlConnection conn = DbConfig.GetConnection())
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(sql, conn))
+                    using (SqlDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            items.Add(r.GetString(0));
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // No romper si falla la BD
+            }
 
-    public class Parte
-    {
-        public string ID { get; set; }
-        public string Nombre { get; set; }
-        public string Categoria { get; set; }
-        public string Proveedor { get; set; }
-        public int CantidadActual { get; set; }
-        public string Unidad { get; set; }
-        public decimal CostoUnitario { get; set; }
-        public decimal ValorTotal { get; set; }
-        public string EstadoStock { get; set; }
-        public string Observaciones { get; set; }
+            return items.OrderBy(x => x).ToList();
+        }
+
+        // Clase que mapea la tabla (Id permanece interno, no mostrado)
+        private class ParteDb
+        {
+            public int Id { get; set; }
+            public string Codigo { get; set; }
+            public string NombreParte { get; set; }
+            public string Categoria { get; set; }
+            public string Proveedor { get; set; }
+            public int Cantidad { get; set; }
+            public string Unidad { get; set; }
+            public decimal CostoUnitario { get; set; }
+            public string Observaciones { get; set; }
+            public decimal ValorTotal { get; set; }
+        }
     }
 }
