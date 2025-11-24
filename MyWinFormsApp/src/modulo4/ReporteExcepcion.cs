@@ -288,7 +288,7 @@ namespace MyWinFormsApp.src.modulo4
                     pdfTable.SetWidths( columnWidths );
 
                     // Estilo de tabla
-                    iTextSharp.text.Font headerFont = new( iTextSharp.text.Font.FontFamily.UNDEFINED, 12, iTextSharp.text.Font.BOLD, BaseColor.WHITE );
+                    iTextSharp.text.Font headerFont = new( iTextSharp.text.Font.FontFamily.UNDEFINED, 9, iTextSharp.text.Font.BOLD, BaseColor.WHITE );
 
                     // Agregar encabezados
                     foreach ( DataGridViewColumn column in dataGridView1.Columns )
@@ -308,49 +308,23 @@ namespace MyWinFormsApp.src.modulo4
                     foreach ( DataGridViewRow row in dataGridView1.Rows )
                     {
                         bool esFilaTotal = row.Cells[0].Value != null &&
-                                           row.Cells[0].Value.ToString().ToUpper().Contains( "TOTAL" );
+                                           row.Cells[0].Value.ToString().Contains( "Total" );
 
                         BaseColor rowColor = esFilaTotal
-                            ? new BaseColor( 230, 230, 230 )
-                            : (row.Index % 2 == 0 ? BaseColor.WHITE : BaseColor.LIGHT_GRAY);
+                            ? BaseColor.LIGHT_GRAY
+                            : (row.Index % 2 == 0 ? BaseColor.WHITE : new BaseColor( 225, 225, 225 ));
 
                         foreach ( DataGridViewCell cell in row.Cells )
                         {
                             string columnHeader = dataGridView1.Columns[cell.ColumnIndex].HeaderText;
                             object cellValue = cell.Value ?? string.Empty;
-                            string cellText;
-
-                            if ( esFilaTotal )
-                            {
-                                // 🔹 Si es la fila de TOTAL, dejar el valor tal cual
-                                cellText = cellValue.ToString();
-                            }
-                            else if ( columnHeader.Contains( "(L.)" ) )
-                            {
-                                // 🔹 Si es una celda de monto normal, formatearla
-                                if ( decimal.TryParse( cellValue.ToString(), out decimal amount ) )
-                                {
-                                    string formattedAmount = amount.ToString( "N2" );
-                                    int totalWidth = 18;
-                                    cellText = "L." + formattedAmount.PadLeft( totalWidth - 2 );
-                                }
-                                else
-                                {
-                                    cellText = "L. 0.00".PadLeft( 18 );
-                                }
-                            }
-                            else
-                            {
-                                // 🔹 Cualquier otro texto
-                                cellText = cellValue.ToString();
-                            }
 
                             // 🔹 Fuente según si es fila total o no
                             var font = esFilaTotal
-                                ? new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 12, iTextSharp.text.Font.BOLD )
-                                : new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 10 );
+                                ? new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 9, iTextSharp.text.Font.BOLD )
+                                : new iTextSharp.text.Font( iTextSharp.text.Font.FontFamily.HELVETICA, 9 );
 
-                            PdfPCell pdfCell = new PdfPCell( new Phrase( cellText, font ) )
+                            PdfPCell pdfCell = new PdfPCell( new Phrase( cellValue.ToString(), font ) )
                             {
                                 BackgroundColor = rowColor,
                                 HorizontalAlignment = Element.ALIGN_CENTER,
@@ -404,7 +378,8 @@ namespace MyWinFormsApp.src.modulo4
             dataGridView1.Rows.Clear();
             foreach ( var dispositivo in dispositivosFiltrados )
             {
-                dataGridView1.Rows.Add( dispositivo.ID, dispositivo.Fecha, dispositivo.Cliente, dispositivo.Dispositivo, dispositivo.Estado, dispositivo.Dias, dispositivo.MontoP );
+                string txtMonto = decimal.TryParse( dispositivo.MontoP, out decimal monto ) ? "L." + monto.ToString( "N2" ) : "0.00";
+                dataGridView1.Rows.Add( dispositivo.ID, dispositivo.Fecha, dispositivo.Cliente, dispositivo.Dispositivo, dispositivo.Estado, dispositivo.Dias, txtMonto );
             }
 
             // Calcular y mostrar el total
@@ -414,13 +389,40 @@ namespace MyWinFormsApp.src.modulo4
 
             totalRow.DefaultCellStyle.Font = new System.Drawing.Font( dataGridView1.Font, FontStyle.Bold );
             totalRow.DefaultCellStyle.BackColor = Color.LightGray;
-            totalRow.Cells[0].Value = "TOTAL:";
+            totalRow.Cells[0].Value = "Total:";
             totalRow.Cells[6].Value = "L." + totalMonto.ToString( "N2" ).PadLeft( 18 );
         }
 
         private void dateTimePicker1_ValueChanged( object sender, EventArgs e )
         {
             FiltrarPorMes( dateTimePicker1.Value.Month - DateTime.Now.Month );
+        }
+
+        private void btnAgregar_Click( object sender, EventArgs e )
+        {
+
+        }
+
+        private void btnEditar_Click( object sender, EventArgs e )
+        {
+
+        }
+
+        private void btnEliminar_Click( object sender, EventArgs e )
+        {
+            if ( dataGridView1.SelectedRows.Count == 0 )
+            {
+                MessageBox.Show( "Por favor, seleccione una fila para eliminar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning );
+                return;
+            }
+
+            DataGridViewRow selectedRow = dataGridView1.SelectedRows[0];
+            string idDispositivo = selectedRow.Cells[0].Value.ToString();
+            var result = MessageBox.Show( $"¿Está seguro de que desea eliminar el dispositivo con ID {idDispositivo}?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question );
+            if ( result == DialogResult.Yes )
+            {
+                
+            }
         }
     }
 }

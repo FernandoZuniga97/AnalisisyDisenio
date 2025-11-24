@@ -14,6 +14,8 @@ namespace MyWinFormsApp.src.Models
 
         public string Dispositivo { get; set; }
 
+        public string TipoDispositivo { get; set; }
+
         public string Tipo { get; set; }
 
         public string Descripcion { get; set; }
