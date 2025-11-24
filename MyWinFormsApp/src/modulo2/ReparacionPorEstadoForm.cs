@@ -151,33 +151,6 @@ namespace MyWinFormsApp.src.modulo2
             headerPanel.Controls.Add(titlePanel);
 
             // ---------------------------
-            // COMBOBOX DE FILTRADO
-            // ---------------------------
-            cmbEstado = new ComboBox()
-            {
-                Width = 180,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = Color.Black,
-                BackColor = Color.White
-            };
-            cmbEstado.Items.AddRange(new string[] { "Todos", "En proceso", "Finalizada", "Retrasada" });
-            cmbEstado.SelectedIndex = 0;
-
-            headerPanel.Controls.Add(cmbEstado);
-            cmbEstado.BringToFront();
-            cmbEstado.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            cmbEstado.Top = 15;
-            cmbEstado.Left = headerPanel.Width - cmbEstado.Width - 30;
-
-            headerPanel.Resize += (s, e) =>
-            {
-                cmbEstado.Left = headerPanel.Width - cmbEstado.Width - 30;
-            };
-
-            cmbEstado.SelectedIndexChanged += (s, e) => FiltrarPorEstado();
-
-            // ---------------------------
             // DATA GRID VIEW
             // ---------------------------
             dgReparaciones = new DataGridView()
@@ -214,9 +187,8 @@ namespace MyWinFormsApp.src.modulo2
                 );
             };
 
-            
-// --------------------------
-// Panel blanco superior con botones
+ // --------------------------
+// Panel blanco superior con botones y ComboBox
 // --------------------------
 Panel separatorLine = new Panel()
 {
@@ -226,41 +198,65 @@ Panel separatorLine = new Panel()
     Padding = new Padding(10)
 };
 
-// Botones
-btnAgregar = new Button() { Text = "Agregar Reparación", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 112, 192), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-btnEliminar = new Button() { Text = "Eliminar Reparación", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 84, 153), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-btnEditar = new Button() { Text = "Editar Reparación", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 128, 255), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-btnImprimir = new Button() { Text = "Imprimir", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 65, 130), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
-
-// Eventos
-btnAgregar.Click += BtnAgregar_Click;
-btnEliminar.Click += BtnEliminar_Click;
-btnEditar.Click += BtnEditar_Click;
-btnImprimir.Click += BtnImprimir_Click;
-
-// FlowLayoutPanel para alinear botones a la derecha
-FlowLayoutPanel flp = new FlowLayoutPanel()
+// FlowLayoutPanel izquierdo para el ComboBox
+FlowLayoutPanel flpIzquierda = new FlowLayoutPanel()
 {
-    Dock = DockStyle.Right,
-    FlowDirection = FlowDirection.LeftToRight, // izquierda a derecha
+    Dock = DockStyle.Left,
+    FlowDirection = FlowDirection.LeftToRight,
     AutoSize = true,
     WrapContents = false
 };
 
-flp.Controls.Add(btnAgregar);
-flp.Controls.Add(btnEditar);
-flp.Controls.Add(btnEliminar);
-flp.Controls.Add(btnImprimir);
+// ComboBox de estado
+cmbEstado = new ComboBox()
+{
+    Width = 150,
+    Height = 35, // altura más grande
+    DropDownStyle = ComboBoxStyle.DropDownList,
+    Font = new Font("Segoe UI", 10, FontStyle.Bold),
+    ForeColor = Color.Black,
+    BackColor = Color.White
+};
+cmbEstado.Items.AddRange(new string[] { "Todos", "En proceso", "Finalizada", "Retrasada" });
+cmbEstado.SelectedIndex = 0;
+cmbEstado.SelectedIndexChanged += (s, e) => FiltrarPorEstado();
 
+flpIzquierda.Controls.Add(cmbEstado);
 
-// Añadir los botones al FlowLayoutPanel
-flp.Controls.AddRange(new Control[] { btnAgregar, btnEliminar, btnEditar, btnImprimir });
+// FlowLayoutPanel derecho para los botones
+FlowLayoutPanel flpDerecha = new FlowLayoutPanel()
+{
+    Dock = DockStyle.Right,
+    FlowDirection = FlowDirection.LeftToRight,
+    AutoSize = true,
+    WrapContents = false
+};
 
-// Añadir FlowLayoutPanel al panel blanco
-separatorLine.Controls.Add(flp);
+// Botones
+btnAgregar = new Button() { Text = "Agregar Reparación", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 112, 192), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+btnEditar = new Button() { Text = "Editar Reparación", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 128, 255), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+btnEliminar = new Button() { Text = "Eliminar Reparación", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 84, 153), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+btnImprimir = new Button() { Text = "Imprimir", Width = 120, Height = 30, BackColor = Color.FromArgb(0, 65, 130), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+
+// Eventos
+btnAgregar.Click += BtnAgregar_Click;
+btnEditar.Click += BtnEditar_Click;
+btnEliminar.Click += BtnEliminar_Click;
+btnImprimir.Click += BtnImprimir_Click;
+
+// Agregar botones al FlowLayoutPanel derecho
+flpDerecha.Controls.Add(btnAgregar);
+flpDerecha.Controls.Add(btnEditar);
+flpDerecha.Controls.Add(btnEliminar);
+flpDerecha.Controls.Add(btnImprimir);
+
+// Añadir ambos FlowLayoutPanel al panel blanco
+separatorLine.Controls.Add(flpIzquierda);
+separatorLine.Controls.Add(flpDerecha);
 
 // Añadir panel de botones al contentPanel
 contentPanel.Controls.Add(separatorLine);
+
 
             // ---------------------------
             // ARMAR ESTRUCTURA
@@ -340,16 +336,25 @@ contentPanel.Controls.Add(separatorLine);
         }
 
         private void BtnAgregar_Click(object sender, EventArgs e)
-        {
-            var form = new ReparacionDialog();
-            if (form.ShowDialog() == DialogResult.OK)
-            {
-                contadorID++;
-                form.ReparacionNueva.ID = $"R-{contadorID:D3}";
-                lista.Add(form.ReparacionNueva);
-                ActualizarGrid();
-            }
-        }
+{
+    // Calcular próximo ID según la lista actual
+    int proximoID = 1;
+    if (lista.Count > 0)
+    {
+        proximoID = lista
+            .Select(r => int.Parse(r.ID.Substring(2))) // quitar "R-"
+            .Max() + 1;
+    }
+
+    var form = new ReparacionDialog(null, proximoID);
+    if (form.ShowDialog() == DialogResult.OK)
+    {
+        // Ya no necesitas contadorID++, el ID se asigna en el dialog
+        lista.Add(form.ReparacionNueva);
+        ActualizarGrid();
+    }
+}
+
 
         private void BtnEditar_Click(object sender, EventArgs e)
         {
@@ -525,199 +530,153 @@ contentPanel.Controls.Add(separatorLine);
         public string Observaciones { get; set; }
     }
 
-    public class ReparacionDialog : Form
+   public class ReparacionDialog : Form
 {
     public Reparacion ReparacionNueva { get; private set; }
 
     private TextBox txtID, txtDispositivo, txtCliente, txtDescripcion, txtCosto, txtObservaciones;
     private ComboBox cmbEstado, cmbTecnico;
-    private DateTimePicker dtpFechaIngreso, dtpFechaEstimada;
 
-    public ReparacionDialog(Reparacion existente = null)
+    public ReparacionDialog(Reparacion existente = null, int proximoID = 1)
     {
         Text = existente == null ? "Agregar Reparación" : "Editar Reparación";
-        Width = 450;
-        Height = 600;
+        Width = 400;
+        Height = 550;
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
 
-        // --- Panel de controles ---
-        var panel = new TableLayoutPanel()
-        {
-            Dock = DockStyle.Fill,
-            RowCount = 11,
-            ColumnCount = 2,
-            Padding = new Padding(10)
-        };
+        var panel = new TableLayoutPanel() { Dock = DockStyle.Fill, RowCount = 8, ColumnCount = 2, Padding = new Padding(10) };
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
 
-        // --- Etiquetas ---
-        var lbls = new[]
+        string[] labels = { "ID:", "Dispositivo:", "Cliente:", "Técnico:", "Descripción:", "Estado:", "Costo (L):", "Observaciones:" };
+        for (int i = 0; i < labels.Length; i++)
         {
-            "ID:", "Dispositivo:", "Cliente:", "Descripción:", "Estado:", "Técnico:", "Fecha de Ingreso:", "Fecha Estimada Entrega:", "Costo (L):", "Observaciones:"
-        };
-        int i = 0;
-        foreach (var label in lbls)
-        {
-            panel.Controls.Add(new Label() { Text = label, AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 0, i);
-            i++;
+            panel.Controls.Add(new Label() { Text = labels[i], AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold) }, 0, i);
         }
 
         // --- Controles ---
-        txtID = new TextBox();
+        txtID = new TextBox() { ReadOnly = true };
         txtDispositivo = new TextBox();
         txtCliente = new TextBox();
+        cmbTecnico = new ComboBox() { DropDownStyle = ComboBoxStyle.DropDownList };
+        cmbTecnico.Items.AddRange(new[] { "J. Martínez", "C. Flores", "M. Pérez", "L. Reyes" });
         txtDescripcion = new TextBox();
         cmbEstado = new ComboBox() { DropDownStyle = ComboBoxStyle.DropDownList };
         cmbEstado.Items.AddRange(new[] { "En proceso", "Finalizada", "Retrasada" });
-        cmbTecnico = new ComboBox() { DropDownStyle = ComboBoxStyle.DropDownList };
-        cmbTecnico.Items.AddRange(new[] { "J. Martínez", "C. Flores", "M. Pérez", "L. Reyes" });
-        dtpFechaIngreso = new DateTimePicker() { Format = DateTimePickerFormat.Short };
-        dtpFechaEstimada = new DateTimePicker() { Format = DateTimePickerFormat.Short };
         txtCosto = new TextBox();
-        txtObservaciones = new TextBox() { Multiline = true, Height = 60, MaxLength = 200 };
+        txtObservaciones = new TextBox();
 
-        // --- Agregar controles al panel ---
         panel.Controls.Add(txtID, 1, 0);
         panel.Controls.Add(txtDispositivo, 1, 1);
         panel.Controls.Add(txtCliente, 1, 2);
-        panel.Controls.Add(txtDescripcion, 1, 3);
-        panel.Controls.Add(cmbEstado, 1, 4);
-        panel.Controls.Add(cmbTecnico, 1, 5);
-        panel.Controls.Add(dtpFechaIngreso, 1, 6);
-        panel.Controls.Add(dtpFechaEstimada, 1, 7);
-        panel.Controls.Add(txtCosto, 1, 8);
-        panel.Controls.Add(txtObservaciones, 1, 9);
+        panel.Controls.Add(cmbTecnico, 1, 3);
+        panel.Controls.Add(txtDescripcion, 1, 4);
+        panel.Controls.Add(cmbEstado, 1, 5);
+        panel.Controls.Add(txtCosto, 1, 6);
+        panel.Controls.Add(txtObservaciones, 1, 7);
 
-        // --- Botón Guardar ---
-        var btnAceptar = new Button()
+        var btnGuardar = new Button() { Text = "Guardar", Dock = DockStyle.Bottom, Height = 40, BackColor = ColorTranslator.FromHtml("#0070C0"), ForeColor = Color.White };
+        btnGuardar.Click += (s, e) =>
         {
-            Text = "Guardar",
-            Dock = DockStyle.Bottom,
-            Height = 40,
-            BackColor = ColorTranslator.FromHtml("#0070C0"),
-            ForeColor = Color.White
-        };
-
-        btnAceptar.Click += (s, e) =>
-        {
-            // --- VALIDACIÓN ID ---
-            string id = txtID.Text.Trim();
-            if (string.IsNullOrWhiteSpace(id) || !System.Text.RegularExpressions.Regex.IsMatch(id, @"^R-\d{3}$"))
-            {
-                MessageBox.Show("El ID es obligatorio y debe tener formato R-###.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!ValidarFormulario())
                 return;
-            }
 
-            // --- FECHA DE INGRESO ---
-            DateTime fechaIngreso = dtpFechaIngreso.Value.Date;
-            if (fechaIngreso > DateTime.Now)
-            {
-                MessageBox.Show("La fecha de ingreso no puede ser futura.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- CLIENTE ---
-            string cliente = txtCliente.Text.Trim();
-            if (string.IsNullOrWhiteSpace(cliente) || cliente.Length < 3 || !System.Text.RegularExpressions.Regex.IsMatch(cliente, @"^[a-zA-Z\s]+$"))
-            {
-                MessageBox.Show("El cliente es obligatorio, solo letras y espacios, mínimo 3 caracteres.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- DISPOSITIVO ---
-            string dispositivo = txtDispositivo.Text.Trim();
-            if (string.IsNullOrWhiteSpace(dispositivo))
-            {
-                MessageBox.Show("El dispositivo es obligatorio.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- TÉCNICO ASIGNADO ---
-            string tecnico = cmbTecnico.SelectedItem?.ToString();
-            if (string.IsNullOrWhiteSpace(tecnico))
-            {
-                MessageBox.Show("Debe seleccionar un técnico asignado.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- DESCRIPCIÓN DEL DAÑO ---
-            string descripcion = txtDescripcion.Text.Trim();
-            if (string.IsNullOrWhiteSpace(descripcion) || descripcion.Length < 10)
-            {
-                MessageBox.Show("La descripción del daño es obligatoria y debe tener al menos 10 caracteres.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- ESTADO ---
-            string estado = cmbEstado.SelectedItem?.ToString();
-            if (estado != "En proceso" && estado != "Finalizada" && estado != "Retrasada")
-            {
-                MessageBox.Show("Estado de reparación inválido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- FECHA ESTIMADA DE ENTREGA ---
-            DateTime fechaEstimada = dtpFechaEstimada.Value.Date;
-            if (fechaEstimada < fechaIngreso)
-            {
-                MessageBox.Show("La fecha estimada de entrega no puede ser menor a la fecha de ingreso.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- COSTO ESTIMADO ---
-            if (!decimal.TryParse(txtCosto.Text, out decimal costo) || costo <= 0 || costo > 10000)
-            {
-                MessageBox.Show("El costo estimado debe ser un número mayor que 0 y no mayor a 10,000.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- OBSERVACIONES ---
-            string observaciones = txtObservaciones.Text.Trim();
-            if (observaciones.Length > 200)
-            {
-                MessageBox.Show("Las observaciones no pueden exceder 200 caracteres.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // --- TODO CORRECTO ---
             ReparacionNueva = new Reparacion
             {
-                ID = id,
-                Dispositivo = dispositivo,
-                Cliente = cliente,
-                TecnicoAsignado = tecnico,
-                DescripciondelDano = descripcion,
-                EstadoReparacion = estado,
-                FechadeIngreso = fechaIngreso.ToShortDateString(),
-                FechaEstimadaEntrega = fechaEstimada.ToShortDateString(),
-                CostoEstimado = costo,
-                Observaciones = observaciones
+                ID = txtID.Text,
+                Dispositivo = txtDispositivo.Text.Trim(),
+                Cliente = txtCliente.Text.Trim(),
+                TecnicoAsignado = cmbTecnico.SelectedItem.ToString(),
+                DescripciondelDano = txtDescripcion.Text.Trim(),
+                EstadoReparacion = cmbEstado.SelectedItem.ToString(),
+                CostoEstimado = decimal.Parse(txtCosto.Text),
+                Observaciones = txtObservaciones.Text.Trim(),
+                FechadeIngreso = DateTime.Now.ToShortDateString(),
+                FechaEstimadaEntrega = DateTime.Now.AddDays(7).ToShortDateString()
             };
 
             DialogResult = DialogResult.OK;
         };
 
-        Controls.Add(btnAceptar);
+        Controls.Add(btnGuardar);
         Controls.Add(panel);
 
+        // --- Cargar datos existentes o generar nuevo ID ---
         if (existente != null)
         {
             txtID.Text = existente.ID;
             txtDispositivo.Text = existente.Dispositivo;
             txtCliente.Text = existente.Cliente;
+            cmbTecnico.SelectedItem = existente.TecnicoAsignado;
             txtDescripcion.Text = existente.DescripciondelDano;
             cmbEstado.SelectedItem = existente.EstadoReparacion;
-            cmbTecnico.SelectedItem = existente.TecnicoAsignado;
-            dtpFechaIngreso.Value = DateTime.Parse(existente.FechadeIngreso);
-            dtpFechaEstimada.Value = DateTime.Parse(existente.FechaEstimadaEntrega);
             txtCosto.Text = existente.CostoEstimado.ToString();
             txtObservaciones.Text = existente.Observaciones;
         }
+        else
+        {
+            // ID automático R-### según próximo valor disponible
+            txtID.Text = $"R-{proximoID:D3}";
+        }
+    }
+
+    private bool ValidarFormulario()
+    {
+        if (string.IsNullOrWhiteSpace(txtDispositivo.Text))
+        {
+            MessageBox.Show("El campo Dispositivo es obligatorio.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            txtDispositivo.Focus();
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(txtCliente.Text) || txtCliente.Text.Trim().Length < 3 || !System.Text.RegularExpressions.Regex.IsMatch(txtCliente.Text, @"^[a-zA-Z\s]+$"))
+        {
+            MessageBox.Show("El campo Cliente es obligatorio y solo puede contener letras y espacios, mínimo 3 caracteres.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            txtCliente.Focus();
+            return false;
+        }
+
+        if (cmbTecnico.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccione un Técnico válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            cmbTecnico.Focus();
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(txtDescripcion.Text) || txtDescripcion.Text.Trim().Length < 10)
+        {
+            MessageBox.Show("La Descripción del daño es obligatoria y debe tener al menos 10 caracteres.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            txtDescripcion.Focus();
+            return false;
+        }
+
+        if (cmbEstado.SelectedItem == null)
+        {
+            MessageBox.Show("Seleccione un Estado de reparación válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            cmbEstado.Focus();
+            return false;
+        }
+
+        if (!decimal.TryParse(txtCosto.Text, out decimal costo) || costo <= 0 || costo > 10000)
+        {
+            MessageBox.Show("Ingrese un Costo válido entre 1 y 10,000.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            txtCosto.Focus();
+            return false;
+        }
+
+        if (txtObservaciones.Text.Length > 200)
+        {
+            MessageBox.Show("Las Observaciones no pueden exceder 200 caracteres.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            txtObservaciones.Focus();
+            return false;
+        }
+
+        return true;
     }
 }
+
 
 }

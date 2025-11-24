@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -12,12 +13,14 @@ namespace MyWinFormsApp.src.modulo2
     {
         private TableLayoutPanel mainLayout;
         private Panel headerPanel;
+        private Panel topPanel; // franja blanca con botón
+        private Button btnImprimir;
         private Label lblTitulo;
         private Label lblSubtitulo;
         private Label lblPeriodo;
         private Chart chartTiempos;
-
         private List<TiempoTecnico> listaTiempos;
+        private int currentPage = 1;
 
         public TiempoPromedioReparacionForm()
         {
@@ -36,13 +39,14 @@ namespace MyWinFormsApp.src.modulo2
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 1,
-                RowCount = 2
+                RowCount = 3
             };
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 140));
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 140)); // Header azul
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));  // Franja blanca con botón
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // Contenido
             Controls.Add(mainLayout);
 
-            // ---------- ENCABEZADO ----------
+            // ---------- HEADER AZUL ----------
             headerPanel = new Panel()
             {
                 Dock = DockStyle.Fill,
@@ -105,6 +109,35 @@ namespace MyWinFormsApp.src.modulo2
                 );
             };
 
+            // ---------- FRANJA BLANCA CON BOTÓN IMPRIMIR ----------
+            topPanel = new Panel()
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.White
+            };
+
+            btnImprimir = new Button()
+            {
+                Text = "Imprimir",
+                Width = 120,
+                Height = 40,
+                BackColor = Color.FromArgb(0, 65, 130),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            btnImprimir.Click += BtnImprimir_Click;
+            topPanel.Controls.Add(btnImprimir);
+
+            topPanel.Resize += (s, e) =>
+            {
+                btnImprimir.Location = new Point(
+                    topPanel.Width - btnImprimir.Width - 20,
+                    (topPanel.Height - btnImprimir.Height) / 2
+                );
+            };
+
+            mainLayout.Controls.Add(topPanel, 0, 1);
+
             // ---------- CONTENIDO ----------
             SplitContainer splitContainer = new SplitContainer()
             {
@@ -112,7 +145,7 @@ namespace MyWinFormsApp.src.modulo2
                 Orientation = Orientation.Vertical,
                 SplitterDistance = 820
             };
-            mainLayout.Controls.Add(splitContainer, 0, 1);
+            mainLayout.Controls.Add(splitContainer, 0, 2);
 
             Panel panelIzquierdo = new Panel()
             {
@@ -146,7 +179,7 @@ namespace MyWinFormsApp.src.modulo2
             chartTiempos.ChartAreas.Add(chartArea);
             panelDerecho.Controls.Add(chartTiempos);
 
-            // COLORES
+            // Colores
             Color amarillo = ColorTranslator.FromHtml("#FFD700");
             Color azul = ColorTranslator.FromHtml("#002060");
             Color azulClaro = ColorTranslator.FromHtml("#4A6BB2");
@@ -158,7 +191,6 @@ namespace MyWinFormsApp.src.modulo2
                 IsValueShownAsLabel = true,
                 Font = new Font("Century Gothic", 9, FontStyle.Bold)
             });
-
             chartTiempos.Series.Add(new Series("Teléfono")
             {
                 ChartType = SeriesChartType.Column,
@@ -166,7 +198,6 @@ namespace MyWinFormsApp.src.modulo2
                 IsValueShownAsLabel = true,
                 Font = new Font("Century Gothic", 9, FontStyle.Bold)
             });
-
             chartTiempos.Series.Add(new Series("Impresora")
             {
                 ChartType = SeriesChartType.Column,
@@ -199,11 +230,136 @@ namespace MyWinFormsApp.src.modulo2
                 chartTiempos.Series["Teléfono"].Points.AddXY(t.Tecnico, t.Telefono);
                 chartTiempos.Series["Impresora"].Points.AddXY(t.Tecnico, t.Impresora);
             }
-
-            chartTiempos.Titles.Add("Promedio por tipo de dispositivo");
-            chartTiempos.Titles[0].Font = new Font("Century Gothic", 13, FontStyle.Bold);
-            chartTiempos.Titles[0].ForeColor = azul;
         }
+
+        private void BtnImprimir_Click(object sender, EventArgs e)
+        {
+            PrintDocument printDoc = new PrintDocument();
+            
+    printDoc.DefaultPageSettings.Landscape = true; 
+            printDoc.PrintPage += PrintDoc_PrintPage;
+            currentPage = 1;
+
+            PrintPreviewDialog preview = new PrintPreviewDialog
+            {
+                Document = printDoc,
+                Width = 1200,
+                Height = 800
+            };
+            preview.ShowDialog();
+        }
+
+       private void btnImprimir_Click(object sender, EventArgs e)
+{
+    PrintDocument printDoc = new PrintDocument();
+
+    // Configurar impresión horizontal
+    printDoc.DefaultPageSettings.Landscape = true;
+
+    printDoc.PrintPage += PrintDoc_PrintPage;
+    
+    PrintPreviewDialog preview = new PrintPreviewDialog();
+    preview.Document = printDoc;
+    preview.WindowState = FormWindowState.Maximized;
+    preview.ShowDialog();
+}
+
+private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
+{
+    // ================= HEADER =================
+    Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
+    headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
+
+    // ================= FRANJA BLANCA SIN BOTÓN =================
+    Bitmap topBitmap = new Bitmap(topPanel.Width, topPanel.Height);
+    foreach (Control c in topPanel.Controls) c.Visible = false;
+    topPanel.DrawToBitmap(topBitmap, new Rectangle(0, 0, topPanel.Width, topPanel.Height));
+    foreach (Control c in topPanel.Controls) c.Visible = true;
+
+    // ================= CONTENIDO (TABLAS + GRÁFICO) =================
+    SplitContainer split = (SplitContainer)mainLayout.Controls[2];
+    Panel panelIzq = split.Panel1;
+    Panel panelDer = split.Panel2;
+
+    // Calcular tamaño de contenido: ancho suma de tabla + gráfico, altura máxima
+    int contentWidth = panelIzq.Width + panelDer.Width + 20; // 20px de separación
+    int contentHeight = Math.Max(
+        panelIzq.Controls.Cast<Control>().Sum(c => c.Height + 20), 
+        chartTiempos.Height
+    );
+
+    Bitmap contentBitmap = new Bitmap(contentWidth, contentHeight);
+    using (Graphics g = Graphics.FromImage(contentBitmap))
+    {
+        g.Clear(Color.White);
+
+        // Dibujar tablas (lado izquierdo)
+        int yOffsetIzq = 0;
+        foreach (Control c in panelIzq.Controls)
+        {
+            Bitmap bmp = new Bitmap(c.Width, c.Height);
+            c.DrawToBitmap(bmp, new Rectangle(0, 0, c.Width, c.Height));
+            g.DrawImage(bmp, 0, yOffsetIzq);
+            yOffsetIzq += c.Height + 20;
+        }
+
+        // Dibujar gráfico al lado derecho
+        Bitmap chartBitmap = new Bitmap(chartTiempos.Width, chartTiempos.Height);
+        chartTiempos.DrawToBitmap(chartBitmap, new Rectangle(0, 0, chartTiempos.Width, chartTiempos.Height));
+        g.DrawImage(chartBitmap, panelIzq.Width + 20, 0); // +20px separación
+    }
+
+    // ================= COMBINAR TODO =================
+    int totalWidth = Math.Max(Math.Max(headerBitmap.Width, topBitmap.Width), contentBitmap.Width);
+    int totalHeight = headerBitmap.Height + topBitmap.Height + contentBitmap.Height + 40;
+
+    Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
+    using (Graphics g = Graphics.FromImage(printBitmap))
+    {
+        g.Clear(Color.White);
+        int yOffset = 0;
+        g.DrawImage(headerBitmap, 0, yOffset);
+        yOffset += headerBitmap.Height;
+        g.DrawImage(topBitmap, 0, yOffset);
+        yOffset += topBitmap.Height + 10;
+        g.DrawImage(contentBitmap, 0, yOffset);
+    }
+
+   // ================= ESCALAR Y DIBUJAR EN HOJA HORIZONTAL =================
+e.PageSettings.Landscape = true; // forzar horizontal
+
+Rectangle printableArea = e.MarginBounds; // <-- es int, no float
+
+float scaleX = (float)printableArea.Width / printBitmap.Width;
+float scaleY = (float)printableArea.Height / printBitmap.Height;
+float scale = Math.Min(scaleX, scaleY);
+
+int scaledWidth = (int)(printBitmap.Width * scale);
+int scaledHeight = (int)(printBitmap.Height * scale);
+
+// Centrar horizontalmente
+int xOffset = printableArea.X + (printableArea.Width - scaledWidth) / 2;
+int yOffsetPrint = printableArea.Y;
+
+e.Graphics.DrawImage(printBitmap, xOffset, yOffsetPrint, scaledWidth, scaledHeight);
+
+
+    // ================= NUMERO DE PAGINA =================
+    string pageText = $"Pag. {currentPage}";
+    using (Font pageFont = new Font("Segoe UI", 9))
+    {
+        SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
+        float x = printableArea.Right - textSize.Width;
+        float y = printableArea.Bottom + 10;
+        e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, y);
+    }
+
+    currentPage++;
+    e.HasMorePages = false;
+}
+
+
+
 
         private Panel CrearPanelTecnico(TiempoTecnico t)
         {
@@ -236,7 +392,6 @@ namespace MyWinFormsApp.src.modulo2
             };
             contInterno.Controls.Add(lblHeader);
 
-            // ---------- TABLA ----------
             DataGridView dgv = new DataGridView()
             {
                 Dock = DockStyle.Top,
@@ -276,7 +431,6 @@ namespace MyWinFormsApp.src.modulo2
         }
     }
 
-    // ---------- CLASE CON HORAS Y PROMEDIOS ----------
     public class TiempoTecnico
     {
         public string Tecnico { get; set; }
