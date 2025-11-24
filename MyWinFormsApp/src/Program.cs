@@ -1,5 +1,6 @@
 using System;
 using System.Windows.Forms;
+using static MyWinFormsApp.LoginForm;
 
 namespace MyWinFormsApp
 {
@@ -14,14 +15,19 @@ namespace MyWinFormsApp
             {
                 if (login.ShowDialog() == DialogResult.OK)
                 {
-                    bool isEmployee = login.SelectedRole == LoginForm.UserRole.Employee;
+                    // Convertimos UserRole → string "EMPLEADO" / "CLIENTE"
+                    string selectedRoleString =
+                        (login.SelectedRole == UserRole.Employee)
+                        ? "EMPLEADO"
+                        : "CLIENTE";
+
+                    bool isEmployee = selectedRoleString == "EMPLEADO";
+
                     var main = new MainForm(isEmployee);
-                    main.WindowState = FormWindowState.Maximized; // <-- maximizar después del login
+                    main.WindowState = FormWindowState.Maximized;
                     Application.Run(main);
                 }
             }
-
         }
     }
 }
-

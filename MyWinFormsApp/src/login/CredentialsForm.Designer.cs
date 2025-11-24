@@ -273,7 +273,7 @@ namespace MyWinFormsApp
             // Add click handler to open RegistroForm
             this.lnkForgot.Click += (s, e) =>
             {
-                var registroForm = new RegistroForm();
+                var registroForm = new RegistroForm(this.RoleSelected);
                 registroForm.ShowDialog(this);
             };
 
@@ -313,7 +313,8 @@ namespace MyWinFormsApp
             };
             this.btnCancel.FlatAppearance.BorderColor = Color.Black;
             this.btnCancel.FlatAppearance.BorderSize = 1;
-            this.btnCancel.Click += btnCancel_Click;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+
             this.mainCard.Controls.Add(this.btnCancel);
 
             this.ResumeLayout(false);

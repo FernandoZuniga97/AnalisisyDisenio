@@ -113,18 +113,23 @@ namespace MyWinFormsApp
 
         private void ShowCredentialsAndClose(UserRole role)
         {
-            using (var cred = new CredentialsForm(role.ToString()))
+            // mapear a los valores exactos que queremos en la BD
+            string roleText = role == UserRole.Employee ? "EMPLEADO" : "CLIENTE";
+
+            using (var cred = new CredentialsForm(roleText))
             {
                 var res = cred.ShowDialog();
                 if (res == DialogResult.OK)
                 {
-                    SelectedRole = role;
+                    // ya validado en CredentialsForm; tomar username y roleText
+                    SelectedRole = (role == UserRole.Employee) ? UserRole.Employee : UserRole.Client;
                     Username = cred.Username;
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 }
             }
         }
+
     }
 }
 //continuar otro dia con mas paciencia
