@@ -22,7 +22,7 @@ namespace MyWinFormsApp
         private Label lblPeriodo;
         private DataGridView dgvFallas;
         private Chart chartFallas;
-        private Panel separatorLine;
+        private Panel separatorLine; // CAMPO DE CLASE
         private SplitContainer splitContainer;
         private Button btnExportar;
         private ComboBox cmbTrimestre;
@@ -68,32 +68,51 @@ namespace MyWinFormsApp
                 BackColor = ColorTranslator.FromHtml("#002060")
             };
             contenedorReporte.Controls.Add(headerPanel);
+            
+            // --------------------------
+            // Panel blanco superior con botón
+            // --------------------------
             separatorLine = new Panel()
             {
-                Height = 17,
+                Height = 50,
                 BackColor = Color.White,
                 Dock = DockStyle.Top,
-                Margin = new Padding(0, 15, 0, 15)
+                Padding = new Padding(10) // Esto centra verticalmente
             };
-            contenedorReporte.Controls.Add(separatorLine);
-            separatorLine.BringToFront();
-            // ------------------
-            // BOTÓN EXPORTAR
-            // ------------------
+
+            // Crear botón Exportar PDF
             btnExportar = new Button()
             {
                 Text = "Generar PDF",
-                Dock = DockStyle.Bottom,
-                Height = 40,
-                BackColor = ColorTranslator.FromHtml("#0070C0"),
+                Width = 140,
+                Height = 30,
+                BackColor = Color.FromArgb(0, 112, 192),
                 ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
+            btnExportar.FlatStyle = FlatStyle.Flat;
             btnExportar.FlatAppearance.BorderSize = 0;
             btnExportar.Click += BtnExportar_Click;
-            contenedorReporte.Controls.Add(btnExportar);
-            btnExportar.BringToFront();
+
+            // FlowLayoutPanel para alinear botón a la derecha
+            FlowLayoutPanel flp = new FlowLayoutPanel()
+            {
+                Dock = DockStyle.Right,
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                WrapContents = false
+            };
+
+            // Agregar botón al FLP
+            flp.Controls.Add(btnExportar);
+
+            // Agregar FLP al panel blanco
+            separatorLine.Controls.Add(flp);
+
+            // Agregar panel blanco al contenedor principal
+            contenedorReporte.Controls.Add(separatorLine);
+            separatorLine.BringToFront();
+
             // ------------------
             // TITLE PANEL
             // ------------------
@@ -223,12 +242,11 @@ namespace MyWinFormsApp
                 EnableHeadersVisualStyles = false,
                 RowHeadersVisible = false,
                 DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter },
-                //CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
-                GridColor = Color.White, // Estilo de TipoDeFallasForm
+                GridColor = Color.White, 
                 AllowUserToResizeColumns = false,
                 AllowUserToResizeRows = false,
                 AllowUserToOrderColumns = false,
-                ScrollBars = ScrollBars.Vertical, // Cambiado a Vertical para paginación
+                ScrollBars = ScrollBars.Vertical,
                 CellBorderStyle = DataGridViewCellBorderStyle.Single
             };
             dgvFallas.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#0070C0");
@@ -287,8 +305,6 @@ namespace MyWinFormsApp
             chartFallas.Series.Add(serie);
             splitContainer.Panel2.Controls.Add(chartFallas);
 
-
-
             Load += TipoDeFallasForm_Load;
         }
 
@@ -304,26 +320,29 @@ namespace MyWinFormsApp
                 new TipoFalla { Numero = 5, Tipo = "Puerto de carga dañado", Frecuencia = 9, Fecha = new DateTime(2025, 3, 19) },
                 new TipoFalla { Numero = 6, Tipo = "Altavoz sin sonido", Frecuencia = 7, Fecha = new DateTime(2025, 3, 26) },
                 new TipoFalla { Numero = 7, Tipo = "Micrófono no funciona", Frecuencia = 6, Fecha = new DateTime(2025, 3, 28) },
+                new TipoFalla { Numero = 8, Tipo = "Otros", Frecuencia = 7, Fecha = new DateTime(2025, 3, 28) },
 
-                new TipoFalla { Numero = 8, Tipo = "Pantalla sin brillo", Frecuencia = 10, Fecha = new DateTime(2025, 4, 10) },
-                new TipoFalla { Numero = 9, Tipo = "Falla de software", Frecuencia = 11, Fecha = new DateTime(2025, 4, 20) },
-                new TipoFalla { Numero = 10, Tipo = "Wi-Fi no conecta", Frecuencia = 7, Fecha = new DateTime(2025, 5, 2) },
-                new TipoFalla { Numero = 11, Tipo = "Bluetooth inestable", Frecuencia = 6, Fecha = new DateTime(2025, 5, 14) },
-                new TipoFalla { Numero = 12, Tipo = "No carga batería", Frecuencia = 9, Fecha = new DateTime(2025, 5, 29) },
-                new TipoFalla { Numero = 13, Tipo = "Sensor de proximidad", Frecuencia = 8, Fecha = new DateTime(2025, 6, 10) },
+                new TipoFalla { Numero = 9, Tipo = "Pantalla sin brillo", Frecuencia = 10, Fecha = new DateTime(2025, 4, 10) },
+                new TipoFalla { Numero = 10, Tipo = "Falla de software", Frecuencia = 11, Fecha = new DateTime(2025, 4, 20) },
+                new TipoFalla { Numero = 11, Tipo = "Wi-Fi no conecta", Frecuencia = 7, Fecha = new DateTime(2025, 5, 2) },
+                new TipoFalla { Numero = 12, Tipo = "Bluetooth inestable", Frecuencia = 6, Fecha = new DateTime(2025, 5, 14) },
+                new TipoFalla { Numero = 13, Tipo = "No carga batería", Frecuencia = 9, Fecha = new DateTime(2025, 5, 29) },
+                new TipoFalla { Numero = 14, Tipo = "Sensor de proximidad", Frecuencia = 8, Fecha = new DateTime(2025, 6, 10) },
+                new TipoFalla { Numero = 15, Tipo = "Otros", Frecuencia = 8, Fecha = new DateTime(2025, 6, 10) }, 
 
-                new TipoFalla { Numero = 14, Tipo = "Pantalla táctil falla", Frecuencia = 12, Fecha = new DateTime(2025, 7, 5) },
-                new TipoFalla { Numero = 15, Tipo = "Falla de cámara trasera", Frecuencia = 9, Fecha = new DateTime(2025, 7, 20) },
-                new TipoFalla { Numero = 16, Tipo = "Altavoz distorsionado", Frecuencia = 11, Fecha = new DateTime(2025, 8, 4) },
-                new TipoFalla { Numero = 17, Tipo = "GPS no responde", Frecuencia = 8, Fecha = new DateTime(2025, 8, 19) },
-                new TipoFalla { Numero = 18, Tipo = "Problemas de encendido", Frecuencia = 10, Fecha = new DateTime(2025, 9, 1) },
-                new TipoFalla { Numero = 19, Tipo = "Error en sistema", Frecuencia = 9, Fecha = new DateTime(2025, 9, 17) },
+                new TipoFalla { Numero = 16, Tipo = "Pantalla táctil falla", Frecuencia = 12, Fecha = new DateTime(2025, 7, 5) },
+                new TipoFalla { Numero = 17, Tipo = "Falla de cámara trasera", Frecuencia = 9, Fecha = new DateTime(2025, 7, 20) },
+                new TipoFalla { Numero = 18, Tipo = "Altavoz distorsionado", Frecuencia = 11, Fecha = new DateTime(2025, 8, 4) },
+                new TipoFalla { Numero = 19, Tipo = "GPS no responde", Frecuencia = 8, Fecha = new DateTime(2025, 8, 19) },
+                new TipoFalla { Numero = 20, Tipo = "Problemas de encendido", Frecuencia = 10, Fecha = new DateTime(2025, 9, 1) },
+                new TipoFalla { Numero = 21, Tipo = "Otros", Frecuencia = 9, Fecha = new DateTime(2025, 9, 17) },
 
-                new TipoFalla { Numero = 20, Tipo = "Pantalla negra", Frecuencia = 9, Fecha = new DateTime(2025, 10, 3) },
-                new TipoFalla { Numero = 21, Tipo = "Conector USB flojo", Frecuencia = 2, Fecha = new DateTime(2025, 10, 18) },
-                new TipoFalla { Numero = 22, Tipo = "Cámara frontal defectuosa", Frecuencia = 5, Fecha = new DateTime(2025, 11, 5) },
-                new TipoFalla { Numero = 23, Tipo = "Vibrador no funciona", Frecuencia = 7, Fecha = new DateTime(2025, 11, 20) },
-                };
+                new TipoFalla { Numero = 22, Tipo = "Pantalla negra", Frecuencia = 9, Fecha = new DateTime(2025, 10, 3) },
+                new TipoFalla { Numero = 23, Tipo = "Conector USB flojo", Frecuencia = 2, Fecha = new DateTime(2025, 10, 18) },
+                new TipoFalla { Numero = 24, Tipo = "Cámara frontal defectuosa", Frecuencia = 5, Fecha = new DateTime(2025, 11, 5) },
+                new TipoFalla { Numero = 25, Tipo = "Vibrador no funciona", Frecuencia = 7, Fecha = new DateTime(2025, 11, 20) },
+                new TipoFalla { Numero = 26, Tipo = "Otros", Frecuencia = 10, Fecha = new DateTime(2025, 11, 20) },
+            };
 
             // Mostrar trimestre inicial
             CmbTrimestre_SelectedIndexChanged(this, EventArgs.Empty);
@@ -405,99 +424,157 @@ namespace MyWinFormsApp
                 Width = 1000,
                 Height = 800
             };
+
+            currentPage = 1; // muy importante
             preview.ShowDialog();
         }
 
         private void PrintDoc_PrintPageFallas(object sender, PrintPageEventArgs e)
-{
-    // Capturar header
-    Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
-    headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
-
-    // Capturar tabla
-    int tablaWidth = dgvFallas.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
-    int tablaHeight = dgvFallas.ColumnHeadersHeight + dgvFallas.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
-    Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
-    using (Graphics g = Graphics.FromImage(dgvBitmap))
-    {
-        g.Clear(Color.White);
-        int xPos = 0;
-        for (int i = 0; i < dgvFallas.Columns.Count; i++)
         {
-            var col = dgvFallas.Columns[i];
-            Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvFallas.ColumnHeadersHeight);
-            using (Brush backBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.BackColor))
-                g.FillRectangle(backBrush, headerRect);
-            using (Brush foreBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.ForeColor))
-                g.DrawString(col.HeaderText, dgvFallas.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect,
-                             new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-            g.DrawRectangle(Pens.Black, headerRect);
-            xPos += col.Width;
-        }
+            // ============================
+            // CAPTURAR HEADER
+            // ============================
+            Bitmap headerBitmap = new Bitmap(headerPanel.Width, headerPanel.Height);
+            headerPanel.DrawToBitmap(headerBitmap, new Rectangle(0, 0, headerPanel.Width, headerPanel.Height));
 
-        int yPos = dgvFallas.ColumnHeadersHeight;
-        foreach (DataGridViewRow row in dgvFallas.Rows)
-        {
-            xPos = 0;
-            for (int i = 0; i < row.Cells.Count; i++)
+            // ============================
+            // CAPTURAR LINEA BLANCA SIN BOTON
+            // ============================
+            Bitmap separatorBitmap = new Bitmap(separatorLine.Width, separatorLine.Height);
+
+            // ocultar botones temporalmente
+            foreach (Control c in separatorLine.Controls)
+                c.Visible = false;
+
+            separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
+
+            // restaurar visibilidad
+            foreach (Control c in separatorLine.Controls)
+                c.Visible = true;
+
+            // ============================
+            // CAPTURAR TABLA
+            // ============================
+            int tablaWidth = dgvFallas.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
+            int tablaHeight = dgvFallas.ColumnHeadersHeight + dgvFallas.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
+
+            Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
+            using (Graphics g = Graphics.FromImage(dgvBitmap))
             {
-                var cell = row.Cells[i];
-                Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
-                using (Brush backBrush = new SolidBrush(row.Index % 2 == 1 ? Color.LightGray : Color.White))
-                    g.FillRectangle(backBrush, cellRect);
-                using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
-                    g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect,
-                                 new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-                g.DrawRectangle(Pens.White, cellRect);
-                xPos += cell.OwningColumn.Width;
+                g.Clear(Color.White);
+
+                int xPos = 0;
+
+                // Encabezados
+                for (int i = 0; i < dgvFallas.Columns.Count; i++)
+                {
+                    var col = dgvFallas.Columns[i];
+                    Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgvFallas.ColumnHeadersHeight);
+
+                    using (Brush backBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.BackColor))
+                        g.FillRectangle(backBrush, headerRect);
+
+                    using (Brush foreBrush = new SolidBrush(dgvFallas.ColumnHeadersDefaultCellStyle.ForeColor))
+                        g.DrawString(col.HeaderText, dgvFallas.ColumnHeadersDefaultCellStyle.Font, foreBrush, headerRect,
+                            new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+
+                    g.DrawRectangle(Pens.Black, headerRect);
+
+                    xPos += col.Width;
+                }
+
+                using (Pen pen = new Pen(Color.Gold, 5))
+                {
+                    g.DrawLine(pen, 0, dgvFallas.ColumnHeadersHeight - 1, dgvBitmap.Width, dgvFallas.ColumnHeadersHeight - 1);
+                }
+
+                // Celdas
+                int yPos = dgvFallas.ColumnHeadersHeight;
+
+                foreach (DataGridViewRow row in dgvFallas.Rows)
+                {
+                    xPos = 0;
+                    for (int i = 0; i < row.Cells.Count; i++)
+                    {
+                        var cell = row.Cells[i];
+                        Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
+
+                        using (Brush backBrush = new SolidBrush(row.Index % 2 == 1 ? Color.LightGray : Color.White))
+                            g.FillRectangle(backBrush, cellRect);
+
+                        using (Brush foreBrush = new SolidBrush(cell.Style.ForeColor.IsEmpty ? Color.Black : cell.Style.ForeColor))
+                            g.DrawString(cell.FormattedValue?.ToString(), cell.InheritedStyle.Font, foreBrush, cellRect,
+                                new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+
+                        g.DrawRectangle(Pens.White, cellRect);
+
+                        xPos += cell.OwningColumn.Width;
+                    }
+                    yPos += row.Height;
+                }
             }
-            yPos += row.Height;
+
+            // ============================
+            // CAPTURAR GRAFICO
+            // ============================
+            Bitmap chartBitmap = new Bitmap(chartFallas.Width, chartFallas.Height);
+            chartFallas.DrawToBitmap(chartBitmap, new Rectangle(0, 0, chartFallas.Width, chartFallas.Height));
+
+            // ============================
+            // COMBINAR TODO
+            // ============================
+            int totalWidth = Math.Max(headerBitmap.Width, Math.Max(separatorBitmap.Width, Math.Max(dgvBitmap.Width, chartBitmap.Width)));
+            int totalHeight = headerBitmap.Height + separatorBitmap.Height + dgvBitmap.Height + chartBitmap.Height + 40;
+
+            Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
+
+            using (Graphics g = Graphics.FromImage(printBitmap))
+            {
+                g.Clear(Color.White);
+
+                int yOffset = 0;
+
+                g.DrawImage(headerBitmap, 0, yOffset);
+                yOffset += headerBitmap.Height;
+
+                g.DrawImage(separatorBitmap, 0, yOffset);
+                yOffset += separatorBitmap.Height + 10;
+
+                g.DrawImage(dgvBitmap, 0, yOffset);
+                yOffset += dgvBitmap.Height + 10;
+
+                g.DrawImage(chartBitmap, 0, yOffset);
+            }
+
+            // ============================
+            // ESCALAR E IMPRIMIR
+            // ============================
+            float scale = Math.Min(
+                (float)e.MarginBounds.Width / printBitmap.Width,
+                (float)e.MarginBounds.Height / printBitmap.Height
+            );
+
+            int printWidth = (int)(printBitmap.Width * scale);
+            int printHeight = (int)(printBitmap.Height * scale);
+
+            e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
+
+            // ============================
+            // NUMERO DE PAGINA
+            // ============================
+            string pageText = $"Pag. {currentPage}";
+            using (Font pageFont = new Font("Segoe UI", 9))
+            {
+                SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
+                float x = e.MarginBounds.Right - textSize.Width;
+                float y = e.MarginBounds.Bottom + 10;
+
+                e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, y);
+            }
+
+            currentPage++;
+            e.HasMorePages = false;
         }
-    }
-
-    // Capturar gráfico
-    Bitmap chartBitmap = new Bitmap(chartFallas.Width, chartFallas.Height);
-    chartFallas.DrawToBitmap(chartBitmap, new Rectangle(0, 0, chartFallas.Width, chartFallas.Height));
-
-    // Combinar todo
-    int totalWidth = Math.Max(headerBitmap.Width, Math.Max(dgvBitmap.Width, chartBitmap.Width));
-    int totalHeight = headerBitmap.Height + dgvBitmap.Height + chartBitmap.Height + 20;
-
-    Bitmap printBitmap = new Bitmap(totalWidth, totalHeight);
-    using (Graphics g = Graphics.FromImage(printBitmap))
-    {
-        g.Clear(Color.White);
-        g.DrawImage(headerBitmap, 0, 0);
-        g.DrawImage(dgvBitmap, 0, headerBitmap.Height);
-        g.DrawImage(chartBitmap, 0, headerBitmap.Height + dgvBitmap.Height + 10);
-    }
-
-    // Escalar y dibujar
-    float scale = Math.Min((float)e.MarginBounds.Width / printBitmap.Width, (float)e.MarginBounds.Height / printBitmap.Height);
-    int printWidth = (int)(printBitmap.Width * scale);
-    int printHeight = (int)(printBitmap.Height * scale);
-    e.Graphics.DrawImage(printBitmap, e.MarginBounds.Left, e.MarginBounds.Top, printWidth, printHeight);
-
-    // ============================
-    // NUMERO DE PÁGINA ABAJO DERECHA
-    // ============================
-
-    string pageText = $"Pag. {currentPage}";
-    using (Font pageFont = new Font("Segoe UI", 9))
-    {
-        SizeF textSize = e.Graphics.MeasureString(pageText, pageFont);
-
-        float x = e.MarginBounds.Right - textSize.Width; // Derecha
-        float y = e.MarginBounds.Bottom + 10;            // Abajo de la tabla/gráfico
-
-        e.Graphics.DrawString(pageText, pageFont, Brushes.Black, x, y);
-    }
-
-    // Si no hay más páginas
-    currentPage++;
-    e.HasMorePages = false;
-}
-
     }
 
     public class TipoFalla
