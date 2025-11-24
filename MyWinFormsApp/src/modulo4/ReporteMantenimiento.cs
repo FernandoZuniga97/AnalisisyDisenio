@@ -573,6 +573,7 @@ namespace MyWinFormsApp.src.modulo4
                 if ( registroAEliminar != null )
                 {
                     registros.Remove( registroAEliminar );
+                    MessageBox.Show( "Registro eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information );
                     FiltrarPorSemana( dateTimePicker1.Value );
                 }
             }

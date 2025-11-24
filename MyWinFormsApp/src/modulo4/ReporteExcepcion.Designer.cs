@@ -32,15 +32,15 @@ namespace MyWinFormsApp.src.modulo4
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             panel2 = new System.Windows.Forms.Panel();
             dataGridView1 = new System.Windows.Forms.DataGridView();
             txtID = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -85,18 +85,18 @@ namespace MyWinFormsApp.src.modulo4
             dataGridView1.AllowUserToDeleteRows = false;
             dataGridView1.AllowUserToResizeColumns = false;
             dataGridView1.AllowUserToResizeRows = false;
-            dataGridViewCellStyle10.BackColor = Color.FromArgb( 224, 224, 224 );
-            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb( 224, 224, 224 );
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             dataGridView1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle11.BackColor = Color.FromArgb( 0, 32, 96 );
-            dataGridViewCellStyle11.Font = new Font( "Segoe UI", 9F, FontStyle.Bold );
-            dataGridViewCellStyle11.ForeColor = Color.White;
-            dataGridViewCellStyle11.Padding = new System.Windows.Forms.Padding( 5 );
-            dataGridViewCellStyle11.SelectionBackColor = Color.FromArgb( 0, 32, 96 );
-            dataGridViewCellStyle11.SelectionForeColor = SystemColors.HighlightText;
-            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb( 0, 32, 96 );
+            dataGridViewCellStyle2.Font = new Font( "Segoe UI", 9F, FontStyle.Bold );
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.Padding = new System.Windows.Forms.Padding( 5 );
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb( 0, 32, 96 );
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Columns.AddRange( new System.Windows.Forms.DataGridViewColumn[] { txtID, lblFecha, lblCliente, lblDispostivo, lblEstado, lblDiasSinRetiro, lblMontoPendiente } );
             dataGridView1.EnableHeadersVisualStyles = false;
@@ -112,8 +112,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // txtID
             // 
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            txtID.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            txtID.DefaultCellStyle = dataGridViewCellStyle3;
             txtID.Frozen = true;
             txtID.HeaderText = "ID";
             txtID.Name = "txtID";
@@ -122,8 +122,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // lblFecha
             // 
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            lblFecha.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            lblFecha.DefaultCellStyle = dataGridViewCellStyle4;
             lblFecha.Frozen = true;
             lblFecha.HeaderText = "Fecha ingreso";
             lblFecha.Name = "lblFecha";
@@ -132,8 +132,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // lblCliente
             // 
-            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            lblCliente.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            lblCliente.DefaultCellStyle = dataGridViewCellStyle5;
             lblCliente.Frozen = true;
             lblCliente.HeaderText = "Cliente";
             lblCliente.Name = "lblCliente";
@@ -142,8 +142,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // lblDispostivo
             // 
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            lblDispostivo.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            lblDispostivo.DefaultCellStyle = dataGridViewCellStyle6;
             lblDispostivo.Frozen = true;
             lblDispostivo.HeaderText = "Dispositivo";
             lblDispostivo.Name = "lblDispostivo";
@@ -152,8 +152,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // lblEstado
             // 
-            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            lblEstado.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            lblEstado.DefaultCellStyle = dataGridViewCellStyle7;
             lblEstado.Frozen = true;
             lblEstado.HeaderText = "Estado de reparacion";
             lblEstado.Name = "lblEstado";
@@ -162,8 +162,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // lblDiasSinRetiro
             // 
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            lblDiasSinRetiro.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            lblDiasSinRetiro.DefaultCellStyle = dataGridViewCellStyle8;
             lblDiasSinRetiro.Frozen = true;
             lblDiasSinRetiro.HeaderText = "Días sin retirar";
             lblDiasSinRetiro.Name = "lblDiasSinRetiro";
@@ -171,8 +171,8 @@ namespace MyWinFormsApp.src.modulo4
             // 
             // lblMontoPendiente
             // 
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            lblMontoPendiente.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            lblMontoPendiente.DefaultCellStyle = dataGridViewCellStyle9;
             lblMontoPendiente.Frozen = true;
             lblMontoPendiente.HeaderText = "Monto pendiente (L.)";
             lblMontoPendiente.Name = "lblMontoPendiente";
@@ -315,6 +315,7 @@ namespace MyWinFormsApp.src.modulo4
             btnAgregar.TabIndex = 13;
             btnAgregar.Text = "Agregar";
             btnAgregar.UseVisualStyleBackColor = true;
+            btnAgregar.Visible = false;
             btnAgregar.Click += btnAgregar_Click;
             // 
             // btnEditar
@@ -327,6 +328,7 @@ namespace MyWinFormsApp.src.modulo4
             btnEditar.TabIndex = 12;
             btnEditar.Text = "Editar";
             btnEditar.UseVisualStyleBackColor = true;
+            btnEditar.Visible = false;
             btnEditar.Click += btnEditar_Click;
             // 
             // btnEliminar
