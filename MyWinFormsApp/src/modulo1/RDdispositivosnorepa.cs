@@ -2,15 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using System.Drawing.Printing; // Importante para impresión
+using System.Drawing.Printing;
+using System.Data.SqlClient;
+using System.Data;
+using MyWinFormsApp.Database;
 
 namespace MyWinFormsApp
 {
     public class RDdispositivosnorepaForm : Form
     {
+        private const string TableName = "[dbo].[DispositivosNoReparados]";
+        //--------------------------
         private Label lblTitulo;
         private Label lblSubtitulo;
         private Label lblFecha;
@@ -32,8 +38,9 @@ namespace MyWinFormsApp
         private int registrosPorPagina = 20; // 20 registros por página
         private int totalPaginas = 1;
 
-        private List<Norepa> lista;
-        private int contadorID = 4;
+        // **USAR SOLO listaDispositivos para la persistencia**
+        private List<Norepa> listaDispositivos;
+        private int contadorID = 4; // Variable que ya no se utiliza al depender de la DB
 
         public RDdispositivosnorepaForm()
         {
@@ -198,6 +205,7 @@ namespace MyWinFormsApp
                 ScrollBars = ScrollBars.Vertical, // Cambiado a Vertical para paginación
                 GridColor = Color.White,
                 CellBorderStyle = DataGridViewCellBorderStyle.Single,
+                RowTemplate = { MinimumHeight = 35 }
             };
 
             // Estilos del DataGridView
@@ -214,18 +222,11 @@ namespace MyWinFormsApp
                 else
                     dgDnRepa.Rows[ev.RowIndex].DefaultCellStyle.BackColor = Color.White;
             };
-
-            // Remover CellPainting
-            // dgDnRepa.CellPainting += (s, ev) => { ... };
-
             Panel panelTabla = new Panel() { Dock = DockStyle.Fill };
             panelTabla.Controls.Add(dgDnRepa);
-            //-------------
-            // Propiedades base para los botones
             var buttonBaseStyle = new Font("Segoe UI", 9, FontStyle.Bold);
             var buttonWidth = 120;
             var buttonHeight = 30;
-            // Usamos un margen uniforme (por ejemplo, 0, 0, 10, 0) para separarlos
             var buttonMargin = new Padding(0, 0, 10, 0);
             // --- Botones de Acción ---
             btnAgregar = new Button()
@@ -306,46 +307,119 @@ namespace MyWinFormsApp
 
         private void DnRForm_Load(object sender, EventArgs e)
         {
-            lista = new List<Norepa>()
-            {
-            new Norepa { ID="NR-001", FechadeIngreso="27/08/2025", Dispositivo="Samsung S23 Plus", Cliente="Ana García", TecnicoAsignado="M. Pérez", DescripciondelDano="Revisión general y limpieza", CostoEstimado=2500m, Observaciones="Cliente decidió no continuar con la reparación por el costo elevado" },
-            new Norepa { ID="NR-002", FechadeIngreso="27/08/2025", Dispositivo="iPhone 14 Pro", Cliente="Carlos Mejía", TecnicoAsignado="D. López", DescripciondelDano="Botón Home sin respuesta", CostoEstimado=180m, Observaciones="No se encontró repuesto disponible en el mercado" },
-            new Norepa { ID="NR-003", FechadeIngreso="27/08/2025", Dispositivo="iPhone 13", Cliente="Luis Torres", TecnicoAsignado="M. Pérez", DescripciondelDano="Batería se descarga muy rápido", CostoEstimado=600m, Observaciones="Cliente no aprobó el cambio de batería" },
-            new Norepa { ID="NR-004", FechadeIngreso="27/08/2025", Dispositivo="Xiaomi Redmi Note 11", Cliente="Pedro López", TecnicoAsignado="L. Reyes", DescripciondelDano="Puerto de carga dañado", CostoEstimado=120m, Observaciones="Pieza no disponible en inventario" },
-            new Norepa { ID="NR-005", FechadeIngreso="27/08/2025", Dispositivo="Motorola G Stylus", Cliente="María Soto", TecnicoAsignado="F. Cabrera", DescripciondelDano="Pantalla rota", CostoEstimado=850m, Observaciones="Cliente retiró el equipo sin autorización de reparación" },
-            new Norepa { ID="NR-006", FechadeIngreso="27/08/2025", Dispositivo="Huawei P40 Lite", Cliente="José Molina", TecnicoAsignado="M. Pérez", DescripciondelDano="Cámara trasera dañada", CostoEstimado=400m, Observaciones="Proveedor no entregó el repuesto solicitado" },
-            new Norepa { ID="NR-007", FechadeIngreso="27/08/2025", Dispositivo="Samsung A54", Cliente="Karla Ruiz", TecnicoAsignado="L. Reyes", DescripciondelDano="Altavoz no funciona", CostoEstimado=220m, Observaciones="Cliente no regresó para aprobación del presupuesto" },
-            new Norepa { ID="NR-008", FechadeIngreso="28/08/2025", Dispositivo="Xiaomi Redmi Note 12", Cliente="Pedro López", TecnicoAsignado="D. López", DescripciondelDano="Pantalla táctil intermitente", CostoEstimado=310m, Observaciones="El repuesto no es compatible con el modelo exacto" },
-            new Norepa { ID="NR-009", FechadeIngreso="29/08/2025", Dispositivo="iPhone 12 Mini", Cliente="Carmen Díaz", TecnicoAsignado="M. Pérez", DescripciondelDano="Micrófono principal sin sonido", CostoEstimado=270m, Observaciones="Cliente no aprobó la reparación por demora en entrega" },
-            new Norepa { ID="NR-010", FechadeIngreso="28/08/2025", Dispositivo="Samsung Galaxy A32", Cliente="Antonio Rivera", TecnicoAsignado="F. Cabrera", DescripciondelDano="No enciende", CostoEstimado=180m, Observaciones="Placa base irreparable según diagnóstico técnico" },
-            new Norepa { ID="NR-011", FechadeIngreso="30/08/2025", Dispositivo="Oppo Reno 7", Cliente="Rosa Martínez", TecnicoAsignado="L. Reyes", DescripciondelDano="Cámara frontal dañada", CostoEstimado=350m, Observaciones="El cliente decidió no invertir en la reparación" },
-            new Norepa { ID="NR-012", FechadeIngreso="29/08/2025", Dispositivo="Realme 9 Pro", Cliente="Mario Aguilar", TecnicoAsignado="D. López", DescripciondelDano="Conector de carga flojo", CostoEstimado=200m, Observaciones="El repuesto llegó defectuoso, reparación cancelada" },
-            new Norepa { ID="NR-013", FechadeIngreso="27/09/2025", Dispositivo="Xiaomi Poco X5", Cliente="Lucía Navarro", TecnicoAsignado="M. Pérez", DescripciondelDano="No detecta SIM", CostoEstimado=190m, Observaciones="El problema es de placa y no se dispone de repuesto" },
-            new Norepa { ID="NR-014", FechadeIngreso="14/09/2025", Dispositivo="Samsung S21 FE", Cliente="Daniel Castro", TecnicoAsignado="F. Cabrera", DescripciondelDano="Batería inflada", CostoEstimado=320m, Observaciones="Cliente no autorizó el reemplazo por costo elevado" },
-            new Norepa { ID="NR-015", FechadeIngreso="08/09/2025", Dispositivo="iPhone XR", Cliente="Andrea Méndez", TecnicoAsignado="L. Reyes", DescripciondelDano="Pantalla no responde", CostoEstimado=480m, Observaciones="Falta de disponibilidad de pantalla original" },
-            new Norepa { ID="NR-016", FechadeIngreso="10/09/2025", Dispositivo="Xiaomi Redmi 10C", Cliente="Pedro López", TecnicoAsignado="D. López", DescripciondelDano="Puerto USB dañado", CostoEstimado=150m, Observaciones="Cliente no aceptó reparación temporal" },
-            new Norepa { ID="NR-017", FechadeIngreso="12/09/2025", Dispositivo="Samsung A13", Cliente="José Molina", TecnicoAsignado="M. Pérez", DescripciondelDano="No carga", CostoEstimado=200m, Observaciones="El repuesto no se consigue en el país" },
-            new Norepa { ID="NR-018", FechadeIngreso="14/09/2025", Dispositivo="iPhone 11", Cliente="Carla Ramos", TecnicoAsignado="F. Cabrera", DescripciondelDano="Cristal trasero roto", CostoEstimado=900m, Observaciones="Cliente decidió reemplazar el equipo" },
-            new Norepa { ID="NR-019", FechadeIngreso="17/09/2025", Dispositivo="Huawei Nova 10", Cliente="Luis Torres", TecnicoAsignado="D. López", DescripciondelDano="Problema de audio", CostoEstimado=230m, Observaciones="Reparación no autorizada por falta de repuesto" },
-            new Norepa { ID="NR-020", FechadeIngreso="20/09/2025", Dispositivo="Xiaomi Redmi Note 13", Cliente="María Soto", TecnicoAsignado="M. Pérez", DescripciondelDano="Pantalla con líneas verticales", CostoEstimado=310m, Observaciones="Proveedor canceló el envío del repuesto" },
-            new Norepa { ID="NR-021", FechadeIngreso="22/09/2025", Dispositivo="Motorola Edge 30", Cliente="Carlos Mejía", TecnicoAsignado="L. Reyes", DescripciondelDano="No detecta Wi-Fi", CostoEstimado=250m, Observaciones="Cliente no aprobó la reparación por tiempo de espera" },
-            new Norepa { ID="NR-022", FechadeIngreso="25/09/2025", Dispositivo="Samsung S24 Ultra", Cliente="Pedro López", TecnicoAsignado="F. Cabrera", DescripciondelDano="Vidrio agrietado", CostoEstimado=950m, Observaciones="No se consiguió pantalla compatible" },
-            new Norepa { ID="NR-023", FechadeIngreso="27/09/2025", Dispositivo="iPhone 15", Cliente="Ana García", TecnicoAsignado="D. López", DescripciondelDano="Problema de encendido", CostoEstimado=700m, Observaciones="Cliente canceló la reparación antes del inicio" },
-            new Norepa { ID="NR-024", FechadeIngreso="12/09/2025", Dispositivo="Xiaomi Redmi 13C", Cliente="Pedro López", TecnicoAsignado="L. Reyes", DescripciondelDano="No reconoce carga rápida", CostoEstimado=210m, Observaciones="El equipo no pudo ser abierto sin riesgo" },
-            new Norepa { ID="NR-025", FechadeIngreso="19/09/2025", Dispositivo="Realme GT Neo", Cliente="Lucía Navarro", TecnicoAsignado="M. Pérez", DescripciondelDano="Placa base dañada", CostoEstimado=1300m, Observaciones="Reparación no viable, placa no disponible" }
-
-            };
+            CargarDispositivosDesdeDB();
             MostrarPagina();
         }
+        // LÓGICA DE CONEXIÓN Y DATOS
+        // Método para ejecutar comandos SQL que no devuelven datos (INSERT, UPDATE, DELETE)
+        private int ExecuteNonQuery(string sql, List<SqlParameter> parameters = null)
+        {
+            int rowsAffected = 0;
+            try
+            {
+                using (SqlConnection connection = DbConfig.GetConnection())
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        if (parameters != null)
+                        {
+                            command.Parameters.AddRange(parameters.ToArray());
+                        }
+                        rowsAffected = command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al ejecutar la operación: {ex.Message}", "Error de Base de Datos", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return rowsAffected;
+        }
+        //-------------------------------------
+        // --- NUEVA FUNCIÓN: Ejecuta INSERT y devuelve el ID generado (SCOPE_IDENTITY) ---
+        private int ExecuteInsertAndGetId(string sqlInsert, List<SqlParameter> parameters)
+        {
+            try
+            {
+                using (SqlConnection connection = DbConfig.GetConnection())
+                {
+                    connection.Open();
+                    // La consulta debe ser: INSERT ...; SELECT SCOPE_IDENTITY();
+                    using (SqlCommand command = new SqlCommand(sqlInsert, connection))
+                    {
+                        if (parameters != null)
+                        {
+                            command.Parameters.AddRange(parameters.ToArray());
+                        }
+                        object result = command.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            // SCOPE_IDENTITY retorna un tipo numérico/decimal, se convierte a int
+                            return Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al ejecutar la inserción y obtener ID: {ex.Message}", "Error de Base de Datos", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return -1; // Indica fallo
+        }
+        // Nuevo método para cargar datos desde la DB
+        private void CargarDispositivosDesdeDB()
+        {
+            listaDispositivos = new List<Norepa>();
+            // Se selecciona Id como INT y se asume que Codigo (indice 1) se omite en el mapeo a Norepa.
+            string query = $"SELECT Id, Codigo, FechaIngreso, Dispositivo, Cliente, TecnicoAsignado, DescripcionDanio, CostoEstimado, Observaciones FROM {TableName} ORDER BY Id ASC";
+            try
+            {
+                using (SqlConnection connection = DbConfig.GetConnection())
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                listaDispositivos.Add(new Norepa
+                                {
+                                    ID = reader.GetInt32(0),
+                                    CodigoDisplay = reader.GetString(1),
+                                    FechadeIngreso = reader.GetDateTime(2).ToString("dd/MM/yyyy"),
+                                    Dispositivo = reader.GetString(3),
+                                    Cliente = reader.GetString(4),
+                                    TecnicoAsignado = reader.GetString(5),
+                                    DescripciondelDano = reader.GetString(6),
+                                    CostoEstimado = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
+                                    Observaciones = reader.IsDBNull(8) ? "-" : reader.GetString(8)
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar datos: {ex.Message}\nVerifica la cadena de conexión y que la DB/Tabla existan.", "Error de Carga", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-        // Reemplazo de ActualizarGrid por MostrarPagina para manejar la paginación
+            // Recalcular total de páginas después de cargar la lista
+            totalPaginas = (int)Math.Ceiling((double)listaDispositivos.Count / registrosPorPagina);
+            if (totalPaginas == 0) totalPaginas = 1;
+            if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        }
+        // LÓGICA DE INTERFAZ DE USUARIO (Actualizada para usar la DB)
         private void MostrarPagina()
         {
-            totalPaginas = (int)Math.Ceiling((double)lista.Count / registrosPorPagina);
+            // **CORRECCIÓN 2: Uso consistente de listaDispositivos**
+            totalPaginas = (int)Math.Ceiling((double)listaDispositivos.Count / registrosPorPagina);
             if (paginaActual < 1) paginaActual = 1;
             if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
-            var registros = lista
+            var registros = listaDispositivos
                 .Skip((paginaActual - 1) * registrosPorPagina)
                 .Take(registrosPorPagina)
                 .ToList();
@@ -356,7 +430,12 @@ namespace MyWinFormsApp
             // Nombres de encabezado
             if (dgDnRepa.Columns.Count > 0)
             {
-                dgDnRepa.Columns["ID"].HeaderText = "Código";
+                // 1. Ocultar la columna de ID numérico (de la DB)
+                dgDnRepa.Columns["ID"].Visible = false;
+                // 2. Mostrar y nombrar la columna de CÓDIGO NR-XXX
+                dgDnRepa.Columns["CodigoDisplay"].Visible = true; // Aseguramos que sea visible
+                dgDnRepa.Columns["CodigoDisplay"].DisplayIndex = 0; // Colocamos el código como primera columna
+                dgDnRepa.Columns["CodigoDisplay"].HeaderText = "Código";
                 dgDnRepa.Columns["FechadeIngreso"].HeaderText = "Fecha de Ingreso";
                 dgDnRepa.Columns["Dispositivo"].HeaderText = "Dispositivo";
                 dgDnRepa.Columns["Cliente"].HeaderText = "Cliente";
@@ -364,11 +443,11 @@ namespace MyWinFormsApp
                 dgDnRepa.Columns["DescripciondelDano"].HeaderText = "Descripción del Daño";
                 dgDnRepa.Columns["CostoEstimado"].HeaderText = "Costo Estimado";
                 dgDnRepa.Columns["Observaciones"].HeaderText = "Observaciones";
-
                 // Formato de moneda
                 dgDnRepa.Columns["CostoEstimado"].DefaultCellStyle.Format = "'L' #,##0.00";
                 dgDnRepa.Columns["CostoEstimado"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 dgDnRepa.Columns["Observaciones"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+
             }
 
             // Aplicar estilos de fila alternada (Ajustado para el índice visible)
@@ -376,11 +455,10 @@ namespace MyWinFormsApp
             {
                 dgDnRepa.Rows[i].DefaultCellStyle.BackColor = (i % 2 == 1) ? ColorTranslator.FromHtml("#F0F0F0") : Color.White;
             }
-
-            // Ajuste de anchos para DataGridView (similar al archivo original, pero usando el diccionario)
             var widths = new Dictionary<string, int>
             {
                 ["ID"] = 80,
+                ["CodigoDisplay"] = 100,
                 ["FechadeIngreso"] = 180,
                 ["Dispositivo"] = 140,
                 ["Cliente"] = 160,
@@ -469,7 +547,7 @@ namespace MyWinFormsApp
             separatorLine.DrawToBitmap(separatorBitmap, new Rectangle(0, 0, separatorLine.Width, separatorLine.Height));
 
             // --- Captura DataGridView (Solo la página actual) ---
-            int tablaWidth = dgDnRepa.Columns.Cast<DataGridViewColumn>().Sum(c => c.Width);
+            int tablaWidth = dgDnRepa.Columns.Cast<DataGridViewColumn>().Where(c => c.Visible).Sum(c => c.Width);
             int tablaHeight = dgDnRepa.ColumnHeadersHeight + dgDnRepa.Rows.Cast<DataGridViewRow>().Sum(r => r.Height);
             Bitmap dgvBitmap = new Bitmap(tablaWidth, tablaHeight);
             using (Graphics g = Graphics.FromImage(dgvBitmap))
@@ -481,6 +559,8 @@ namespace MyWinFormsApp
                 for (int i = 0; i < dgDnRepa.Columns.Count; i++)
                 {
                     var col = dgDnRepa.Columns[i];
+                    if (!col.Visible)
+                        continue;
                     Rectangle headerRect = new Rectangle(xPos, 0, col.Width, dgDnRepa.ColumnHeadersHeight);
                     using (Brush backBrush = new SolidBrush(dgDnRepa.ColumnHeadersDefaultCellStyle.BackColor))
                         g.FillRectangle(backBrush, headerRect);
@@ -503,6 +583,9 @@ namespace MyWinFormsApp
                     int filaIndex = dgDnRepa.Rows.IndexOf(row);
                     for (int i = 0; i < row.Cells.Count; i++)
                     {
+                        var col = dgDnRepa.Columns[i];
+                        if (!col.Visible)
+                            continue;
                         var cell = row.Cells[i];
                         Rectangle cellRect = new Rectangle(xPos, yPos, cell.OwningColumn.Width, row.Height);
                         // Usar el color de fila alternado
@@ -521,7 +604,10 @@ namespace MyWinFormsApp
                                 valor = ((decimal)cell.Value).ToString("'L' #,##0.00", CultureInfo.InvariantCulture);
                                 sf.Alignment = StringAlignment.Far; // Alinear a la derecha para moneda
                             }
-
+                            else if (cell.Value != null)
+                            {
+                                valor = cell.Value.ToString();
+                            }
                             g.DrawString(valor, cell.InheritedStyle.Font, foreBrush, cellRect, sf);
                         }
                         using (Pen whitePen = new Pen(Color.White))
@@ -625,39 +711,82 @@ namespace MyWinFormsApp
                     string.IsNullOrWhiteSpace(txtDescripciondelDano.Text) ||
                     string.IsNullOrWhiteSpace(txtCostoEstimado.Text))
                 {
-                    MessageBox.Show("Todos los campos son obligatorios excepto Observaciones.");
+                    MessageBox.Show("Todos los campos son obligatorios excepto Observaciones.", "Datos Incompletos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                if (!decimal.TryParse(txtCostoEstimado.Text.Replace("L", "").Replace(",", "").Trim(), NumberStyles.Currency, CultureInfo.InvariantCulture, out decimal costo))
+                if (!DateTime.TryParseExact(txtFechadeIngreso.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fecha))
                 {
-                    MessageBox.Show("Solo se permiten números válidos en el costo estimado.");
+                    MessageBox.Show("El formato de fecha debe ser dd/MM/yyyy.", "Error de Formato", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                if (!decimal.TryParse(txtCostoEstimado.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal costo))
+                {
+                    MessageBox.Show("El Costo Estimado debe ser un valor numérico válido (ej. 120.50).", "Error de Formato", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                contadorID++;
-                string nuevoID = $"NR-{contadorID.ToString("D3")}";
+                // --- LÓGICA DE INSERCIÓN EN LA BASE DE DATOS ---
+                string sql = $@"INSERT INTO {TableName} 
+                                (Codigo, FechaIngreso, Dispositivo, Cliente, TecnicoAsignado, DescripcionDanio, CostoEstimado, Observaciones)
+                                VALUES 
+                                (@Codigo, @FechaIngreso, @Dispositivo, @Cliente, @TecnicoAsignado, @DescripcionDanio, @CostoEstimado, @Observaciones)";
+                //--------------
+                // 1. Insertar el registro con un código temporal y obtener el ID.
+                string sqlInsert = $@"INSERT INTO {TableName} 
+                                    (Codigo, FechaIngreso, Dispositivo, Cliente, TecnicoAsignado, DescripcionDanio, CostoEstimado, Observaciones)
+                                    VALUES 
+                                    ('TEMP', @FechaIngreso, @Dispositivo, @Cliente, @TecnicoAsignado, @DescripcionDanio, @CostoEstimado, @Observaciones);
+                                    SELECT SCOPE_IDENTITY();";
 
-                lista.Add(new Norepa()
+                List<SqlParameter> insertParameters = new List<SqlParameter>
                 {
-                    ID = nuevoID,
-                    FechadeIngreso = txtFechadeIngreso.Text,
-                    Dispositivo = txtDispositivo.Text,
-                    Cliente = txtCliente.Text,
-                    TecnicoAsignado = txtTecnicoAsignado.Text,
-                    DescripciondelDano = txtDescripciondelDano.Text,
-                    CostoEstimado = costo,
-                    Observaciones = string.IsNullOrWhiteSpace(txtObs.Text) ? "-" : txtObs.Text
-                });
+                    new SqlParameter("@FechaIngreso", fecha.ToString("yyyy-MM-dd")), // Formato ISO para SQL DATE
+                    new SqlParameter("@Dispositivo", txtDispositivo.Text),
+                    new SqlParameter("@Cliente", txtCliente.Text),
+                    new SqlParameter("@TecnicoAsignado", txtTecnicoAsignado.Text),
+                    new SqlParameter("@DescripcionDanio", txtDescripciondelDano.Text),
+                    new SqlParameter("@CostoEstimado", costo),
+                    new SqlParameter("@Observaciones", string.IsNullOrWhiteSpace(txtObs.Text) ? (object)DBNull.Value : txtObs.Text)
+                };
+                int newId = ExecuteInsertAndGetId(sqlInsert, insertParameters);
+                if (newId > 0)
+                {
+                    // 2. Construir el código secuencial NR-001, NR-002, etc.
+                    string codigoGenerado = $"NR-{newId:D3}"; // D3 asegura 3 dígitos (001, 010, 100)
 
-                MostrarPagina();
-                formAgregar.Close();
-            };
-
+                    // 3. Actualizar el registro para colocar el código generado.
+                    string sqlUpdate = $"UPDATE {TableName} SET Codigo = @Codigo WHERE Id = @Id";
+                    List<SqlParameter> parameters = new List<SqlParameter>
+                {
+                    new SqlParameter("@Codigo", codigoGenerado),
+                        new SqlParameter("@Id", newId),
+                    new SqlParameter("@FechaIngreso", fecha.ToString("yyyy-MM-dd")), // Formato ISO para SQL DATE
+                    new SqlParameter("@Dispositivo", txtDispositivo.Text),
+                    new SqlParameter("@Cliente", txtCliente.Text),
+                    new SqlParameter("@TecnicoAsignado", txtTecnicoAsignado.Text),
+                    new SqlParameter("@DescripcionDanio", txtDescripciondelDano.Text),
+                    new SqlParameter("@CostoEstimado", costo),
+                    new SqlParameter("@Observaciones", string.IsNullOrWhiteSpace(txtObs.Text) ? (object)DBNull.Value : txtObs.Text)
+                };
+                    if (ExecuteNonQuery(sqlUpdate, new List<SqlParameter>
+                {
+                    new SqlParameter("@Codigo", codigoGenerado),
+                    new SqlParameter("@Id", newId)
+                    }) > 0)
+                    {
+                        MessageBox.Show("Registro agregado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CargarDispositivosDesdeDB();
+                        MostrarPagina();
+                        formAgregar.Close();
+                    }
+                }
+            }; // Cierre correcto del handler Click
             panel.Controls.AddRange(new Control[] {
                 lblFechadeIngreso, txtFechadeIngreso, lblDispositivo, txtDispositivo, lblCliente, txtCliente,
                 lblTecnicoAsignado, txtTecnicoAsignado, lblDescripciondelDano, txtDescripciondelDano, lblCostoEstimado, txtCostoEstimado,
-                lblObs, txtObs, btnGuardar });
+                lblObs, txtObs, btnGuardar
+            });
             formAgregar.ShowDialog();
         }
 
@@ -665,14 +794,26 @@ namespace MyWinFormsApp
         {
             if (dgDnRepa.CurrentRow != null)
             {
-                // Obtener el registro de la lista subyacente
-                var registroVisible = (Norepa)dgDnRepa.CurrentRow.DataBoundItem;
-                lista.Remove(registroVisible);
+                // Obtener el ID de la fila seleccionada
+                var registroVisible = dgDnRepa.CurrentRow.DataBoundItem as Norepa;
+                if (registroVisible == null) return;
 
-                DialogResult result = MessageBox.Show($"¿Está seguro de borrar el registro '{registroVisible.ID}'?", "Confirmar eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (result == DialogResult.Yes)
+                if (MessageBox.Show($"¿Está seguro de eliminar el registro {registroVisible.CodigoDisplay}?", "Confirmar Eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    MostrarPagina();
+                    // --- LÓGICA DE ELIMINACIÓN EN LA BASE DE DATOS ---
+                    string sql = $"DELETE FROM {TableName} WHERE Id = @Id";
+                    List<SqlParameter> parameters = new List<SqlParameter>
+                    {
+                        // El ID se pasa como INT
+                        new SqlParameter("@Id", registroVisible.ID)
+                    };
+
+                    if (ExecuteNonQuery(sql, parameters) > 0)
+                    {
+                        MessageBox.Show("Registro eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CargarDispositivosDesdeDB(); // Recargar datos
+                        MostrarPagina();
+                    }
                 }
             }
         }
@@ -682,7 +823,8 @@ namespace MyWinFormsApp
             if (dgDnRepa.CurrentRow == null) return;
 
             // Obtener el objeto Norepa de la fila seleccionada
-            Norepa norepa = (Norepa)dgDnRepa.CurrentRow.DataBoundItem;
+            var norepa = dgDnRepa.CurrentRow.DataBoundItem as Norepa;
+            if (norepa == null) return;
 
             Form formEditar = new Form()
             {
@@ -722,7 +864,8 @@ namespace MyWinFormsApp
             top += gap;
 
             Label lblCostoEstimado = new Label() { Text = "Costo Estimado", Left = 20, Top = top, Width = labelWidth };
-            TextBox txtCostoEstimado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.CostoEstimado.ToString() };
+            // Mostrar Costo Estimado sin formato de moneda para facilitar la edición
+            TextBox txtCostoEstimado = new TextBox() { Left = 150, Top = top, Width = textBoxWidth, Text = norepa.CostoEstimado.ToString(CultureInfo.InvariantCulture) };
             top += gap;
 
             Label lblObs = new Label() { Text = "Observaciones", Left = 20, Top = top, Width = labelWidth };
@@ -732,33 +875,50 @@ namespace MyWinFormsApp
             Button btnGuardar = new Button() { Text = "Guardar", Left = 150, Width = 100, Top = top };
             btnGuardar.Click += (s2, e2) =>
             {
-                if (string.IsNullOrWhiteSpace(txtFechadeIngreso.Text) ||
-                    string.IsNullOrWhiteSpace(txtDispositivo.Text) ||
-                    string.IsNullOrWhiteSpace(txtCliente.Text) ||
-                    string.IsNullOrWhiteSpace(txtTecnicoAsignado.Text) ||
-                    string.IsNullOrWhiteSpace(txtDescripciondelDano.Text) ||
-                    string.IsNullOrWhiteSpace(txtCostoEstimado.Text))
+                // Validación y conversión de datos (igual que en el original)
+                if (!DateTime.TryParseExact(txtFechadeIngreso.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fecha))
                 {
-                    MessageBox.Show("Todos los campos son obligatorios excepto Observaciones.");
+                    MessageBox.Show("El formato de fecha debe ser dd/MM/yyyy.", "Error de Formato", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                // Usar NumberStyles.Number con CultureInfo.InvariantCulture para manejar la entrada de decimales.
+                if (!decimal.TryParse(txtCostoEstimado.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal costo))
+                {
+                    MessageBox.Show("El Costo Estimado debe ser un valor numérico válido.", "Error de Formato", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                if (!decimal.TryParse(txtCostoEstimado.Text.Replace("L", "").Replace(",", "").Trim(), NumberStyles.Currency, CultureInfo.InvariantCulture, out decimal costo))
+                // --- LÓGICA DE ACTUALIZACIÓN EN LA BASE DE DATOS ---
+                string sql = $@"UPDATE {TableName} SET 
+                                    FechaIngreso = @FechaIngreso, 
+                                    Dispositivo = @Dispositivo, 
+                                    Cliente = @Cliente, 
+                                    TecnicoAsignado = @TecnicoAsignado, 
+                                    DescripcionDanio = @DescripcionDanio, 
+                                    CostoEstimado = @CostoEstimado, 
+                                    Observaciones = @Observaciones 
+                                    WHERE Id = @Id";
+
+                List<SqlParameter> parameters = new List<SqlParameter>
+                    {
+                        new SqlParameter("@FechaIngreso", fecha.ToString("yyyy-MM-dd")), // Formato ISO
+                        new SqlParameter("@Dispositivo", txtDispositivo.Text),
+                        new SqlParameter("@Cliente", txtCliente.Text),
+                        new SqlParameter("@TecnicoAsignado", txtTecnicoAsignado.Text),
+                        new SqlParameter("@DescripcionDanio", txtDescripciondelDano.Text), // Mapeo a DescripcionDanio
+                        new SqlParameter("@CostoEstimado", costo),
+                        new SqlParameter("@Observaciones", string.IsNullOrWhiteSpace(txtObs.Text) ? (object)DBNull.Value : txtObs.Text),
+                        new SqlParameter("@Id", norepa.ID) // ID para la cláusula WHERE
+                    };
+
+                if (ExecuteNonQuery(sql, parameters) > 0)
                 {
-                    MessageBox.Show("Solo se permiten números válidos en el costo estimado.");
-                    return;
+                    // Si la actualización es exitosa, actualiza el objeto local y recarga.
+                    MessageBox.Show("Registro editado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CargarDispositivosDesdeDB();
+                    MostrarPagina();
+                    formEditar.Close();
                 }
-
-                norepa.FechadeIngreso = txtFechadeIngreso.Text;
-                norepa.Dispositivo = txtDispositivo.Text;
-                norepa.Cliente = txtCliente.Text;
-                norepa.TecnicoAsignado = txtTecnicoAsignado.Text;
-                norepa.DescripciondelDano = txtDescripciondelDano.Text;
-                norepa.CostoEstimado = costo;
-                norepa.Observaciones = string.IsNullOrWhiteSpace(txtObs.Text) ? "-" : txtObs.Text;
-
-                MostrarPagina();
-                formEditar.Close();
             };
 
             panel.Controls.AddRange(new Control[] {
@@ -769,13 +929,13 @@ namespace MyWinFormsApp
             formEditar.ShowDialog();
         }
 
-        // Se elimina el método ActualizarGrid y se usa MostrarPagina en su lugar.
 
     }
 
     public class Norepa
     {
-        public string ID { get; set; }
+        public int ID { get; set; } // ID de la DB
+        public string CodigoDisplay { get; set; }
         public string FechadeIngreso { get; set; }
         public string Dispositivo { get; set; }
         public string Cliente { get; set; }

@@ -3,7 +3,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using MyWinFormsApp.src.modulo4;
 using MyWinFormsApp.src.modulo2;
-
+using MyWinFormsApp.Database; // ¡Asegúrate de agregar este 'using'!
+using System.Data.SqlClient;
 
 namespace MyWinFormsApp
 {
@@ -32,10 +33,37 @@ namespace MyWinFormsApp
         {
             _isEmployee = isEmployee;
             InitializeComponent();
+
             InitializeAnimation();
             ConfigureModules();
+            ValidateDatabaseConnection();
         }
+        private void ValidateDatabaseConnection()
+        {
+            // Llama al método estático que acabas de agregar en Database.cs
+            string connectionResult = DbConfig.xaa();
 
+            if (connectionResult.Contains("exitosa"))
+            {
+                // Muestra un mensaje de éxito
+                // MessageBox.Show(
+                //     connectionResult,
+                //      "Validación de Base de Datos Gicellimp",
+                //       MessageBoxButtons.OK,
+                //        MessageBoxIcon.Information
+                //    );
+            }
+            else
+            {
+                // Muestra un mensaje de error y el detalle
+                MessageBox.Show(
+                    "Fallo al conectar con la base de datos Gicellimp. Revisa app.config y SQL Server.\n\nDetalle: " + connectionResult,
+                    "Error Crítico de Conexión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
         private void ConfigureModules()
         {
             btnModule1.Visible = btnModule2.Visible =
